@@ -140,14 +140,21 @@ Lucide (=@lucide/svelte=, one import per icon, so only those used are bundled). 
 
 Sizes: 16px in buttons and the nav next to 11–13px text, 14px in small buttons and chevrons, 13px in the sidebar footer. Lucide sets =aria-hidden= on decorative icons; the one icon-only button without a label (Régua's play-all) got =aria-label=. Musical symbols that are content (rhythm values, /Andamento ♩ =/, ↑ ↓ ✓ in sentences) stay text. Documented under Icons in =docs/design/system.org=.
 
-* TODO Portuguese and English, with a toggle
-Every string is Portuguese and inline: in the pages, and in the logic modules' feedback (Acordes, Intervalos), the counterpoint rules' ~40 messages, Ditado's errors, the Manifesto's text.
+* DONE Portuguese and English, with a toggle
+Every string was Portuguese and inline: in the pages, and in the logic modules' feedback, the counterpoint rules' messages, Ditado's errors, the Manifesto's text.
 
-** Plan
-Paraglide (the owner's pick: industry standard). A message catalogue per language and a =locale= state, kept in =localStorage= and defaulting to the browser's language; a PT / EN toggle in the sidebar. Logic modules return message keys and arguments instead of sentences.
+** Done
++ commit =0e08b7f=
 
-** Decided
-Paraglide, after the icons.
+Paraglide (=@inlang/paraglide-js=), the owner's pick. 547 messages in =messages/pt-br.json= and =messages/en.json=. The locale is the toggle's saved choice, else the browser's language, else Portuguese; it's resolved in the browser (the app is an SPA, so no per-language URLs or server hooks). =src/lib/i18n.svelte.ts= keeps it in a rune and overrides Paraglide's =getLocale()= with it, so the PT / EN toggle at the bottom of the sidebar re-renders every message in place: no reload, the quiz and the score survive (an end-to-end test checks it). =<html lang>= follows.
 
-** Still needs the owner
-The English wording of the Manifesto, and the musical terms: note names (Dó/Ré or C/D in English? the UI already mixes them), interval names, solfège. I'll draft them; they review.
+To make that work, state holds facts and the text is made when rendered: quiz outcomes, the score history's prompt and answer (functions), the counterpoint issues (functions), the tuner's reading, the Pomodoro's status, Ditado's hints. Tables the parity tests compare with the legacy page keep their Portuguese and are shown through a =labels.ts= per feature; a test checks that in Portuguese those read exactly as the tables, and that both catalogues have the same keys and parameters.
+
+Not translated, on purpose: LilyPond exports, developer-facing errors, note letters, chord symbols and degrees. In English the notes are letter names (=A → E=), in Portuguese solfège (=Lá → Mi=), as before.
+
+* WAIT Review the English
+The English is my draft: every message in =messages/en.json=, the Manifesto included.
+
+** Waiting on
+The owner's review. Choices worth a look: interval names and abbreviations (=m2=, =M3=, =P5=, Perfect Fourth…), "Ear Training" for /Percepção/, "Listening" for /Apreciação/, "Ruler" for /Régua/, "Harmony 3D", and the Manifesto's wording. Also: should the LilyPond exports (=.ly= headers, instrument names like =Voz 2=) follow the language?
+

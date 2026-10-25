@@ -1,71 +1,69 @@
 #+TITLE: Ditado melódico
 #+OPTIONS: ^:{}
 
-Generate a short melody (or a Slonimsky pattern), hear it, pick its scale degrees from four options; the staff, engraved with VexFlow, is blurred until you answer. Scores under module =d=.
+Generate a melody or Slonimsky pattern, listen, pick its degrees from four options. The staff (VexFlow) stays blurred until you answer. Module =d=.
 
-+ Page :: =src/routes/(app)/ditado/+page.svelte=, =Field.svelte= (a numbered form label)
-+ State :: =src/lib/features/ditado/ditado.svelte.ts=, =ditado=
-+ Logic :: =theory.ts= (scales, spelling, key signatures), =rhythm.ts= (meters, rhythm patterns, durations), =melody.ts= (melody and Slonimsky generators, distractors), =model.ts= (pitches + rhythm → bars, playback events, LilyPond), =staff.ts= (VexFlow engraving)
+Files: =(app)/ditado/+page.svelte=, =Field.svelte=; =features/ditado/=:
++ =theory.ts= :: scales, spelling, key signatures.
++ =rhythm.ts= :: meters, rhythm patterns, durations.
++ =melody.ts= :: melody and Slonimsky generators, distractors.
++ =model.ts= :: pitches + rhythm → bars, playback events, LilyPond.
++ =staff.ts= :: engraving.
++ =ditado.svelte.ts= :: =ditado=.
 
-* The form
+* Form
 
-=ditado.settings= holds the form as raw strings, and each value is parsed when it's used (=Number(x) || 1=, =parseInt(x) || 70=), as the legacy code read the DOM then. Fields, by their on-screen number:
+Kept as raw strings, parsed when used (as legacy read the DOM).
 
-| #     | Field                    | Values                                                        | Mode      |
-|-------+--------------------------+---------------------------------------------------------------+-----------|
-| 01    | Modo                     | =melody=, =slonimsky=                                         | both      |
-| 02    | Tonalidade               | index into =TONICS= (C … B, with C#, Eb, F#, G#, Bb)           | both      |
-| 03    | Escala                   | =SCALES=: major, three minors, two pentatonics, seven modes   | both      |
-| 04    | Compasso                 | 2/4, 3/4, 4/4, 6/8, 9/8, 12/8                                  | both      |
-| 05    | Compassos                | bars, 1–8                                                     | melody    |
-| 06    | Ritmo                    | =basic=, =eighth=, =varied=, =syncopated=                     | melody    |
-| 07    | Extensão                 | range in semitones: 7, 12, 16                                 | melody    |
-| 08    | Salto máx.               | largest step: 5, 7, 12                                        | melody    |
-| 09    | Movimento                | =step=, =mixed=, =leap=                                       | melody    |
-| 10    | Contorno                 | =mixed=, =asc=, =desc=, =arch=, =wave=                        | melody    |
-| 11    | Foco                     | =scale=, =tonic=, =thirds=, =fourths=, =chromatic=            | melody    |
-| 12    | Padrão                   | semitone steps, e.g. =2 1 2 3=                                | slonimsky |
-| 13    | Repetições               | 1–8                                                           | slonimsky |
-| 14    | Transformação            | =original=, =retrograde=, =inversion=, =retro-inv=            | slonimsky |
-| 15    | Andamento                | BPM, at least 30                                              | both      |
+| #  | Field       | Values                                      | Mode      |
+|----+-------------+---------------------------------------------+-----------|
+| 01 | Mode        | melody, Slonimsky                           | both      |
+| 02 | Key         | 12 tonics                                   | both      |
+| 03 | Scale       | major, 3 minors, 2 pentatonics, 7 modes     | both      |
+| 04 | Meter       | 2/4, 3/4, 4/4, 6/8, 9/8, 12/8               | both      |
+| 05 | Bars        | 1–8                                         | both      |
+| 06 | Rhythm      | basic, eighths, varied, syncopated          | both      |
+| 07 | Range       | 7, 12, 16 semitones                         | melody    |
+| 08 | Max leap    | 5, 7, 12                                    | melody    |
+| 09 | Motion      | step, mixed, leap                           | melody    |
+| 10 | Contour     | mixed, rising, falling, arch, wave          | melody    |
+| 11 | Focus       | scale, tonic, 3rds, 4ths/5ths, chromatic    | melody    |
+| 12 | Pattern     | semitone steps, e.g. =2 1 2 3=              | Slonimsky |
+| 13 | Repetitions | 1–8                                         | Slonimsky |
+| 14 | Transform   | original, retrograde, inversion, retro-inv. | Slonimsky |
+| 15 | Tempo       | BPM ≥ 30                                    | both      |
 
-05–15 are under /Parâmetros avançados/; the melody block and the Slonimsky block are hidden by mode. Compassos, Ritmo and the meter apply in both modes: the Slonimsky pattern is fitted to the rhythm's note count.
+05–15 are under /Parâmetros avançados/.
 
 * Generating
 
-=generate()=:
-
-1. Rhythm: =rhythmDurations(meter, rhythm, bars)=, one list of durations (in quarter notes) per bar. A bar is built group by group from =GROUP_OPTIONS[simple|compound][rhythm]=; for =syncopated= in 4/4, 6/8, 9/8 and 12/8, half the time a whole-bar pattern from =BAR_OVERRIDES= is used instead (one that crosses beat groups).
-2. Pitches, as semitone offsets from the tonic, which sits at MIDI =60 + tonic pitch class=; all notes stay within A2–A5 (MIDI 45–81, =TESSITURA_LOW/HIGH=):
-   + /Melody/: =candidateSequence()=, up to 600 tries. A random walk over the scale notes in the tessitura (plus their chromatic neighbours for /Cromatismo controlado/), starting on the tonic. Each step must differ from the last, stay within the range and the max leap, and satisfy /Movimento/ (counted in scale steps), /Foco/ (thirds: 3–4 semitones; fourths: 5 or 7; tonic: non-tonic, non-dominant notes are skipped 75% of the time) and /Contorno/ (=arch= rises in the first half, falls in the second; =wave= alternates direction). The last note is replaced by the tonic if the tonic is within the max leap of the note before it (the legacy page measured from the note it replaced, so its last leap could be larger); the whole line must fit the range. A dead end returns =null= and the loop retries.
-   + /Slonimsky/: =slonimskySequence()=, up to 200 tries. The pattern is summed into a line and repeated (each repetition starts where the last ended), transformed, cut or cycled to the rhythm's note count, then shifted to a random position that fits the tessitura; if it can't fit, it's centred and clamped. Each /Gerar/ thus transposes it.
-   + If nothing comes out: /Não foi possível gerar — afrouxe um parâmetro./ (melody) or /Padrão grande demais para A2–A5…/ (Slonimsky), in place of the quiz.
-3. =buildModel()= splits each note at beat-group boundaries (=splitDurationsAtGroupBoundaries=, with =tieIn= / =tieOut=), attaches pitches, the key signature (=keySigInfo=) and the metric groups. The /Mapa métrico/ label shows the meter and its groups (=4/4 · ♩ + ♩ + ♩ + ♩=, =6/8 · ♩. + ♩.=).
-4. The quiz gets four options, the right one and up to three =distractors()= (one inner note moved a semitone), shuffled; each is shown as degree names (=1 – 2 – b3 – 1=, =DEG=). The staff is blurred, with /🔒 ouça e adivinhe/ on a dark chip over it.
+1. Rhythm per bar, beat group by beat group; syncopated 4/4 and compound meters use a whole-bar pattern half the time.
+2. Pitches, as offsets from the tonic (MIDI =60 + tonic=), within A2–A5:
+   + Melody :: a random walk from the tonic under range, max leap, motion, focus and contour; ends on the tonic, within the max leap of the note before. Up to 600 tries.
+   + Slonimsky :: the pattern repeated, transformed, fitted to the rhythm's length, moved to a random place in the range. Up to 200 tries.
+   + Failure shows a hint instead of the quiz.
+3. =buildModel()= splits notes at beat groups (ties), adds the key signature and metric groups (shown in /Mapa métrico/).
+4. Options: the answer plus up to three with one inner note a semitone off, shuffled, shown as degrees.
 
 * Answering
 
-+ Picking an option scores it (tag =D=, prompt the meter, answer =✓= / =✗=), marks right and wrong, unblurs the staff and shows /Resposta/: the degrees and one rhythm glyph per sounding note (=rhythmSymbol=).
-+ /Revelar resposta/ unblurs the staff and lays the options out again, reshuffled and clickable, with the answer shown. Picking after a reveal is still scored, once.
-+ /Ouvir/ plays the melody: tied cells merged (=flattenEvents=), each note 90% of its length, at /Andamento/. /Tônica/ plays the tonic.
++ Pick :: scores (tag =D=), marks, unblurs, shows the degrees and rhythm.
++ /Revelar resposta/ :: unblurs and reshuffles the options; a later pick still scores (legacy).
++ /Ouvir/ :: the melody, ties merged, at the tempo. /Tônica/ :: the tonic. Both read key and tempo from the form when pressed (legacy).
 
-/Ouvir/, /Tônica/ and the LilyPond export read /Tonalidade/ and /Andamento/ from the form when pressed, not from the exercise: change the key after generating and the playback is transposed while the staff isn't. Legacy behaviour.
+* Engraving (=staff.ts=)
 
-* Engraving
-
-=renderStaff(host, model, baseMidi)= in =staff.ts=, VexFlow 4.2.2 with the SVG backend, run by a Svelte attachment whenever a new exercise is generated:
-
-+ One 240px stave per bar; the first has the treble clef, the key signature (=keySig.vexKey=) and the time signature; later bars have no start barline, the last an end barline.
-+ Note names come from =spellNote()=: in-scale notes on the scale's letters, others on =FALLBACK_LETTER=; accidentals are drawn only where they differ from the signature (naturals to cancel it).
-+ Dotted values get a =Dot= modifier but keep their undotted duration, so the voice is non-strict (=setStrict(false)=); beams are generated per beat group (3/8 in compound meters, 1/4 in simple); ties join split cells.
-+ After drawing, =cropToDrawing()= shrinks the SVG's =viewBox= and size to the drawn bounding box plus a 12px margin, and the paper box centres it both ways with auto margins; a staff wider than the box scrolls from its clef.
-+ Each optional step (barline types, dots, each beam, each tie) is wrapped so that a failure skips that element, as the legacy =try/catch= did. If the whole staff fails, its error message is shown in place of it.
++ One 240px stave per bar; clef, key and time on the first; end barline on the last.
++ Notes spelled on the scale's letters; accidentals only against the signature.
++ Dots as modifiers in a non-strict voice; beams per beat group; ties.
++ The SVG is cropped to the drawing and centred on the paper.
++ A failing element is skipped; a failing staff shows its error.
 
 * LilyPond
 
-The /Representação musical/ block is collapsed; its header (a button, =aria-expanded=, =ditado.lilyOpen=) slides it open. Its =<pre>= is empty, as it was in the legacy app. /Copiar .ly/ copies and /Baixar .ly/ downloads (=bem-ditado.ly=) the output of =toLily()=: LilyPond 2.24.0, the key (=\key d \major=, modes by name, the minors as =\minor=), the meter, absolute pitches, ties, and =\midi { \tempo 4 = <bpm> }=.
+Collapsed block, slides open. Its =<pre>= is empty (legacy; TODO). /Copiar .ly/, /Baixar .ly/: LilyPond 2.24 with key, meter, ties, tempo.
 
 * Kept on purpose
 
-+ In =buildModel()=, a bar's cells are sorted by beat group, then by =offset=, after =offset= has been overwritten with the pitch: inside a beat group with more than one note, the staff and the playback order its notes from low to high, not as generated; the options and the /Resposta/ degrees use the generated order. Legacy bug, kept ([[file:../parity.org][Parity]]).
-+ =nameAt()= in =theory.ts= relies on JS =%= keeping the sign, so a note far from its letter falls through to a single sharp or flat.
++ Within a beat group, notes sort by pitch, not time, so staff and playback can differ from the answer.
++ =nameAt()= relies on JS =%= keeping the sign.

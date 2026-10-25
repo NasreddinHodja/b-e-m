@@ -1,21 +1,22 @@
 #+title: B.E.M — Bloco de Estudos Musicais
 
-Ear training and music study in the browser: chords and intervals quizzes, melodic dictation, a Fux counterpoint checker, an interval ruler, diatonic harmony in 3D, a tuner, a metronome and a practice journal. The UI is in Portuguese.
+Ear training in the browser: chord and interval quizzes, melodic dictation, a Fux counterpoint checker, an interval ruler, harmony in 3D, a tuner, a metronome, a practice journal. Portuguese and English.
 
-SvelteKit SPA (adapter-static, =ssr = false=), Svelte 5, TypeScript, Tailwind 4, Firebase for sign-in and the journal. A 1:1 port of the original single-file app, which is kept as =index.html=, the reference the port is checked against.
+SvelteKit SPA, Svelte 5, TypeScript, Tailwind 4, Firebase. A 1:1 port of the original single-file app, kept in =legacy/index.html= as the reference.
 
 #+begin_src sh
 pnpm install
-pnpm dev          # signed in, no Firebase; VITE_BACKEND=firebase for the real one
+pnpm dev          # signed in, no Firebase
 #+end_src
 
-+ [[file:docs/README.org][Documentation]]: architecture, every view, design system, parity
-+ [[file:CONTRIBUTING.org][Contributing]]: scripts, checks, conventions, commits
-+ [[file:docs/guide/deploy.org][Deploying]]: GitHub Pages and Firebase
++ [[file:docs/README.org][Documentation]]
++ [[file:CONTRIBUTING.org][Contributing]]
++ [[file:docs/guide/deploy.org][Deploying]]
 
 * Recreate the scaffold
 
 #+begin_src sh
 pnpm dlx sv@1.1.1 create --template minimal --types ts --add prettier eslint --install pnpm .
 pnpm dlx sv@1.1.1 add tailwindcss="plugins:none" sveltekit-adapter="adapter:static" --install pnpm
+pnpm dlx sv@1.1.1 add vitest="usages:unit" playwright="demo:no" paraglide="languageTags:pt-br,en+demo:no" --install pnpm
 #+end_src

@@ -1,87 +1,78 @@
 #+TITLE: Overview
 #+OPTIONS: ^:{}
 
-SvelteKit 3 with Svelte 5 runes, built as a static SPA (=@sveltejs/adapter-static=, =fallback: '404.html'=; =ssr = false= in =src/routes/+layout.ts=). TypeScript strict. Tailwind 4 without preflight. pnpm. Everything runs in the browser; the only server is Firebase (auth and Firestore), or nothing at all in dev ([[file:backend.org][Backend]]).
+Static SPA: SvelteKit 3, Svelte 5 runes, TypeScript strict, Tailwind 4 (no preflight), pnpm. =adapter-static= with =fallback: '404.html'=; =ssr = false= (=src/routes/+layout.ts=). The only server is Firebase, or none in dev ([[file:backend.org][Backend]]).
 
-Pinned runtime libraries, the versions the legacy page loaded ([[file:../parity.org][Parity]]): =vexflow= 4.2.2, =three= 0.128.0, =firebase= 10.8.0.
+Pinned to the legacy page's versions: =vexflow= 4.2.2, =three= 0.128.0, =firebase= 10.8.0.
 
-SvelteKit 3 specifics this repo depends on:
-
-+ Config lives in =vite.config.ts= (the =sveltekit()= plugin's options); there is no =svelte.config.js=.
-+ =src/lib= is imported through the =#lib= subpath import (=package.json= =imports=), not =$lib=. Imports need the =.js= extension, and a =foo.svelte.ts= module is imported as =foo.svelte.js=.
-+ Route IDs include the group: =resolve('/(app)/acordes')=, typed by =RouteId= from =$app/types=.
+SvelteKit 3 specifics:
++ Config is in =vite.config.ts=; no =svelte.config.js=.
++ =src/lib= is =#lib= (=package.json= =imports=). Imports need =.js=; =foo.svelte.ts= is imported as =foo.svelte.js=.
++ Route IDs include the group: =resolve('/(app)/acordes')=.
 
 * Routes
 
-| Route                        | File                                     | View                                             |
-|------------------------------+------------------------------------------+--------------------------------------------------|
-| (all)                        | =src/routes/+layout.svelte=              | boot screen, "unreachable" screen, global CSS    |
-| =/login=                     | =src/routes/login/+page.svelte=          | e-mail and password sign-in                      |
-| (signed-in views)            | =src/routes/(app)/+layout.svelte=        | sign-in guard, sidebar, hamburger, content width |
-| =/=                          | =src/routes/(app)/+page.ts=              | redirects (307) to =/acordes=                    |
-| =/acordes=                   | =(app)/acordes/+page.svelte=             | [[file:../features/acordes.org][Acordes]]                                          |
-| =/intervalos=                | =(app)/intervalos/+page.svelte=          | [[file:../features/intervalos.org][Intervalos]]                                       |
-| =/ditado=                    | =(app)/ditado/+page.svelte=, =Field.svelte= | [[file:../features/ditado.org][Ditado melódico]]                                  |
-| =/contraponto=               | =(app)/contraponto/+page.svelte=, =Roll.svelte=, =colors.ts= | [[file:../features/contraponto.org][Contraponto]]                     |
-| =/regua=                     | =(app)/regua/+page.svelte=               | [[file:../features/regua.org][Régua]]                                            |
-| =/harmonia-3d=               | =(app)/harmonia-3d/+page.svelte=         | [[file:../features/harmonia-3d.org][Harmonia 3D]]                                      |
-| =/apreciacao=                | =(app)/apreciacao/+page.svelte=          | [[file:../features/pages.org][Apreciação]]                                       |
-| =/afinador=                  | =(app)/afinador/+page.svelte=            | [[file:../features/afinador.org][Afinador]]                                         |
-| =/pratica=                   | =(app)/pratica/+page.svelte=             | [[file:../features/pratica.org][Prática]]                                          |
-| =/metronomo=                 | =(app)/metronomo/+page.svelte=           | [[file:../features/pratica.org][Metrônomo]]                                        |
-| =/manifesto=                 | =(app)/manifesto/+page.svelte=           | [[file:../features/pages.org][Manifesto]]                                        |
-| =/historico=                 | =(app)/historico/+page.svelte=           | [[file:../features/pages.org][Histórico]]                                        |
+| Route        | File                                              | View                                            |
+|--------------+---------------------------------------------------+-------------------------------------------------|
+| (all)        | =src/routes/+layout.svelte=                       | boot and "unreachable" screens, CSS, title      |
+| =/login=     | =src/routes/login/+page.svelte=                   | sign-in                                         |
+| (signed in)  | =src/routes/(app)/+layout.svelte=                 | guard, sidebar, hamburger, content width        |
+| =/=          | =(app)/+page.ts=                                  | redirects to =/acordes=                         |
+| =/acordes=   | =(app)/acordes/+page.svelte=                      | [[file:../features/acordes.org][Acordes]]                                         |
+| =/intervalos= | =(app)/intervalos/+page.svelte=                  | [[file:../features/intervalos.org][Intervalos]]                                      |
+| =/ditado=    | =(app)/ditado/+page.svelte=, =Field.svelte=       | [[file:../features/ditado.org][Ditado]]                                          |
+| =/contraponto= | =(app)/contraponto/+page.svelte=, =Roll.svelte=, =colors.ts= | [[file:../features/contraponto.org][Contraponto]]                        |
+| =/regua=     | =(app)/regua/+page.svelte=                        | [[file:../features/regua.org][Régua]]                                           |
+| =/harmonia-3d= | =(app)/harmonia-3d/+page.svelte=                | [[file:../features/harmonia-3d.org][Harmonia 3D]]                                     |
+| =/afinador=  | =(app)/afinador/+page.svelte=                     | [[file:../features/afinador.org][Afinador]]                                        |
+| =/pratica=, =/metronomo= | =(app)/pratica/=, =(app)/metronomo/=  | [[file:../features/pratica.org][Prática, Metrônomo]]                              |
+| =/apreciacao=, =/manifesto=, =/historico= | their folders        | [[file:../features/pages.org][static pages, history]]                          |
 
-Each route is one tab of the legacy page. The sidebar's groups, labels, icons, badges and which views use the wide column come from =NAV= in =src/lib/nav.ts=; =Sidebar.svelte= and the layout both read it, so a new view is a route plus a =NAV= entry.
+The sidebar's groups, labels, icons, badges and wide views come from =NAV= (=src/lib/nav.ts=). A new view is a route plus a =NAV= entry.
 
 * Layers
 
-+ =src/lib/features/<view>/= :: a view's logic. Plain =.ts= modules hold the music logic (pure functions and tables, no Svelte); one =*.svelte.ts= class holds the view's state and actions, exported as a module singleton (=export const acordes = new AcordesQuiz()=). Pages only render that state and call its methods.
-+ =src/lib/session/score.svelte.ts= :: =score=, every scored answer of this session. The sidebar's counters and badges, each quiz's history list, Intervalos' per-interval stats and the Histórico page are all derived from =score.answers=. =record()= also saves the totals through the backend.
-+ =src/lib/backend/= :: =session= (status, user, the active backend) and the two backends. See [[file:backend.org][Backend]].
-+ =src/lib/audio/= :: =audio=, the one synth every view plays through. See [[file:audio.org][Audio]].
-+ =src/lib/music/pitch.ts= :: =PC_NAMES=, =mod12=, =midiToFreq=, =pcName=, shared by the views. Features keep their own spelling tables where the legacy code had its own (=ditado/theory.ts=, =harmonia3d/fields.ts=, =contraponto/rules.ts=).
-+ =src/lib/ui/= :: shared components and the =FeedbackResult= / =AnswerMark= types. See [[file:../design/system.org][Design system]].
-+ =src/lib/nav.ts= :: the sidebar's structure.
++ =src/lib/features/<view>/= :: pure =.ts= modules (tables, algorithms) and one =*.svelte.ts= class with the state and actions, exported as a singleton. Pages render it and call its methods.
++ =src/lib/session/score.svelte.ts= :: =score=, the session's scored answers. Counters, badges, histories and Intervalos' stats derive from it; =record()= saves the totals.
++ =src/lib/backend/= :: =session= and the two backends ([[file:backend.org][Backend]]).
++ =src/lib/audio/= :: =audio=, the shared synth ([[file:audio.org][Audio]]).
++ =src/lib/music/pitch.ts= :: =midiToFreq=, =pcName=, =mod12=.
++ =src/lib/ui/= :: shared components ([[file:../design/system.org][Design system]]).
++ =src/lib/i18n.svelte.ts= :: the language (below).
 
-Dependencies run one way: routes → features → session / backend / audio / music / ui. Nothing under =src/lib= imports from =src/routes=; =ui= imports only the =Answer= type, from =session/score.svelte.ts=.
+Imports run routes → features → session, backend, audio, music, ui. Nothing in =src/lib= imports =src/routes=.
 
 * State
 
-Every feature's state is a module-level singleton created on first import. Navigating away unmounts the page but not the state, so a quiz, a half-built progression or a running timer is where it was when you come back: the legacy page hid tabs rather than destroying them, and this reproduces that. Consequences that are on purpose:
-
+Feature state lives in module singletons, so it survives navigation, as the legacy page's hidden tabs did. So:
 + The metronome and the Pomodoro keep running on other pages.
-+ The tuner keeps the microphone open on other pages until /Desligar microfone/.
-+ Harmonia 3D is the exception: leaving the page stops its playback (the legacy tab switch did), and the three.js scene is destroyed and rebuilt, while the progression and camera stay in =harmonia=.
++ The tuner keeps the microphone on until /Desligar microfone/.
++ Except Harmonia 3D: leaving stops playback and destroys the scene; the progression and camera stay.
 
-Constructors that generate a first exercise (=acordes=, =intervalos=, =ditado=, =contraponto=, =harmonia=) do it without playing audio.
-
-Reactivity: =$state= fields, =$derived= getters, =SvelteSet= for sets (Intervalos' active intervals, Régua's lit rows), =$state.raw= where a value is replaced rather than mutated (the tuner's history, Ditado's current exercise). Harmonia 3D keeps the camera and animation values as plain, non-reactive fields: the scene reads them every frame.
+First exercises are generated without sound. =SvelteSet= for sets, =$state.raw= for values replaced whole. Harmonia 3D's camera fields aren't reactive: the scene reads them every frame.
 
 * Languages
 
-Portuguese (the base) and English, with Paraglide (=@inlang/paraglide-js=). The strings are in =messages/pt-br.json= and =messages/en.json=; =project.inlang/settings.json= configures them, and the Vite plugin compiles them into =src/lib/paraglide/= (generated, not tracked), one function per message: =m.acordes_play_a()=, =m.semitones_count({ n })=.
+Paraglide (=@inlang/paraglide-js=): =messages/pt-br.json= (base) and =messages/en.json=, compiled to =src/lib/paraglide/= (not tracked). Call =m.key()= where text is rendered.
 
-The language is chosen in the browser only (the app is an SPA): the one saved by the toggle (=localStorage=, =PARAGLIDE_LOCALE=), else the browser's, else Portuguese (=strategy= in =vite.config.ts=). =src/lib/i18n.svelte.ts= (=language=) holds it in a rune and makes Paraglide's =getLocale()= read it, so every =m.*()= in a template re-renders when the PT / EN toggle at the bottom of the sidebar is pressed: no reload, nothing of the session lost. It also sets =<html lang>=. The root layout imports it before anything renders.
-
-What follows from rendering text late:
-+ State holds facts, not sentences: the quizzes keep the outcome of an answer (=#guessResult=, =#result=) and word the feedback in a getter; a scored answer's =prompt= and =answer= are functions (=score.svelte.ts=); the counterpoint rules return issues whose =m= is a function; the tuner keeps =stability= and =reading=, not their text.
-+ Tables that the parity tests compare with the legacy page (chords, intervals, the ruler, the pillars, Harmonia 3D's presets) keep their Portuguese; the page shows them through a =labels.ts= per feature (=aFuncLabel=, =intervalName=, =reguaQuality=…). =src/lib/i18n.test.ts= checks that, in Portuguese, those labels read exactly as the tables, and that both catalogues have the same keys and parameters.
-+ Not translated: LilyPond exports (Contraponto's and Ditado's =.ly= text, instrument names), developer-facing errors and console messages, note letters, chord symbols and degree numbers.
++ Locale: the toggle's saved choice (=localStorage=), else the browser's, else Portuguese.
++ =i18n.svelte.ts= keeps it in a rune behind =getLocale()=, so the sidebar's PT / EN toggle re-renders in place: no reload, no lost state. It sets =<html lang>=.
++ State holds facts, text is made when rendered: quiz results, history =prompt= / =answer= and counterpoint issue =m= are functions.
++ Tables compared with the legacy page keep their Portuguese; =labels.ts= per feature translates them. =src/lib/i18n.test.ts= checks both catalogues match and the Portuguese labels equal the tables.
++ Not translated: LilyPond exports, developer errors, note letters, chord symbols, degrees.
 
 * Boot and sign-in
 
-1. =src/routes/+layout.svelte= calls =session.start()= and shows /INICIANDO SISTEMA B.E.M.../ while =session.status= is =loading=.
-2. =start()= loads the chosen backend with a dynamic import, so the other one's code is never fetched, and subscribes to auth. If no auth answer comes in 8 s, the status becomes =unreachable= and the layout shows the legacy "couldn't connect to Firebase" text.
-3. =signed-in= renders the =(app)= layout; =signed-out= makes it =goto('/login')=. The login page, once signed in, goes to =/acordes=.
-4. /Sair do App/ in the sidebar calls =session.signOut()=; the guard then sends you to =/login=.
+1. The root layout calls =session.start()=; /INICIANDO SISTEMA B.E.M.../ while =loading=.
+2. The backend loads by dynamic import. No auth answer in 8 s: =unreachable=.
+3. =signed-out= sends =(app)= to =/login=; signing in goes to =/acordes=.
 
 * Layout
 
-=(app)/+layout.svelte=: the sidebar is fixed, 220px wide; the wrapper pads 220px on the left and =main= is centred in the rest (=mx-auto=), at most 780px wide, or 1320px for the views with =wide: true= in =NAV= (Contraponto, Harmonia 3D). Below 768px (Tailwind's =max-md=) the sidebar slides off-canvas, a hamburger button at the top left toggles it, a dark overlay closes it, and navigating closes it when =window.innerWidth <= 768=.
+Sidebar fixed, 220px. =main= is centred right of it: 780px, or 1320px for =wide= views (Contraponto, Harmonia 3D). Under 768px the sidebar is a drawer: hamburger, overlay, closes on navigation.
 
-The sidebar (=Sidebar.svelte=), top to bottom: the logo; correct and wrong totals; /zerar pontuação/ (a =confirm()=, then =score.reset()=); /Sair do App/; the nav, with an =a/b= badge on Acordes, Intervalos and Ditado; the speaker / headphone switch for =audio.setMode=.
+Sidebar, top to bottom: logo, totals, /zerar pontuação/ (confirm), /Sair do App/, nav with =a/b= badges on the quizzes, speaker / headphone switch, PT / EN.
 
-* Build and deploy
+* Build
 
-=pnpm build= writes =build/=, with =404.html= as the SPA fallback. =paths.base= is =BASE_PATH= in builds and empty under =vite dev=. =.github/workflows/deploy.yml= builds on push to =main= and deploys to GitHub Pages. See [[file:../guide/deploy.org][Deploying]].
+=pnpm build= → =build/=. =paths.base= is =BASE_PATH= (empty in dev). Deploy: [[file:../guide/deploy.org][Deploying]].

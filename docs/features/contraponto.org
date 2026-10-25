@@ -1,62 +1,42 @@
 #+TITLE: Contraponto (Fux)
 #+OPTIONS: ^:{}
 
-Write up to three voices against a cantus firmus, in first or second species, as text or on a piano roll; the rules are checked as you type, the voices play back, and the score exports to LilyPond. Not scored.
+Up to three voices against a cantus firmus, 1st or 2nd species, as text or on a piano roll. Rules checked live, playback, LilyPond export. Not scored.
 
-+ Page :: =src/routes/(app)/contraponto/+page.svelte=; =Roll.svelte= (the piano roll), =colors.ts= (voice colours)
-+ State :: =src/lib/features/contraponto/contraponto.svelte.ts=, =contraponto=
-+ Rules :: =src/lib/features/contraponto/rules.ts=
-+ Export :: =src/lib/features/contraponto/lilypond.ts=
+Files: =(app)/contraponto/+page.svelte=, =Roll.svelte=, =colors.ts=; =features/contraponto/= =rules.ts=, =lilypond.ts=, =contraponto.svelte.ts= (=contraponto=).
 
 * Voices
 
-=contraponto.voices= is 2–4 voices of ={ cf, sp, on, txt }=: voice 0 is the cantus firmus (=cf=, always first species), the others have a species (1 or 2), a /som/ checkbox (=on=, audible in playback) and their notes as text. =active= is the voice the roll edits (the radio button, and the gold outline).
+Voice 0 is the cantus (1st species); others have a species and a /som/ (audible) switch. Notes: =D4=, =F#4=, =Bb3=; =r= is a rest in 2nd species. Each note has a diatonic step and a MIDI number, so spelling matters. 1st species: one note per cantus note; 2nd: two, except the last.
 
-Notes are tokens separated by spaces or commas: letter, accidentals (=#= / =b=, any number), octave; =C4= is middle C (=parse()=). In second species =r= or =-= is a rest (=readVoice()=). Each note becomes ={ n, dia, midi }=: its spelling, its diatonic step (=octave·7 + letter=) and MIDI number. Intervals are measured in both, so a spelling matters (an augmented second isn't a minor third).
++ Examples :: a cantus with a correct 1st- or 2nd-species voice.
++ Species switch :: doubles or halves the notes.
++ /+ voz/ :: up to 4; starts as the cantus an octave up. /×/ removes.
++ /± compasso/ :: repeats or drops the last measure.
 
-A first-species voice has one note per cantus note; a second-species voice two, except the last, so =2n − 1=.
+* Roll
 
-Actions:
+Columns are half-measures, rows semitones. Shows the active voice's intervals with the cantus and rings on issues (red error, amber warning). Clicking near another voice's note selects it; dragging places notes, spelled with /Ao inserir nota/'s accidental, previewed with the cantus.
 
-+ /Exemplo 1ª esp./, /Exemplo 2ª esp./ :: the cantus =D4 F4 E4 D4 G4 F4 A4 G4 F4 E4 D4= with a correct example voice. The page opens on the first.
-+ Species select :: doubles every note but the last (1 → 2), or keeps every other one (2 → 1).
-+ /+ voz/ :: up to 4; a new voice is the cantus an octave up, first species.
-+ /×/ :: removes that voice.
-+ /+ compasso/, /− compasso/ :: repeats every voice's last note (twice in second species) or removes the last measure; not below 2 cantus notes.
+* Rules (=analyze=)
 
-Every change to the notes regenerates the LilyPond text (=#changed()=, the legacy =run()=); the textarea can be edited by hand in between.
+Errors unless marked warning:
++ Note count must be =n= or =2n − 1=; else nothing else is checked.
++ Rests only at the start. Voice crossing (warning).
++ No strong-beat dissonance; weak-beat dissonance only as a passing note.
++ Unison only at start and end. Start perfect; end unison or octave (fifth: warning).
++ Cadence (warnings): penultimate major sixth above or minor third below (2nd species: fifth, then that).
++ Parallel fifths/octaves and direct motion into perfects, downbeat to downbeat; a 2nd-species leap of a fourth+ in between excuses it.
++ Melody: augmented/diminished intervals, tritone, sixths (but rising minor), sevenths, leaps over an octave; chromatic step and repeated note (warnings).
++ Three notes (warnings): same note three times, two leaps one way, an uncompensated leap.
++ Range over a tenth (warning).
 
-* The roll
-
-=Roll.svelte= draws the voices as an SVG: columns are half-measures (=CW= 34px), rows semitones (=RH= 10px), with lines on the natural notes, labels for the pitches in use, dashed measure lines, the active voice's intervals with the cantus (diatonic numbers) along the bottom, and red (error) or amber (warning) rings on the notes the issues point at.
-
-Pointer down in a column picks the voice: the active one, unless another voice has a note within a semitone of the pointer there. Dragging then sets that voice's note in that column (=slotAt()=, =place()=), spelled on the nearest natural with the accidental from /Ao inserir nota/ (=spellNear()=), and previews it with the cantus note under it. The pitch range is frozen while dragging so the roll doesn't rescale under the pointer.
-
-* Rules
-
-=analyze(cf, cp, sp, above)= checks one added voice against the cantus; =above= is whether its average pitch is at or above the cantus's. Everything is an error (=erro=) unless marked as a warning (=aviso=):
-
-+ The cantus needs at least 2 notes; the voice needs exactly =n= (first species) or =2n − 1= (second) notes, or nothing else is checked.
-+ Rests only at the start.
-+ Voice crossing (warning).
-+ No dissonance on a strong beat (every note in first species, the first of each pair in second).
-+ Second species: a dissonance on the weak beat only as a passing note (step in, step out, same direction).
-+ Unison only at the start and end (strong beats).
-+ Start on a perfect consonance (unison, fifth, octave); end on a unison or octave (a fifth at the end is a warning).
-+ Cadence (warnings): first species, the penultimate note a major sixth above, or a minor third below, the cantus; second species, the penultimate measure starts on a fifth and its second note is that sixth or third.
-+ Parallel fifths and octaves, and direct motion into a perfect interval from a perfect or an imperfect one, strong beat to strong beat in adjacent measures. In second species, a weak-beat leap of a fourth or more between them excuses it.
-+ Melody, note to note: augmented and diminished seconds, thirds, fourths, fifths and octaves; the tritone; sixths, except a minor sixth upward; sevenths; leaps beyond the octave; a chromatic step on one letter (warning); a repeated note in second species (warning).
-+ Melody, three notes (warnings): the same note three times (first species), two leaps of a third or more in the same direction, a leap of a fourth or more followed by more motion the same way.
-+ Range over a tenth (16 semitones) (warning).
-
-=pairsCheck()= checks each pair of added voices, downbeat to downbeat: parallel fifths and octaves and direct motion between perfects (errors), direct motion from imperfect to perfect (warning).
-
-Unparseable notes in any voice replace all of this with one error naming them. The summary line above the roll: /Digite ou desenhe o contraponto./ when voice 2 is empty, else the error and warning counts (red when there are errors), or /Nenhum problema encontrado./ (green).
+=pairsCheck()= checks added voices against each other for parallels. Unparseable notes give one error instead.
 
 * Playback
 
-/▶ Tocar/ schedules every audible voice at once from =audio.now() + 0.1=: a half-measure is one beat at /Andamento/ (40–160), first-species notes and the final note last two. A gold playhead follows on the roll (=requestAnimationFrame=, =head=). /repetir/ loops; /■ Parar/ stops the playhead (notes already scheduled still sound, as in the legacy app).
+All audible voices at once; a half-measure is one beat. Playhead on the roll; /repetir/ loops. /Parar/ stops the playhead, not scheduled notes (legacy).
 
 * LilyPond
 
-=generateLilyPond()=: LilyPond 2.26.0, =\time 2/2=, =\tempo 2 = <bpm>=, one variable per voice (=cantusFirmus=, =voz2= …) with bar lines after each note (first species) or each pair, a =StaffGroup= with instrument names, the bass clef for a voice more than 6 semitones below the cantus on average, =\layout= and =\midi=. /Gerar LilyPond/ regenerates it; /Copiar .ly/ copies the textarea; /Salvar .ly/ downloads it as =bem-contraponto.ly=.
+2.26, 2/2, one variable per voice, bar lines per species, bass clef for low voices. Regenerated on every note change; /Copiar/, /Salvar .ly/.

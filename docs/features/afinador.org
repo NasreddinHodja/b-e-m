@@ -1,25 +1,17 @@
 #+TITLE: Afinador
 #+OPTIONS: ^:{}
 
-A chromatic tuner on the microphone: note, octave, cents off, stability, a needle and a sparkline of recent readings. Not scored.
+Microphone tuner: note, cents, stability, needle, sparkline. Not scored.
 
-+ Page :: =src/routes/(app)/afinador/+page.svelte= (the needle colour, the sparkline canvas)
-+ Pitch detection :: =src/lib/features/afinador/autocorrelate.ts=
-+ State :: =src/lib/features/afinador/tuner.svelte.ts=, =tuner=
+Files: =(app)/afinador/+page.svelte=; =features/afinador/= =autocorrelate.ts=, =tuner.svelte.ts= (=tuner=).
 
 * Flow
 
-+ /🎤 Ativar microfone/ :: =start()= asks for the microphone with echo cancellation, noise suppression and auto gain off (and the non-standard =latency: 0= the legacy page passed), opens its own =AudioContext= (not =audio='s), and runs it through a 60 Hz high-pass into an =AnalyserNode= (=fftSize= 4096). Refused: /❌ Microfone bloqueado/.
-+ Each animation frame :: =autoCorrelate()= on the time-domain buffer. A reading outside the mode's range is ignored: /Cromático/ 27.5–4200 Hz, /Violão/Guitarra/ 80–1400, /Voz/ 85–1100. Kept readings are smoothed (weight 0.6 for a jump over 15%, else 0.18), then shown: the nearest note against /Ref. A =/ (default 440; the input's =min=/=max= are 415–466 but typed values aren't clamped, and an empty field means 440), cents clamped to ±50, the needle eased toward =50 + cents·0.75= %, stability from the spread of the last 20 readings, and the last 120 cents values for the sparkline.
-+ Within ±5 cents :: /✓ Afinado/ and the note in green; sharp /↑ Muito agudo/ in gold; flat /↓ Muito grave/ in red.
-+ /⏹ Desligar microfone/ :: =stop()= stops the tracks, closes the context, cancels the loop.
++ /Ativar microfone/ :: mic without echo cancellation, noise suppression or auto gain; its own =AudioContext=; 60 Hz high-pass into an analyser (4096). Refused: /Microfone bloqueado/.
++ Every frame :: =autoCorrelate()=; readings outside the mode's range are dropped (chromatic 27.5–4200 Hz, guitar 80–1400, voice 85–1100), the rest smoothed. Shows the nearest note against /Ref. A/ (default 440, not clamped), cents ±50, stability over 20 readings, 120 readings of history.
++ ±5 cents :: in tune (green); sharp gold; flat red.
++ The mic stays on across pages until /Desligar microfone/ (legacy).
 
-The microphone stays on when you go to another page, until /Desligar microfone/: the legacy page kept it on across tabs.
+* autoCorrelate(buffer, rate)
 
-* autoCorrelate
-
-=autoCorrelate(buffer, sampleRate)= returns Hz, or −1:
-
-1. RMS under 0.018 is silence.
-2. The buffer is trimmed at each end to where the signal first drops under 0.22.
-3. Autocorrelation at every lag; the initial downslope is skipped and the highest peak after it is the period, refined by parabolic interpolation.
+Hz, or −1 for silence (RMS < 0.018). Trims weak edges, autocorrelates, takes the highest peak after the first descent, refines it parabolically.

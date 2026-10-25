@@ -1,81 +1,50 @@
 #+TITLE: Backend
 #+OPTIONS: ^:{}
 
-Everything that leaves the browser goes through one interface, =Backend= (=src/lib/backend/types.ts=): =auth=, =diario= (the practice journal) and =stats= (the score totals). Two implementations: Firebase (=firebase.ts=) and a local one for development (=local.ts=). Nothing outside =src/lib/backend/= imports Firebase.
+One interface, =Backend= (=src/lib/backend/types.ts=): =auth=, =diario= (the journal), =stats= (score totals). Two implementations: =firebase.ts= and =local.ts=. Only =src/lib/backend/= imports Firebase.
 
-* Choosing one
+* Which one
 
-=session.svelte.ts=:
+=kind = VITE_BACKEND ?? (DEV ? 'local' : 'firebase')= (=session.svelte.ts=).
 
-#+begin_src ts
-const kind = import.meta.env.VITE_BACKEND ?? (import.meta.env.DEV ? 'local' : 'firebase');
-#+end_src
+| Command                          | Backend  |
+|----------------------------------+----------|
+| =pnpm dev=                       | local    |
+| =VITE_BACKEND=firebase pnpm dev= | Firebase |
+| =pnpm build=                     | Firebase |
+| =VITE_BACKEND=local pnpm build=  | local    |
 
-| Command                              | Backend  |
-|--------------------------------------+----------|
-| =pnpm dev=                           | local    |
-| =VITE_BACKEND=firebase pnpm dev=     | Firebase |
-| =pnpm build=                         | Firebase |
-| =VITE_BACKEND=local pnpm build=      | local    |
+* Interface
 
-* The interface
++ =auth= :: =onChange(cb)= (now, then on every change), =signIn(email, password)= (rejects on bad credentials), =signOut()=.
++ =diario= :: =list(uid)= newest first, =add(uid, entry)=, =remove(uid, id)=.
++ =stats= :: =save(uid, stats)=.
 
-#+begin_src ts
-interface AuthService {
-  onChange(cb: (user: User | null) => void): () => void; // now or soon, then on every change
-  signIn(email: string, password: string): Promise<void>; // rejects on bad credentials
-  signOut(): Promise<void>;
-}
-interface DiarioRepository {
-  list(uid: string): Promise<DiarioEntry[]>; // newest first
-  add(uid: string, entry: NewDiarioEntry): Promise<DiarioEntry>;
-  remove(uid: string, id: string): Promise<void>;
-}
-interface StatsRepository {
-  save(uid: string, stats: Stats): Promise<void>;
-}
-#+end_src
-
-+ =User= :: ={ uid, email }=.
-+ =DiarioEntry= :: ={ id, titulo, obs, data, timestamp }=: =data= is the display date, =new Date().toLocaleString('pt-BR')= when it was written; =timestamp= is =Date.now()=.
-+ =Stats= :: =gScoreC=, =gScoreW= (all quizzes), =hScoreC/W= (Acordes), =iScoreC/W= (Intervalos), =dScoreC/W= (Ditado): correct and wrong counts. The field names are the legacy document's.
+Data:
++ =DiarioEntry= :: ={ id, titulo, obs, data, timestamp }=; =data= is a =pt-BR= date string.
++ =Stats= :: =gScoreC/W= (all), =hScoreC/W= (Acordes), =iScoreC/W= (Intervalos), =dScoreC/W= (Ditado): legacy field names.
 
 * Session
 
-=session= (=session.svelte.ts=) is the only thing the app talks to:
+=session= is what the app uses:
++ =status= :: =loading= → =signed-in= / =signed-out=; =unreachable= after 8 s without an answer.
++ =user=, =backend=, =start()= (idempotent), =signIn()=, =signOut()=.
++ =saveStats()= :: no-op when signed out.
 
-+ =status= :: =loading= → =signed-in= or =signed-out=, following =onChange=; =unreachable= if the first answer takes more than 8 s (=BOOT_TIMEOUT_MS=).
-+ =user= :: the signed-in =User= or =null=.
-+ =backend= :: the loaded =Backend=, for the repositories.
-+ =start()= :: idempotent; the root layout calls it.
-+ =signIn()=, =signOut()= :: pass through to =auth=; the routes react to =status=.
-+ =saveStats(stats)= :: a no-op until someone is signed in.
-
-Who writes what:
-
-+ =score.record()= (=src/lib/session/score.svelte.ts=) calls =session.saveStats()= after every scored answer, with the totals of the session so far. /zerar pontuação/ clears the session's answers but doesn't save; the next answer saves the new totals.
-+ =diario= (=src/lib/features/pratica/diario.svelte.ts=) reloads the journal whenever =session.user.uid= changes, adds, removes one, clears all (one =remove= per entry), and exports the list as =diario_bem.json=. See [[file:../features/pratica.org][Prática]].
-
-Stats are only written, never read back: every session's counters start at zero, as in the legacy app.
+Writers: =score.record()= saves the session totals after each answer (a reset doesn't save). =diario= reloads on user change, adds, removes, clears (one request per entry), exports =diario_bem.json=. Stats are never read back.
 
 * Firebase
 
-=firebase.ts=, the modular SDK 10.8.0. The web config is in the file: it is public by design, and access is up to the project's Firestore security rules (which aren't in this repo). Project =b-e-m-2b022=.
+Modular SDK 10.8.0, project =b-e-m-2b022=. The web config is public; access is up to Firestore rules (not in this repo).
 
-| Data          | Firestore path                         | Write                                    |
-|---------------+----------------------------------------+------------------------------------------|
-| Journal entry | =users/{uid}/diario/{auto id}=         | =addDoc=; listed =orderBy('timestamp', 'desc')=; =deleteDoc= |
-| Stats         | =users/{uid}/stats/current=            | =setDoc(..., { merge: true })=           |
+| Data    | Path                           | How                                          |
+|---------+--------------------------------+----------------------------------------------|
+| Journal | =users/{uid}/diario/{auto id}= | =addDoc=, =orderBy('timestamp', 'desc')=, =deleteDoc= |
+| Stats   | =users/{uid}/stats/current=    | =setDoc= with =merge=                        |
 
-Auth is e-mail and password (=signInWithEmailAndPassword=). There's no sign-up in the app: accounts are made in the Firebase console. A domain the app is served from must be in Authentication → Settings → Authorized domains ([[file:../guide/deploy.org][Deploying]]).
+E-mail and password sign-in; accounts are made in the Firebase console. Serving domains must be authorized ([[file:../guide/deploy.org][Deploying]]).
 
-* Local backend
+* Local
 
-=local.ts=, for =pnpm dev=:
-
-+ Starts signed in as ={ uid: 'local', email: 'dev@local' }=.
-+ /Sair do App/ really signs out: the guard sends you to =/login=, as in production. Any e-mail and password sign back in, as that e-mail, with the same =uid=.
-+ The journal is =localStorage['bem_dev_diario']= (a JSON array, newest first; ids are the timestamp); stats are =localStorage['bem_dev_stats']=.
-+ =onChange= answers in a microtask, so the boot screen flashes and goes.
-
-Clearing those two keys resets the dev data.
++ Starts signed in as =dev@local=. Signing out works; any credentials sign back in.
++ Journal: =localStorage['bem_dev_diario']=; stats: =localStorage['bem_dev_stats']=. Delete them to reset.

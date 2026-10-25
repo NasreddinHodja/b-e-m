@@ -1,82 +1,60 @@
 #+TITLE: Contributing
 #+OPTIONS: ^:{}
 
-* Prerequisites
-
-+ Node.js 24 (CI's version)
-+ pnpm 12 (=pnpm/action-setup= in CI uses 12.3.4)
-
 * Setup
+
+Node 24, pnpm 12.
 
 #+begin_src sh
 git clone https://github.com/jfaragao-commits/b-e-m.git
 cd b-e-m
 pnpm install
-pnpm dev         # http://localhost:5173, signed in, no Firebase
+pnpm dev         # localhost:5173, signed in, no Firebase
 #+end_src
 
-=pnpm dev= uses the local backend: you start signed in as =dev@local=, signing out works, any e-mail and password sign back in, and the journal and stats are in =localStorage=. =VITE_BACKEND=firebase pnpm dev= uses the real project ([[file:docs/architecture/backend.org][Backend]]).
-
-=pnpm-workspace.yaml='s =allowBuilds= lets only =esbuild= run its install script; Firebase's =@firebase/util= and =protobufjs= postinstalls are refused.
+Dev uses the local backend; =VITE_BACKEND=firebase pnpm dev= for the real one ([[file:docs/architecture/backend.org][Backend]]). Only =esbuild= may run install scripts (=pnpm-workspace.yaml=).
 
 * Scripts
 
-| Command            | Description                                                   |
-|--------------------+---------------------------------------------------------------|
-| =pnpm dev=         | Dev server, local backend                                     |
-| =pnpm build=       | Static build into =build/=, Firebase backend, =404.html= fallback |
-| =pnpm preview=     | Serve =build/=                                                |
-| =pnpm check=       | =svelte-kit sync= and =svelte-check= (TypeScript, strict)     |
-| =pnpm check:watch= | The same, on every change                                     |
-| =pnpm lint=        | =prettier --check .= and ESLint                               |
-| =pnpm format=      | =prettier --write .=                                          |
-| =pnpm test=        | Unit tests (Vitest), once                                     |
-| =pnpm test:watch=  | The same, on every change                                     |
-| =pnpm test:e2e=    | End-to-end tests (Playwright) on a local-backend build        |
+| Command           | Does                                            |
+|-------------------+-------------------------------------------------|
+| =pnpm dev=        | dev server, local backend                       |
+| =pnpm build=      | static build, Firebase backend                  |
+| =pnpm preview=    | serve =build/=                                  |
+| =pnpm check=      | type check                                      |
+| =pnpm lint=       | Prettier and ESLint                             |
+| =pnpm format=     | Prettier, writing                               |
+| =pnpm test=       | unit and parity tests (Vitest)                  |
+| =pnpm test:e2e=   | end-to-end tests (Playwright) on a build        |
+
+=check:watch= and =test:watch= rerun on change.
 
 * Tests
 
-=pnpm test= runs every =src/**/*.test.ts= in Node: the pure modules (music theory, rhythm, melody generation, the counterpoint rules, LilyPond output, Harmonia 3D's spelling, pitch detection). Code that draws random numbers is tested with =Math.random= replaced by a seeded generator (=src/lib/testing/random.ts=), so runs repeat. Tests pin down legacy quirks too, each named as one.
-
-The =parity.test.ts= files compare the port with the legacy page itself: =src/lib/testing/legacy.ts= runs =index.html='s scripts in a Node =vm= sandbox with a stand-in DOM and hands back their functions, and the tests feed both the same inputs and the same seeded random draws (Ditado's spelling, key signatures, rhythms, melodies, Slonimsky lines, model, playback and LilyPond; every counterpoint rule, summary and LilyPond on 400 random sets of voices; Harmonia 3D's tables and spelling; the chord, interval and ruler tables, the synth's profiles and pitch detection). Any difference is a parity bug, unless it's a change listed in [[file:docs/parity.org][Parity]].
-
-=pnpm test:e2e= builds the app with =VITE_BACKEND=local= and serves it on port 4174, then drives it in Chromium from =e2e/*.e2e.ts=. It uses the system's =/usr/bin/chromium=; =CHROMIUM_PATH= points elsewhere, or set it empty and run =pnpm exec playwright install chromium= for Playwright's own. It checks that every view opens without console errors or failed requests, a deep link, scoring on Acordes, Intervalos and Ditado, Contraponto's bad-note error, the journal (add, reload, delete, HTML shown as text), sign-out and sign-in, the score reset, and the phone menu.
-
-CI ([[file:.github/workflows/ci.yml][ci.yml]]) runs lint, type checking, the unit tests, a build and the end-to-end tests (on Playwright's Chromium) on every push to =main= and every pull request against it.
++ Unit :: =src/**/*.test.ts=, in Node. Random code runs on a seeded =Math.random= (=src/lib/testing/random.ts=).
++ Parity :: =parity.test.ts= files run =legacy/index.html='s own code (=src/lib/testing/legacy.ts=, a =vm= with a fake DOM) against the port, same inputs, same draws. A difference is a bug unless listed in [[file:docs/parity.org][Parity]].
++ End-to-end :: =e2e/=, against a local-backend build on port 4174, in =pt-BR=. Uses =/usr/bin/chromium=; set =CHROMIUM_PATH= elsewhere, or empty plus =pnpm exec playwright install chromium=.
++ CI :: [[file:.github/workflows/ci.yml][ci.yml]] runs all of it on pushes to =main= and PRs.
 
 * Before a commit
 
-#+begin_src sh
-pnpm format
-pnpm lint
-pnpm check
-pnpm test
-pnpm build
-#+end_src
+=pnpm format=, =lint=, =check=, =test=, =build=: all pass on every commit.
 
-All five pass on every commit.
+* Conventions
 
-* Code conventions
-
-+ The port is 1:1 with =index.html=. Don't change what a user sees or hears, including legacy bugs, without recording it in [[file:docs/parity.org][Parity]]. When porting a legacy line that looks wrong, port it and say so in a comment.
-+ A view is a route under =src/routes/(app)/<view>/= plus an entry in =NAV= (=src/lib/nav.ts=). Its logic goes in =src/lib/features/<view>/=: pure =.ts= modules for tables and algorithms, one =*.svelte.ts= class for state and actions, exported as a singleton. The page renders that state and calls its methods; it holds no logic beyond presentation ([[file:docs/architecture/overview.org][Overview]]).
-+ Scored answers go through =score.record()=; sound through =audio=; the backend through =session=. Nothing imports Firebase outside =src/lib/backend/=.
-+ Imports from =src/lib= use =#lib/...= with the =.js= extension (=#lib/audio/engine.svelte.js= for =engine.svelte.ts=). Links and redirects use =resolve()= from =$app/paths= with the route ID, group included: =resolve('/(app)/acordes')=.
-+ Svelte 5 runes only (=vite.config.ts= forces runes mode); props are typed.
-+ Styles are Tailwind utilities with this repo's tokens; see [[file:docs/design/system.org][Design system]] for what exists (Tailwind's default colours and sizes don't) and why preflight is off.
-+ Comments say why, or what a non-obvious value is; doc comments (=/** */=) on exported functions, classes and non-obvious fields.
-+ Every string a user sees is a message in =messages/pt-br.json= and =messages/en.json= (same key in both, same ={params}=), called as =m.key()= where it's rendered, never stored as text in state ([[file:docs/architecture/overview.org][Overview]], Languages). =pnpm test= fails if the two catalogues differ in keys or parameters.
-+ Docs are Org, under =docs/=; a change to behaviour or structure updates the doc that describes it.
++ 1:1 with =legacy/index.html=: a visible change, or a legacy bug fixed, is listed in [[file:docs/parity.org][Parity]]. A ported line that looks wrong gets a comment.
++ A view: a route in =src/routes/(app)/<view>/=, a =NAV= entry, logic in =src/lib/features/<view>/= (pure modules + one singleton state class). Pages only render.
++ Answers through =score.record()=, sound through =audio=, data through =session=. Firebase only in =src/lib/backend/=.
++ =#lib/...= imports with =.js=; links with =resolve('/(app)/…')=.
++ Runes only; typed props.
++ Tailwind with this repo's tokens ([[file:docs/design/system.org][Design system]]).
++ Every visible string is a message in both =messages/*.json=, rendered with =m.key()=, never stored as text.
++ Comments say why. Docs are Org, in =docs/=, updated with the code.
 
 * Commits
 
-[[https://www.conventionalcommits.org][Conventional Commits]]: =feat=, =fix=, =docs=, =chore=, =ci=, =test=, =perf=, =refactor=, =style=.
-
-+ The subject is lowercase and states what is now true, not a task: =feat: the app on SvelteKit, one route per tab=, =ci: deploy to GitHub Pages from Actions=.
-+ The body, when there is one, is prose or =-= bullets wrapped at about 72 columns, with the specifics: what changed, file paths, what was measured and how.
-+ One concern per commit.
-+ No =Co-Authored-By= or tool attribution lines.
+[[https://www.conventionalcommits.org][Conventional Commits]]. Lowercase subject stating what's now true (=feat: the content column centred beside the sidebar=). Body with specifics, wrapped at 72. One concern per commit. No attribution lines.
 
 * Deploying
 
-See [[file:docs/guide/deploy.org][Deploying]].
+[[file:docs/guide/deploy.org][Deploying]].

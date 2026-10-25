@@ -10,7 +10,7 @@ pnpm, TypeScript, ESLint + Prettier, Tailwind with the styles ported, logic enca
 + commit =8656109= (Pages deploy)
 + commit =665fe09= (docs)
 
-Each tab is a route, each view's logic is in =src/lib/features/<view>/= with its state in a singleton class, and the backend, audio and score are separate modules ([[file:docs/architecture/overview.org][overview]]). Checked by screenshot diffs against =index.html=: 9 of 12 views pixel-identical on first load, the other 3 differ only in random content. Interactions weren't compared; that's under the tests item.
+Each tab is a route, each view's logic is in =src/lib/features/<view>/= with its state in a singleton class, and the backend, audio and score are separate modules ([[file:docs/architecture/overview.org][overview]]). Checked by screenshot diffs against =legacy/index.html=: 9 of 12 views pixel-identical on first load, the other 3 differ only in random content. Interactions weren't compared; that's under the tests item.
 
 * DONE Tests
 Nothing guarded the logic or the UI.
@@ -22,7 +22,7 @@ Nothing guarded the logic or the UI.
 
 Vitest runs 72 tests in Node (=pnpm test=). The unit tests cover the pure modules: pitch, chords, Ditado's theory, rhythm, melody, model and LilyPond, the counterpoint rules and LilyPond, Harmonia 3D's spelling and colours, pitch detection. Drawing code runs on a seeded =Math.random=.
 
-The parity tests are the "Rust rewrite" check: =src/lib/testing/legacy.ts= runs the legacy =index.html='s own scripts in a Node =vm= with a stand-in DOM, and each =parity.test.ts= gives the port and the legacy code the same inputs and the same random draws: every Ditado function, every counterpoint rule on 400 random sets of voices, Harmonia 3D's tables and spelling, the shared tables, the synth's profiles and pitch detection. Each suite was checked to fail on a deliberate change. They found no difference.
+The parity tests are the "Rust rewrite" check: =src/lib/testing/legacy.ts= runs =legacy/index.html='s own scripts in a Node =vm= with a stand-in DOM, and each =parity.test.ts= gives the port and the legacy code the same inputs and the same random draws: every Ditado function, every counterpoint rule on 400 random sets of voices, Harmonia 3D's tables and spelling, the shared tables, the synth's profiles and pitch detection. Each suite was checked to fail on a deliberate change. They found no difference.
 
 The unit tests pinned down a legacy bug, kept and now documented: the max-leap check on Ditado's final tonic measures from the note it replaces, so the last leap can exceed /Salto máx./ (a new TODO below).
 

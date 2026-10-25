@@ -1,45 +1,31 @@
 #+TITLE: Harmonia 3D
 #+OPTIONS: ^:{}
 
-Diatonic harmony as geometry: each chord of a major or minor key is a block whose legs are its stacked thirds, and a progression is a row of blocks along a time axis, drawn with three.js r128. Click degrees to hear them and build a progression, play it back, orbit the camera. Not scored.
+Diatonic chords as three.js blocks whose legs are stacked thirds, laid along a time axis. Build a progression, play it, orbit. Not scored.
 
-+ Page :: =src/routes/(app)/harmonia-3d/+page.svelte=
-+ Tables and spelling :: =src/lib/features/harmonia3d/fields.ts=
-+ State :: =src/lib/features/harmonia3d/harmonia.svelte.ts=, =harmonia=
-+ Scene :: =src/lib/features/harmonia3d/scene.ts=, =HarmoniaScene=
+Files: =(app)/harmonia-3d/+page.svelte=; =features/harmonia3d/= =fields.ts= (tables, spelling), =harmonia.svelte.ts= (=harmonia=), =scene.ts= (=HarmoniaScene=).
 
-* The model
+* Model
 
-=FIELDS.maj= and =FIELDS.min=: roman numerals, the twelve tonics offered (circle-of-fifths order), and seven degrees, each three thirds in semitones: =v= (root → 3rd), =h= (3rd → 5th), =s= (5th → 7th), the triad quality (=M=, =m=, =d=), the seventh-chord suffix (=maj7=, =m7=, =7=, =m7♭5=) and =dom= on V7 (major) or VII7 (natural minor, as the legacy page had it).
++ =FIELDS= :: major and natural minor: roman numerals, 12 tonics, 7 degrees as thirds =v= (root→3rd), =h= (3rd→5th), =s= (5th→7th), triad and seventh names, the dominant.
++ Block :: X = root→3rd (down), Y = 3rd→5th (across), the 7th a third leg down. Z = time, one unit per beat.
++ Colours :: dominant red, major green, minor gold, diminished ivory.
 
-A block, in the X/Y plane (=#shape()=): A (root) at the origin, B (3rd) =v= down, C (5th) =h= across, and with sevenths D (7th) =s= further down. X is the vertical leg, Y the horizontal one, Z is time: one unit per beat, a stronger floor line every 4 beats.
+* Flow
 
-Colours (=colorKey()=): dominant red; otherwise major green, minor gold, diminished (or half-diminished with sevenths) ivory.
++ Major / minor :: switches to the relative key.
++ Triads / sevenths :: the third leg grows or shrinks.
++ A degree button :: plays it, appends it (max 16), highlights it 1.5 s.
++ Next chord length :: 1, 2 or 4 beats.
++ Presets :: five progressions; editing switches to /Personalizada/.
++ Play :: the scene's frame loop plays each chord as it's reached, moves a playhead; tempo changes keep the beat.
++ Views :: front, diagonal (default), side, top.
++ Sizes :: semitone labels on the legs.
 
-Note names are spelled per letter (=spellScale()=, =toneNames()=), with ♯ ♭ 𝄪 𝄫.
+* Scene
 
-* State and flow
-
-+ /Campo maior/, /Campo menor/ :: =setField()= switches to the relative key (C major ↔ A minor, =RELATIVE=), stopping playback.
-+ /Tonalidade/ :: =setTonic()=.
-+ /Tríades/, /Tétrades/ :: =setTetra()=; the seventh leg grows or shrinks (=t7= eased toward =t7Goal= each frame; at once with reduced motion).
-+ /Graus do campo/ :: each button shows the block's shape as a small SVG; =addChord(i)= plays the chord and appends ={ d: i, b: dur }= to =prog= (max 16 events, =MAX_EVENTS=; past that it only plays), highlighting it for 1.5 s.
-+ /Duração do próximo acorde/ :: 1, 2 or 4 beats.
-+ Preset select :: five ready-made progressions (=PRESETS=, labels built from the roman numerals) and /Personalizada/. Choosing a preset replaces =prog=; choosing /Personalizada/ changes nothing. Any edit by hand switches the select to /Personalizada/; =setProg()= selects the preset that matches.
-+ /▶ Tocar/ :: =togglePlay()= starts a clock (=playT0=, =performance.now()=); the scene's frame loop works out the current beat, plays each chord as its event starts (for its length × 1.02), moves the playhead plane and a marker through the blocks, and stops at the end. /Andamento/ (50–160) can change while playing without jumping (=setBpm()= keeps the beat position).
-+ /Desfazer/, /Limpar/ :: remove the last event or all of them.
-+ /Vista/ :: =front=, =diag= (the default), =side=, =top=: target camera angles (=VIEWS=); resets pan and zoom and refits.
-+ /Mostrar medidas em semitons/ :: the semitone counts on the legs.
-
-The page text below the progression (=progInfo=): total beats and measures of 4/4, with a comma decimal.
-
-* The scene
-
-=HarmoniaScene= is created in =onMount= with a dynamic =import()= (three.js stays out of the other pages' bundles) and destroyed on leaving; leaving also stops playback. If WebGL fails or the import fails, a message replaces the stage.
-
-+ =#build()= rebuilds all geometry whenever =harmonia.dirty= is set: the floor grid, the axes with cones and bar numbers, and per event a translucent box per leg (stretched along Z for its beats), a ball per chord tone, thin ivory voice-leading threads from the previous chord's tones, its roman-numeral label, the semitone labels (/Mostrar medidas/) and, on the highlighted event, the tone names. The highlighted event is more opaque; while one plays, the others dim. Everything it creates is tracked and disposed on the next build.
-+ Labels are HTML spans over the canvas, pooled per kind (event, measure, tone, axis), projected from 3D anchors every frame and hidden behind the camera.
-+ Camera: an orbit around the scene's centre plus =pan=, eased toward =goal= (factor 0.16, or at once with reduced motion). Drag orbits; Shift-drag or right-drag pans; the wheel or a pinch zooms (distance 10–280) and sets =userZoomed=, which stops resizes from refitting the distance. On first show the distance is fitted to the scene's bounds.
-+ The frame loop skips rendering while the stage isn't in the layout (=offsetParent= null).
-
-The camera and animation fields on =harmonia= (=cam=, =goal=, =pan=, =t7=, =dirty=, …) are plain fields, not runes: only the scene reads them, every frame. Because they live on the singleton, the view comes back as it was left.
++ Loaded with dynamic =import()= on mount; destroyed on leave (stops playback). WebGL or load failure shows a message.
++ Geometry rebuilt when =harmonia.dirty=; old objects disposed.
++ Labels are HTML spans projected each frame.
++ Drag orbits, Shift/right-drag pans, wheel/pinch zooms.
++ Camera fields live on =harmonia= (not reactive), so the view returns as left.

@@ -1,74 +1,62 @@
 #+TITLE: Design system
 #+OPTIONS: ^:{}
 
-The look is the legacy page's: near-black surfaces, warm ivory text, Playfair Display for big numbers and names, Barlow Condensed for display type, gold labels, a film-grain overlay. The text font is Inter; DM Mono, the legacy page's only text font, is kept for data. It's written as Tailwind 4 utilities on the components; the tokens and the few global rules are in =src/routes/layout.css=.
+The legacy look: near-black surfaces, ivory text, gold labels, film grain. Tailwind 4 utilities on the components; tokens and global rules in =src/routes/layout.css=.
 
-* Tailwind without preflight
+* No preflight
 
-=layout.css= imports Tailwind's theme and utilities layers but not =preflight=:
-
-#+begin_src css
-@layer theme, base, components, utilities;
-@import 'tailwindcss/theme.css' layer(theme);
-@import 'tailwindcss/utilities.css' layer(utilities);
-#+end_src
-
-With preflight on, the port didn't render like the legacy page, whose CSS was written on top of browser defaults; so the base layer has the legacy reset instead: =* { box-sizing: border-box; margin: 0; padding: 0 }=. Consequences when writing markup:
-
-+ A =<button>= keeps the browser's border and background unless a class sets them: write =border-0= or =border= with a colour, and =bg-transparent=, as the components do.
-+ =<ul>= keeps its bullets unless =list-none=.
+Only Tailwind's theme and utilities layers are imported; the base layer has the legacy reset (=* { box-sizing: border-box; margin: 0; padding: 0 }=), because preflight broke parity. So:
++ Buttons keep the browser's border and background unless a class sets them (=border-0=, =bg-transparent=).
++ Lists keep bullets unless =list-none=.
++ Form controls get =font-family: inherit= in the base layer.
 
 * Tokens
 
-Defined with =@theme= in =layout.css=. Tailwind's default palette, fonts and type scale are cleared (=--color-*: initial= etc.), so only these exist: a class like =text-gray-500= or =text-xl= doesn't compile to anything.
+Tailwind's defaults are cleared: only these exist (=text-gray-500= compiles to nothing).
 
-+ Colours :: =bg= #0c0c0c, =surface= #141414, =surface-2= #1c1c1c, =well= #080808, =line= #2a2a2a, =line-lt= #333, =fg= #e4e0d8, =fg-soft= #c9c5bc, =fg-mid= #888, =fg-faint= #444, =accent= #e4e0d8, =green= #4a9e6a, =red= #b84848, =gold= #c8a030, =blue= #7a9bc8, =paper= #f2eddf (the Ditado staff), =logo= #e8e2d4, =white=, =black=, =transparent=. Opacity modifiers work (=bg-gold/6=).
-+ Fonts :: =font-sans= (Inter, the body font), =font-mono= (DM Mono), =font-serif= (Playfair Display), =font-display= (Barlow Condensed). All four are under the SIL Open Font License, loaded from Google Fonts in =src/app.html=. Mono is for data only, where characters must line up or read literally: the note-entry and LilyPond fields, Ditado's degree options and answer, the answer grids of chord, function and interval symbols, Harmonia 3D's degree buttons, the tuner's cents and reference A, the piano roll's labels, the history rows. Everything else, prose, buttons, tabs, nav, labels and form controls, is Inter.
-+ Type scale :: =text-3xs= 8px, =2xs= 9, =xs= 10, =sm= 11, =base= 12, =md= 13 (the body), =lg= 15. Larger sizes are written inline (=text-[54px]=).
-+ Animations :: =animate-fade-up= (every =Panel= fades up 5px in 0.25 s), =animate-regua-pulse= (a playing Régua dot).
++ Colours :: =bg= #0c0c0c, =surface= #141414, =surface-2= #1c1c1c, =well= #080808, =line= #2a2a2a, =line-lt= #333, =fg= #e4e0d8, =fg-soft= #c9c5bc, =fg-mid= #888, =fg-faint= #444, =accent= #e4e0d8, =green= #4a9e6a, =red= #b84848, =gold= #c8a030, =blue= #7a9bc8, =paper= #f2eddf, =logo= #e8e2d4, =white=, =black=, =transparent=. Also CSS variables (=var(--color-gold)=).
++ Fonts :: =font-sans= Inter (body), =font-mono= DM Mono, =font-serif= Playfair Display, =font-display= Barlow Condensed. All SIL OFL, from Google Fonts (=src/app.html=).
++ Type :: =3xs= 8px, =2xs= 9, =xs= 10, =sm= 11, =base= 12, =md= 13 (body), =lg= 15. Bigger sizes inline (=text-[54px]=).
++ Animations :: =animate-fade-up= (panels), =animate-regua-pulse=.
 
-The colours are also CSS variables (=var(--color-gold)=), which SVG attributes, inline styles and three.js-side code use.
+Mono is for data only: note entry, LilyPond, degree strings, symbol answer grids, Harmonia's degree buttons, the tuner's readouts, the roll's labels, history rows. Everything else is Inter.
 
 * Global rules
 
-Base layer, =layout.css=: the reset; =body= as a flex row, =min-h-screen=, =bg-bg=, Inter 13px, =text-fg=; =font-family: inherit= on buttons, inputs, selects and textareas (browsers give them their own font, and preflight, which would fix that, is off); the grain (=body::after=, a fixed SVG-noise layer at 3.5% opacity, =z-index: 9999=, no pointer events); =cursor: pointer= on every button and select; the dark =select= and the flat range slider (11px square thumb); a 4px scrollbar.
+Reset, body (flex row, Inter 13px), grain (=body::after=, 3.5% noise), pointer cursor on buttons and selects, dark =select=, flat range slider, 4px scrollbar.
 
-Utilities, for quiz answer buttons, which must override a button's own colours whatever its other classes: =state-selected= (gold), =state-correct= (green), =state-wrong= (red), all =!important=. =markClass(mark, selected)= in =src/lib/ui/types.ts= picks one.
+Answer-state utilities, =!important= so they beat a button's colours: =state-selected= (gold), =state-correct= (green), =state-wrong= (red). =markClass()= (=src/lib/ui/types.ts=) picks one.
 
-* Components
+* Components (=src/lib/ui/=)
 
-=src/lib/ui/=:
++ =Panel= :: section surface; =label=, =labelExtra= snippet, =padding=, =class=.
++ =PanelLabel= :: tiny uppercase label with a rule.
++ =Btn= :: outlined or =primary=; fill slides up on hover; =pad=.
++ =TabBtn= :: toggle; =active=.
++ =CheckBtn= :: full-width check button.
++ =RevealBtn= :: small reveal toggle.
++ =Feedback= :: answer result box; slides open (220 ms, instant with reduced motion).
++ =HistoryList= :: scored answers; =showTag=.
++ =OptsRow=, =OptsLabel= :: control row and its label.
++ =BemLogo= :: the round mark.
 
-+ =Panel= :: the bordered surface every section sits in: =label= (rendered by =PanelLabel=), =labelExtra= snippet after the label text, =padding= (replaces the default =px-[1.6rem] py-[1.4rem]=), =class=.
-+ =PanelLabel= :: tiny uppercase faint label with a rule filling the rest of the row.
-+ =Btn= :: the main button: outlined, or =primary= (filled ivory); on hover a fill slides up from the bottom (=before:= layer). =pad= replaces its padding. =type= defaults to =button=.
-+ =TabBtn= :: small toggle; =active= fills it.
-+ =CheckBtn= :: full-width /Verificar/ button, dims when disabled.
-+ =RevealBtn= :: small outlined button for reveal toggles.
-+ =Feedback= :: the result box under an answer, green or red, from a =FeedbackResult= (=ok=, =title=, =explanation=, optional =theory=); nothing while =null=. It opens and closes with a 220ms height animation (=slide=), instantly under =prefers-reduced-motion=.
-+ =HistoryList= :: rows of scored answers; =showTag= adds the module column; =class= replaces the default =max-h-[180px]=.
-+ =OptsRow=, =OptsLabel= :: a wrapping row of controls (default =mt-2.5=, replaceable) and its faint label.
-+ =BemLogo= :: the round /BEM/ mark; =size= and =fontSize= in px.
-
-Props named =class=, =pad= or =padding= replace defaults rather than add to them, so a caller never fights a default utility.
+=class=, =pad= and =padding= props replace defaults.
 
 * Icons
 
-Lucide, through =@lucide/svelte=, one import per icon (=import Play from '@lucide/svelte/icons/play'=) so only the used ones are bundled. Lucide marks an icon =aria-hidden= unless it gets an accessible prop; an icon-only button carries an =aria-label=. Sizes: 16px in =Btn= and the nav (next to 11–13px text), 14px in small buttons, chevrons and the sidebar's output switch, 13px in the sidebar's 9px footer buttons. =Btn='s label is an =inline-flex= with an 8px gap, so an icon placed before the text lines up with it. The nav's icons are components in =NAV= (=src/lib/nav.ts=).
+Lucide (=@lucide/svelte=), one import per icon. 16px in buttons and nav, 14px in small buttons and chevrons, 13px in the sidebar footer. Hidden from screen readers by default; icon-only buttons get =aria-label=. Musical symbols in content stay text.
 
-Musical symbols that are content stay text: the rhythm values in /Mapa métrico/ and the answer chips, /Andamento ♩ =/, the ↑ ↓ ✓ in sentences.
+* Conventions
 
-* Class conventions
-
-+ Classes are written as Svelte's =class={[...]}= arrays, with =cond && 'class'= for conditional ones; a long or repeated list goes in a =const= in the script block.
-+ When a caller's class must beat a component's own utility of the same property, it uses Tailwind 4's =!= suffix (=mt-0!=, =border-red!=) rather than relying on stylesheet order.
-+ Where the legacy CSS combined transforms in an order that Tailwind's composed =translate=/=scale=/=rotate= utilities would change, the transform is written whole as an arbitrary property: =[transform:scale(1.5)]= (Régua hover), =[transform:rotate(45deg)_translate(4px,4px)]= (the hamburger).
-+ Sizes and spacings are the legacy values, so arbitrary values (=px-[1.2rem]=, =tracking-[0.14em]=) are normal here; prefer the theme scale where it matches exactly.
-+ =prettier-plugin-tailwindcss= sorts the classes (=pnpm format=); =tailwindStylesheet= points it at =layout.css= so it knows the custom tokens.
++ Classes as =class={[...]}= arrays; long lists in a =const=.
++ To beat a component's utility, use the =!= suffix (=mt-0!=).
++ Transforms whose order matters are written whole: =[transform:scale(1.5)]=.
++ Arbitrary values are normal (legacy sizes); use the scale when it matches.
++ =pnpm format= sorts classes (=prettier-plugin-tailwindcss=).
 
 * Breakpoints
 
-+ =max-md= (under 768px): the sidebar becomes an off-canvas drawer with a hamburger; =main= loses its left margin and gets top padding for the button.
-+ =max-[900px]=: Contraponto's two columns stack.
-+ =max-[1100px]=: Harmonia 3D's side panel goes under the stage; the stage drops to 520px and its axis legend hides.
-+ =max-[500px]=, =max-[480px]=: the Acordes teacher grid goes to 4 columns; the Ditado form to 1.
++ under 768px: sidebar drawer.
++ under 900px: Contraponto's columns stack.
++ under 1100px: Harmonia's side panel goes below; stage 520px.
++ under 500 / 480px: teacher grid 4 columns; Ditado form 1 column.

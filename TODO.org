@@ -45,10 +45,10 @@ The teacher panel was the last panel and always open, and it highlights the load
 
 Done in 3044b58. It's now the first panel on Acordes, collapsed by default. Its header (▸ MODO PROFESSOR, the /sem pontuação/ tag) is a button with =aria-expanded= that slides the contents open and closed (instant with reduced motion). The open state is =acordes.teacherOpen=, so it survives going to another view and back (a reload closes it). The ▸ is a text glyph until the icons item.
 
-* TODO Ditado: staff not centred in /Mapa métrico/
-The engraved staff sits at the top left of the paper box, and low: VexFlow's SVG is a fixed 180px tall with the stave drawn at y 50, and its width is the bars', not the box's.
+* DONE Ditado: staff not centred in /Mapa métrico/
+The staff sat at the top left of the paper box and low: VexFlow draws into a fixed canvas (bars × 240 + 20 by 180px) with the stave at y 50 and room for ledger lines below, and the box didn't centre it.
 
-Plan: after engraving, crop the SVG's viewBox to its drawn bounding box plus padding, then centre it both ways in the box (auto margins in a flex box, so a staff wider than the box still scrolls from its left edge).
+Done in 4834649. =renderStaff()= (=src/lib/features/ditado/staff.ts=) now crops the SVG to what was drawn (=getBBox()= plus 12px, as =viewBox=, =width=, =height=), and the paper box is a flex container whose SVG has auto margins: centred both ways when it fits, scrolling from the clef when it doesn't (auto margins resolve to 0 on overflow, so nothing is cut off on the left). Measured: 82px either side and 21px above and below at 2 bars; 8 bars and the 390px layout scroll from the start. The box keeps its 170px minimum height.
 
 * TODO Ditado: LilyPond block should animate open and closed
 /Representação musical — fonte LilyPond/ is a =<details>= that snaps open.

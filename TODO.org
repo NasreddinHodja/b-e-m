@@ -96,14 +96,11 @@ The label sits on a dark chip (=bg-bg/90=, a =gold/40= border) centred over the 
 
 The header is a button (=aria-expanded=, =aria-controls=) with a ▸ that turns when open, and the contents open and close with =svelte/transition='s =slide= (220ms; instant with reduced motion); the state is =ditado.lilyOpen=. CSS =::details-content= transitions would have kept the =<details>=, but I couldn't check their browser support offline, so I used what's already used for the feedback and the teacher panel. Measured: 50 → 114px over about 200ms.
 
-* WAIT Ditado: the LilyPond block shows nothing
-Found while doing the item above: the block's =<pre>= is empty, in the legacy page too (=dLilySource= is never written). /Copiar .ly/ and /Baixar .ly/ do produce the source (=ditado.lily()=).
+* TODO Ditado: the LilyPond block shows nothing
+Found while animating the block: its =<pre>= is empty, in the legacy page too (=dLilySource= is never written). /Copiar .ly/ and /Baixar .ly/ do produce the source (=ditado.lily()=). The owner saw it too; it stays empty for now.
 
 ** Plan
 Show =ditado.lily()= in the =<pre>=, updated with each exercise.
-
-** Waiting on
-The owner's OK: it's a legacy bug, kept so far for parity.
 
 * WAIT Monospace everywhere
 DM Mono is the =body= font (=src/routes/layout.css=), so everything not marked otherwise is mono: prose included, where it reads worse. Only these aren't: =font-serif= (Playfair Display) on big names and numbers (Acordes' chord, Intervalos' notes and stats, feedback titles, the counters, the Pomodoro, BPM, the login title); =font-display= (Barlow Condensed) on the logo, Régua's titles and symbols, the tuner's note, Apreciação's step numbers.

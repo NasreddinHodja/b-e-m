@@ -130,18 +130,15 @@ Add one readable sans (Google Fonts, like the others) as =--font-sans=, make it 
 ** Decided
 A FOSS sans: Inter (SIL Open Font License, like the fonts already used), from Google Fonts like them. Sans for prose, buttons, tabs, nav, form labels, section titles and captions; mono kept for note entry, LilyPond, degree strings, cents and BPM readouts, history times and the roll's labels. After Paraglide.
 
-* STRT Icons
-The "icons" are Unicode and emoji glyphs, at text size, drawn differently on each system, too small:
-+ Nav (=src/lib/nav.ts=): ♬ ↔ ♫ ⚖ ◈ ◇ ♪ ◎ 📓 ⏱ 📖 ○
-+ Sidebar: ↺ (reset), 🚪 (sign out), 📱 🎧 (output)
-+ Buttons: ♩ ♬ ↻ ▶ ■ ⏹ ⏸ ⇩ ↓ ⧉ 🎤 🗑 × ◉ ⚙ 🔒 ▸ (the last also on the two new collapsible headers)
-+ Answer marks ✓ ✗ are text in sentences and could stay.
+* DONE Icons
+The "icons" were Unicode and emoji glyphs (♬ ↔ ⚖ ◈ ◇ ♪ ◎ 📓 ⏱ 📖 ○ 🚪 📱 🎧 ▶ ■ ⏹ ⏸ ⇩ ↓ ⧉ 🎤 🗑 × ◉ ⚙ 🔒 ▸), at text size, drawn differently on each system, too small.
 
-** Plan
-Lucide through =@lucide/svelte= (tree-shaken SVG components, one stroke style): 16px in buttons and nav next to 11–13px text, 20px for icon-only buttons with a 36px+ hit area, =aria-hidden= when next to a label and an =aria-label= when alone. Map each glyph to a Lucide icon in one table first.
+** Done
++ commit =f209033=
 
-** Decided
-Lucide (=@lucide/svelte=), approved and installed.
+Lucide (=@lucide/svelte=, one import per icon, so only those used are bundled). Nav: piano (Acordes), left-right arrows (Intervalos), eighth notes (Ditado), scale (Contraponto), ruler (Régua), box (Harmonia 3D), list-music (Apreciação), gauge (Afinador), notebook-pen (Prática), metronome, book-open (Manifesto), list-clock (Histórico). Sidebar: rotate-ccw (reset), log-out, speaker, headphones. Buttons: play, square (stop), pause, shuffle (new chord, new interval, generate), eighth-note and piano for note and chord playback, copy (check while copied), download, mic and mic-off, trash, x, chevron-right on the three collapsibles, sliders for /Parâmetros avançados/, lock on /ouça e adivinhe/, circle-dot in the Régua hint.
+
+Sizes: 16px in buttons and the nav next to 11–13px text, 14px in small buttons and chevrons, 13px in the sidebar footer. Lucide sets =aria-hidden= on decorative icons; the one icon-only button without a label (Régua's play-all) got =aria-label=. Musical symbols that are content (rhythm values, /Andamento ♩ =/, ↑ ↓ ✓ in sentences) stay text. Documented under Icons in =docs/design/system.org=.
 
 * TODO Portuguese and English, with a toggle
 Every string is Portuguese and inline: in the pages, and in the logic modules' feedback (Acordes, Intervalos), the counterpoint rules' ~40 messages, Ditado's errors, the Manifesto's text.

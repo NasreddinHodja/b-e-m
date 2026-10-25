@@ -115,7 +115,7 @@ Found while animating the block: its =<pre>= is empty, in the legacy page too (=
 ** Plan
 Show =ditado.lily()= in the =<pre>=, updated with each exercise.
 
-* WAIT Monospace everywhere
+* TODO Monospace everywhere
 DM Mono is the =body= font (=src/routes/layout.css=), so everything not marked otherwise is mono: prose included, where it reads worse. Only these aren't: =font-serif= (Playfair Display) on big names and numbers (Acordes' chord, Intervalos' notes and stats, feedback titles, the counters, the Pomodoro, BPM, the login title); =font-display= (Barlow Condensed) on the logo, Régua's titles and symbols, the tuner's note, Apreciação's step numbers.
 
 ** Map of the mono text, by what it is
@@ -127,10 +127,10 @@ DM Mono is the =body= font (=src/routes/layout.css=), so everything not marked o
 ** Plan
 Add one readable sans (Google Fonts, like the others) as =--font-sans=, make it the =body= font, and mark the "data" group =font-mono=; then decide controls and labels by looking at them. Candidates: Inter, IBM Plex Sans (pairs with a mono in the same family, if DM Mono were swapped for IBM Plex Mono), Source Sans 3.
 
-** Waiting on
-The owner's choice of sans, and whether controls and labels go sans or stay mono. Fonts are a taste call; I can make screenshots of each candidate on two or three views to choose from.
+** Decided
+A FOSS sans: Inter (SIL Open Font License, like the fonts already used), from Google Fonts like them. Sans for prose, buttons, tabs, nav, form labels, section titles and captions; mono kept for note entry, LilyPond, degree strings, cents and BPM readouts, history times and the roll's labels. After Paraglide.
 
-* WAIT Icons
+* STRT Icons
 The "icons" are Unicode and emoji glyphs, at text size, drawn differently on each system, too small:
 + Nav (=src/lib/nav.ts=): ♬ ↔ ♫ ⚖ ◈ ◇ ♪ ◎ 📓 ⏱ 📖 ○
 + Sidebar: ↺ (reset), 🚪 (sign out), 📱 🎧 (output)
@@ -140,16 +140,17 @@ The "icons" are Unicode and emoji glyphs, at text size, drawn differently on eac
 ** Plan
 Lucide through =@lucide/svelte= (tree-shaken SVG components, one stroke style): 16px in buttons and nav next to 11–13px text, 20px for icon-only buttons with a 36px+ hit area, =aria-hidden= when next to a label and an =aria-label= when alone. Map each glyph to a Lucide icon in one table first.
 
-** Waiting on
-The owner's OK on Lucide (or another library) and to install it.
+** Decided
+Lucide (=@lucide/svelte=), approved and installed.
 
-* WAIT Portuguese and English, with a toggle
+* TODO Portuguese and English, with a toggle
 Every string is Portuguese and inline: in the pages, and in the logic modules' feedback (Acordes, Intervalos), the counterpoint rules' ~40 messages, Ditado's errors, the Manifesto's text.
 
 ** Plan
-A typed message catalogue per language and a =locale= state, kept in =localStorage= and defaulting to the browser's language; a PT / EN toggle in the sidebar. Logic modules return message keys and arguments instead of sentences.
+Paraglide (the owner's pick: industry standard). A message catalogue per language and a =locale= state, kept in =localStorage= and defaulting to the browser's language; a PT / EN toggle in the sidebar. Logic modules return message keys and arguments instead of sentences.
 
-** Waiting on
-+ Paraglide (inlang; compiled, typed, an official =sv add= add-on; needs installing) or a small hand-written catalogue (no dependency)? I'd take the hand-written one: two languages, no build step.
-+ The English wording of the Manifesto, and the musical terms: note names (Dó/Ré or C/D in English? the UI already mixes them), interval names, solfège.
+** Decided
+Paraglide, after the icons.
 
+** Still needs the owner
+The English wording of the Manifesto, and the musical terms: note names (Dó/Ré or C/D in English? the UI already mixes them), interval names, solfège. I'll draft them; they review.

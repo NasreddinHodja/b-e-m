@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { prefersReducedMotion } from 'svelte/motion';
+  import { slide } from 'svelte/transition';
   import { ditado as d } from '#lib/features/ditado/ditado.svelte.js';
   import { renderStaff } from '#lib/features/ditado/staff.js';
   import { rhythmSymbol } from '#lib/features/ditado/rhythm.js';
@@ -278,24 +280,36 @@
   {/if}
 </Panel>
 
-<details class="animate-fade-up border border-line bg-surface p-0">
-  <summary
-    class="flex cursor-pointer list-none items-center justify-between px-[1.4rem] py-[1.1rem] text-2xs tracking-[0.2em] text-gold uppercase"
+<div class="animate-fade-up border border-line bg-surface">
+  <button
+    type="button"
+    class="flex w-full cursor-pointer items-center justify-between border-0 bg-transparent px-[1.4rem] py-[1.1rem] text-left font-mono text-2xs tracking-[0.2em] text-gold uppercase"
+    aria-expanded={d.lilyOpen}
+    aria-controls="ditado-lily"
+    onclick={() => (d.lilyOpen = !d.lilyOpen)}
   >
     <span>Representação musical — fonte LilyPond</span>
-  </summary>
-  <!-- Never filled in the legacy app either. -->
-  <pre
-    class="m-0 max-h-[240px] overflow-auto border-t border-line bg-well p-3 font-mono text-xs leading-[1.6] whitespace-pre-wrap text-[#cfcabd]"></pre>
-  <div class="grid grid-cols-2 border-t border-line">
-    <Btn
-      class="[border-width:0_1px_0_0]! [border-color:var(--color-line)]!"
-      pad="p-3"
-      onclick={() => d.copyLily()}>{d.copyLabel}</Btn
+    <span
+      class={['inline-block transition-transform duration-150', d.lilyOpen && 'rotate-90']}
+      aria-hidden="true">▸</span
     >
-    <Btn class="[border-width:0]!" pad="p-3" onclick={() => d.downloadLily()}>⇩ Baixar .ly</Btn>
-  </div>
-</details>
+  </button>
+  {#if d.lilyOpen}
+    <div id="ditado-lily" transition:slide={{ duration: prefersReducedMotion.current ? 0 : 220 }}>
+      <!-- Never filled in the legacy app either. -->
+      <pre
+        class="m-0 max-h-[240px] overflow-auto border-t border-line bg-well p-3 font-mono text-xs leading-[1.6] whitespace-pre-wrap text-[#cfcabd]"></pre>
+      <div class="grid grid-cols-2 border-t border-line">
+        <Btn
+          class="[border-width:0_1px_0_0]! [border-color:var(--color-line)]!"
+          pad="p-3"
+          onclick={() => d.copyLily()}>{d.copyLabel}</Btn
+        >
+        <Btn class="[border-width:0]!" pad="p-3" onclick={() => d.downloadLily()}>⇩ Baixar .ly</Btn>
+      </div>
+    </div>
+  {/if}
+</div>
 
 <Panel label="Histórico do Ditado (sessão)">
   <HistoryList answers={score.recent('d')} />

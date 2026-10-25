@@ -73,6 +73,8 @@ class Ditado {
   metric = $state('—');
   quiz = $state<QuizState>({ kind: 'hint', text: 'Gere um exercício para começar.' });
   copyLabel = $state('⧉ Copiar .ly');
+  /** The LilyPond block is expanded. */
+  lilyOpen = $state(false);
   #revealed = false;
 
   constructor() {

@@ -63,7 +63,7 @@ Generate a short melody (or a Slonimsky pattern), hear it, pick its scale degree
 
 * LilyPond
 
-The /Representação musical/ block's =<pre>= is empty, as it was in the legacy app. /Copiar .ly/ copies and /Baixar .ly/ downloads (=bem-ditado.ly=) the output of =toLily()=: LilyPond 2.24.0, the key (=\key d \major=, modes by name, the minors as =\minor=), the meter, absolute pitches, ties, and =\midi { \tempo 4 = <bpm> }=.
+The /Representação musical/ block is collapsed; its header (a button, =aria-expanded=, =ditado.lilyOpen=) slides it open. Its =<pre>= is empty, as it was in the legacy app. /Copiar .ly/ copies and /Baixar .ly/ downloads (=bem-ditado.ly=) the output of =toLily()=: LilyPond 2.24.0, the key (=\key d \major=, modes by name, the minors as =\minor=), the meter, absolute pitches, ties, and =\midi { \tempo 4 = <bpm> }=.
 
 * Kept on purpose
 

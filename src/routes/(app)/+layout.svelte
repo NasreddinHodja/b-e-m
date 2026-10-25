@@ -25,7 +25,8 @@
 </script>
 
 {#if session.status === 'signed-in'}
-  <div class="min-h-screen w-full">
+  <!-- The left padding keeps the content clear of the fixed sidebar; main centers in the rest. -->
+  <div class="min-h-screen w-full md:pl-[220px]">
     <button
       type="button"
       class="fixed top-3.5 left-3.5 z-300 hidden size-10 flex-col items-center justify-center gap-[5px] border border-line-lt bg-surface max-md:flex"
@@ -53,7 +54,7 @@
 
     <main
       class={[
-        'ml-[220px] min-w-0 flex-1 px-[1.8rem] pt-8 pb-20 max-md:ml-0 max-md:max-w-full max-md:px-4 max-md:pt-18',
+        'mx-auto min-w-0 px-[1.8rem] pt-8 pb-20 max-md:max-w-full max-md:px-4 max-md:pt-18',
         wide ? 'max-w-[1320px]' : 'max-w-[780px]'
       ]}
     >

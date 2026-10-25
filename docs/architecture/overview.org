@@ -67,7 +67,7 @@ Reactivity: =$state= fields, =$derived= getters, =SvelteSet= for sets (Intervalo
 
 * Layout
 
-=(app)/+layout.svelte=: the sidebar is fixed, 220px wide; =main= has =ml-[220px]=, max width 780px, or 1320px for the views with =wide: true= in =NAV= (Contraponto, Harmonia 3D). Below 768px (Tailwind's =max-md=) the sidebar slides off-canvas, a hamburger button at the top left toggles it, a dark overlay closes it, and navigating closes it when =window.innerWidth <= 768=.
+=(app)/+layout.svelte=: the sidebar is fixed, 220px wide; the wrapper pads 220px on the left and =main= is centred in the rest (=mx-auto=), at most 780px wide, or 1320px for the views with =wide: true= in =NAV= (Contraponto, Harmonia 3D). Below 768px (Tailwind's =max-md=) the sidebar slides off-canvas, a hamburger button at the top left toggles it, a dark overlay closes it, and navigating closes it when =window.innerWidth <= 768=.
 
 The sidebar (=Sidebar.svelte=), top to bottom: the logo; correct and wrong totals; /zerar pontuação/ (a =confirm()=, then =score.reset()=); /Sair do App/; the nav, with an =a/b= badge on Acordes, Intervalos and Ditado; the speaker / headphone switch for =audio.setMode=.
 

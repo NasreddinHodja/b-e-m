@@ -3,7 +3,7 @@
 
 * The rule
 
-The SvelteKit app is a 1:1 port of the legacy single-page app: the same behaviour, output and look, legacy bugs and quirks included. Structure may change (routes for tabs, typed modules, Tailwind for CSS); nothing a user can observe may, except the one deviation below. A bug noticed while porting is ported as it is and listed here; fixing it is separate work, done after the port and recorded as a change from the legacy.
+The SvelteKit app is a 1:1 port of the legacy single-page app: the same behaviour, output and look, legacy bugs and quirks included. Structure may change (routes for tabs, typed modules, Tailwind for CSS); nothing a user can observe may, except the one deviation and the later changes listed below. A bug noticed while porting is ported as it is and listed here; fixing it is separate work, done after the port and recorded as a change from the legacy.
 
 * The reference
 
@@ -22,6 +22,12 @@ Pinned exactly in =package.json=, no caret. Code written against them uses their
 * The deviation
 
 + Journal entries (Prática) are rendered as text. The legacy page built each row with =innerHTML= from the stored title and note (line 2190), so HTML typed into them rendered; the port escapes it. Whether to reproduce that is an open decision.
+
+* Changes since the port
+
+Deliberate changes made after the port, each its own commit. The reference stays the legacy page; these are the known differences from it.
+
++ Layout :: the content column is centred in the space right of the sidebar; the legacy page left-aligned it against the sidebar.
 
 * Kept on purpose
 

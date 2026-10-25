@@ -114,9 +114,9 @@ export function candidateSequence(o: MelodyOptions): number[] | null {
     seq.push(pick);
   }
   const finalTarget = nearestPoolOffset(o.endDeg, scale, pitchPool);
-  // Measured from the note being replaced, not the one before it, so the leap into the final
-  // tonic can exceed maxLeap: the legacy check, kept for parity.
-  if (Math.abs(finalTarget - seq[seq.length - 1]) > maxLeap) return null;
+  // The leap into the final tonic is from the note before it. (The legacy page measured it from
+  // the note being replaced, so the last leap could exceed maxLeap.)
+  if (seq.length > 1 && Math.abs(finalTarget - seq[seq.length - 2]) > maxLeap) return null;
   seq[seq.length - 1] = finalTarget;
   if (Math.max(...seq) - Math.min(...seq) > range) return null;
   return seq;

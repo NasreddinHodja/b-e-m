@@ -48,9 +48,7 @@ describe('candidateSequence', () => {
         expect(62 + v).toBeLessThanOrEqual(TESSITURA_HIGH);
         expect(SCALES.major).toContain(((v % 12) + 12) % 12);
       }
-      // Not the last step: the final-note check measures from the note it replaces (legacy bug, kept).
-      for (let i = 1; i < s.length - 1; i++)
-        expect(Math.abs(s[i] - s[i - 1])).toBeLessThanOrEqual(7);
+      for (let i = 1; i < s.length; i++) expect(Math.abs(s[i] - s[i - 1])).toBeLessThanOrEqual(7);
       vi.restoreAllMocks();
     }
   });

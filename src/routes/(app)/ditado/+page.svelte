@@ -317,7 +317,8 @@
   </button>
   {#if d.lilyOpen}
     <div id="ditado-lily" transition:slide={{ duration: prefersReducedMotion.current ? 0 : 220 }}>
-      <!-- Never filled in the legacy app either. -->
+      <!-- TODO: show ditado.lily() here, updated with each exercise. Empty as in the legacy app;
+           left empty for now (TODO.org, "the LilyPond block shows nothing"). -->
       <pre
         class="m-0 max-h-[240px] overflow-auto border-t border-line bg-well p-3 font-mono text-xs leading-[1.6] whitespace-pre-wrap text-[#cfcabd]"></pre>
       <div class="grid grid-cols-2 border-t border-line">

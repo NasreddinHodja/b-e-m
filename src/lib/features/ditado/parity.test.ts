@@ -130,7 +130,14 @@ describe('Ditado parity with the legacy page', () => {
                   ] as never[])
                 )
             );
-            expect(a, JSON.stringify({ c, scale, key, seed })).toEqual(b);
+            const where = JSON.stringify({ c, scale, key, seed });
+            // The one change from the legacy page: the leap into the final tonic is checked from
+            // the note before it. Both walk the same way, so they differ only in which of them
+            // rejects the walk, and each rejection must be for that leap.
+            const leap = (s: number[]) => Math.abs(s[s.length - 1] - s[s.length - 2]);
+            if (a && b) expect(a, where).toEqual(b);
+            else if (b) expect(leap(b), where).toBeGreaterThan(c.maxLeap);
+            else if (a) expect(leap(a), where).toBeLessThanOrEqual(c.maxLeap);
           }
         }
   });

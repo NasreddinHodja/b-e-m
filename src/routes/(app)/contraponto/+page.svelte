@@ -13,7 +13,7 @@
   import Roll from './Roll.svelte';
 
   const btn =
-    'inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-xs tracking-[0.08em] uppercase transition-all duration-[140ms] disabled:cursor-not-allowed disabled:opacity-35';
+    'inline-flex items-center gap-1.5 border px-2.5 py-1.5 text-xs tracking-[0.08em] uppercase transition-all duration-[140ms] disabled:cursor-not-allowed disabled:opacity-35';
   const plain = [
     btn,
     'border-line-lt bg-transparent text-fg enabled:hover:border-accent enabled:hover:bg-accent enabled:hover:text-bg'
@@ -23,8 +23,8 @@
     'border-accent bg-accent text-bg enabled:hover:border-gold enabled:hover:bg-gold'
   ];
   const barLabel =
-    'm-0 inline-flex items-center gap-1.5 font-mono text-xs font-medium tracking-[0.08em] text-fg-mid uppercase';
-  const hint = 'mt-2.5 font-mono text-sm leading-[1.5] text-fg-faint';
+    'm-0 inline-flex items-center gap-1.5 text-xs font-medium tracking-[0.08em] text-fg-mid uppercase';
+  const hint = 'mt-2.5 text-sm leading-[1.5] text-fg-faint';
   const well =
     'w-full border border-line-lt bg-well font-mono text-fg focus:border-gold focus:outline-none';
 </script>
@@ -89,9 +89,7 @@
             i === c.active ? 'border-gold shadow-[0_0_0_1px_var(--color-gold)]' : 'border-line'
           ]}
         >
-          <div
-            class="mb-2 flex flex-wrap items-center gap-2 font-mono text-sm font-semibold text-fg"
-          >
+          <div class="mb-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-fg">
             <input
               type="radio"
               name="ct-av"
@@ -116,7 +114,7 @@
               </select>
             {/if}
             <label
-              class="m-0 inline-flex cursor-pointer items-center gap-[5px] font-mono text-xs font-medium tracking-[0.06em] text-fg-mid uppercase"
+              class="m-0 inline-flex cursor-pointer items-center gap-[5px] text-xs font-medium tracking-[0.06em] text-fg-mid uppercase"
               ><input type="checkbox" bind:checked={v.on} />{m.ct_sound()}</label
             >
             {#if !v.cf}
@@ -151,7 +149,7 @@
     <p
       aria-live="polite"
       class={[
-        'm-0 mb-2.5 font-mono text-[14px] font-semibold tracking-[0.04em]',
+        'm-0 mb-2.5 text-[14px] font-semibold tracking-[0.04em]',
         c.summary.tone === 'ok' ? 'text-green' : c.summary.tone === 'bad' ? 'text-red' : 'text-fg'
       ]}
     >
@@ -173,7 +171,7 @@
         >
           <b
             class={[
-              'mr-1.5 font-mono text-xs font-semibold tracking-[0.1em] uppercase',
+              'mr-1.5 text-xs font-semibold tracking-[0.1em] uppercase',
               issue.s === 'erro' ? 'text-red' : 'text-gold'
             ]}>{issue.s === 'erro' ? m.ct_error() : m.ct_warning()}</b
           >{issue.m()}

@@ -30,7 +30,7 @@
   }
 
   const ctrl =
-    'min-h-[38px] w-full border border-line-lt bg-bg px-2.5 py-2 font-mono text-base text-fg outline-none focus:border-gold';
+    'min-h-[38px] w-full border border-line-lt bg-bg px-2.5 py-2 text-base text-fg outline-none focus:border-gold';
   const grid = 'grid grid-cols-2 gap-2.5 max-[480px]:grid-cols-1';
   const hint = 'py-1 text-sm text-fg-faint italic';
   const degrees = (o: string) =>
@@ -284,7 +284,7 @@
     {#if q.answerShown}
       <div class="mt-3 border-t border-line pt-3">
         <PanelLabel class="mb-2">{m.ditado_answer()}</PanelLabel>
-        <div class="mb-2 text-lg tracking-[0.12em] text-fg">
+        <div class="mb-2 font-mono text-lg tracking-[0.12em] text-fg">
           {#each d.current?.notes ?? [] as n, i (i)}{i > 0 ? ' – ' : ''}<span class="text-gold"
               >{degreeOf(n)}</span
             >{/each}
@@ -304,7 +304,7 @@
 <div class="animate-fade-up border border-line bg-surface">
   <button
     type="button"
-    class="flex w-full cursor-pointer items-center justify-between border-0 bg-transparent px-[1.4rem] py-[1.1rem] text-left font-mono text-2xs tracking-[0.2em] text-gold uppercase"
+    class="flex w-full cursor-pointer items-center justify-between border-0 bg-transparent px-[1.4rem] py-[1.1rem] text-left text-2xs tracking-[0.2em] text-gold uppercase"
     aria-expanded={d.lilyOpen}
     aria-controls="ditado-lily"
     onclick={() => (d.lilyOpen = !d.lilyOpen)}

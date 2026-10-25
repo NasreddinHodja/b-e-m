@@ -15,7 +15,7 @@
 
 {#if session.status === 'loading' || session.status === 'unreachable'}
   <div
-    class="fixed inset-0 z-10000 flex flex-col items-center justify-center bg-bg font-mono text-sm tracking-[2px] text-gold"
+    class="fixed inset-0 z-10000 flex flex-col items-center justify-center bg-bg text-sm tracking-[2px] text-gold"
   >
     {#if session.status === 'loading'}
       {m.boot_loading()}

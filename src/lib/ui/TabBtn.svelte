@@ -13,7 +13,7 @@
 <button
   type="button"
   class={[
-    'border px-[11px] py-1 font-mono text-xs tracking-[0.05em] transition-all duration-[120ms]',
+    'border px-[11px] py-1 text-xs tracking-[0.05em] transition-all duration-[120ms]',
     active
       ? 'border-accent bg-accent text-bg'
       : 'border-line bg-transparent text-fg-mid hover:border-fg-mid hover:text-fg',

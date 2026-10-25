@@ -27,6 +27,7 @@
   --color-transparent: transparent;
 
   --font-*: initial;
+  --font-sans: 'Inter', sans-serif;
   --font-mono: 'DM Mono', monospace;
   --font-serif: 'Playfair Display', serif;
   --font-display: 'Barlow Condensed', sans-serif;
@@ -75,7 +76,7 @@
   }
 
   body {
-    @apply flex min-h-screen bg-bg font-mono text-md text-fg;
+    @apply flex min-h-screen bg-bg font-sans text-md text-fg;
   }
 
   /* Film grain over the whole app. */
@@ -88,6 +89,14 @@
     z-index: 9999;
   }
 
+  /* Form controls take the page's font (browsers give them their own); size stays per class. */
+  button,
+  input,
+  select,
+  textarea {
+    font-family: inherit;
+  }
+
   /* Every legacy button and select declared cursor: pointer. */
   button,
   select {
@@ -95,7 +104,7 @@
   }
 
   select {
-    @apply border border-line-lt bg-bg px-2.5 py-1 font-mono text-xs text-fg outline-none focus:border-fg-mid;
+    @apply border border-line-lt bg-bg px-2.5 py-1 text-xs text-fg outline-none focus:border-fg-mid;
   }
 
   input[type='range'] {

@@ -13,7 +13,8 @@
   let { answers, showTag = false, class: cls = 'max-h-[180px]' }: Props = $props();
 </script>
 
-<div class={['flex flex-col gap-[3px] overflow-y-auto', cls]}>
+<!-- Mono: prompts, answers and times line up as data. -->
+<div class={['flex flex-col gap-[3px] overflow-y-auto font-mono', cls]}>
   {#each answers as a (a.id)}
     <div
       class="flex items-center gap-2 border-b border-line py-[5px] text-sm text-fg-mid last:border-none"

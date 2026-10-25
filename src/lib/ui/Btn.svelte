@@ -23,7 +23,7 @@
 <button
   {type}
   class={[
-    'relative overflow-hidden border font-mono text-sm uppercase transition-all duration-[140ms]',
+    'relative overflow-hidden border text-sm uppercase transition-all duration-[140ms]',
     "before:absolute before:inset-0 before:z-0 before:translate-y-[101%] before:transition-transform before:duration-[160ms] before:ease-[ease] before:content-['']",
     'hover:border-accent hover:text-bg hover:before:translate-y-0',
     primary

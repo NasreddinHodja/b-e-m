@@ -15,9 +15,7 @@
   const caption = 'text-2xs tracking-[0.12em] text-fg-faint uppercase';
 </script>
 
-<div
-  class="flex flex-col gap-[1.2rem] border border-line bg-[#0a0a0a] px-[1.2rem] py-[1.4rem] font-mono"
->
+<div class="flex flex-col gap-[1.2rem] border border-line bg-[#0a0a0a] px-[1.2rem] py-[1.4rem]">
   <div>
     <div class="mb-[0.6rem] flex items-center justify-between">
       <span class="font-display text-[22px] font-black tracking-[-0.01em] text-accent">B.E.M</span>
@@ -51,7 +49,7 @@
           <button
             type="button"
             class={[
-              'border px-2 py-[3px] text-left font-mono text-xs transition-all duration-[120ms]',
+              'border px-2 py-[3px] text-left text-xs transition-all duration-[120ms]',
               active
                 ? 'border-accent bg-accent/5 text-accent'
                 : 'border-line bg-transparent text-fg-mid hover:border-fg-mid hover:text-fg'

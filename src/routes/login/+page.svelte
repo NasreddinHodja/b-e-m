@@ -27,7 +27,7 @@
 
   const label = 'text-2xs tracking-[0.1em] text-fg-mid uppercase';
   const input =
-    'border border-line-lt bg-bg px-4 py-[0.8rem] font-mono text-md text-fg outline-none transition-[border-color] duration-200 focus:border-gold';
+    'border border-line-lt bg-bg px-4 py-[0.8rem] text-md text-fg outline-none transition-[border-color] duration-200 focus:border-gold';
 </script>
 
 <div class="flex min-h-screen w-full flex-col items-center justify-center bg-bg">

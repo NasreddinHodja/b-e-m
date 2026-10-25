@@ -45,7 +45,7 @@
   }
 
   const input =
-    'block w-full resize-none border border-line-lt bg-bg px-[0.7rem] py-2 font-mono text-base text-fg outline-none transition-[border-color] duration-150 focus:border-fg-mid';
+    'block w-full resize-none border border-line-lt bg-bg px-[0.7rem] py-2 text-base text-fg outline-none transition-[border-color] duration-150 focus:border-fg-mid';
 </script>
 
 <Panel label={m.pr_pillars()}>

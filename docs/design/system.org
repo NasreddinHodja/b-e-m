@@ -1,7 +1,7 @@
 #+TITLE: Design system
 #+OPTIONS: ^:{}
 
-The look is the legacy page's: near-black surfaces, warm ivory text, DM Mono everywhere, Playfair Display for big numbers and names, Barlow Condensed for display type, gold labels, a film-grain overlay. It's written as Tailwind 4 utilities on the components; the tokens and the few global rules are in =src/routes/layout.css=.
+The look is the legacy page's: near-black surfaces, warm ivory text, Playfair Display for big numbers and names, Barlow Condensed for display type, gold labels, a film-grain overlay. The text font is Inter; DM Mono, the legacy page's only text font, is kept for data. It's written as Tailwind 4 utilities on the components; the tokens and the few global rules are in =src/routes/layout.css=.
 
 * Tailwind without preflight
 
@@ -23,7 +23,7 @@ With preflight on, the port didn't render like the legacy page, whose CSS was wr
 Defined with =@theme= in =layout.css=. Tailwind's default palette, fonts and type scale are cleared (=--color-*: initial= etc.), so only these exist: a class like =text-gray-500= or =text-xl= doesn't compile to anything.
 
 + Colours :: =bg= #0c0c0c, =surface= #141414, =surface-2= #1c1c1c, =well= #080808, =line= #2a2a2a, =line-lt= #333, =fg= #e4e0d8, =fg-soft= #c9c5bc, =fg-mid= #888, =fg-faint= #444, =accent= #e4e0d8, =green= #4a9e6a, =red= #b84848, =gold= #c8a030, =blue= #7a9bc8, =paper= #f2eddf (the Ditado staff), =logo= #e8e2d4, =white=, =black=, =transparent=. Opacity modifiers work (=bg-gold/6=).
-+ Fonts :: =font-mono= (DM Mono, the body font), =font-serif= (Playfair Display), =font-display= (Barlow Condensed). Loaded from Google Fonts in =src/app.html=.
++ Fonts :: =font-sans= (Inter, the body font), =font-mono= (DM Mono), =font-serif= (Playfair Display), =font-display= (Barlow Condensed). All four are under the SIL Open Font License, loaded from Google Fonts in =src/app.html=. Mono is for data only, where characters must line up or read literally: the note-entry and LilyPond fields, Ditado's degree options and answer, the answer grids of chord, function and interval symbols, Harmonia 3D's degree buttons, the tuner's cents and reference A, the piano roll's labels, the history rows. Everything else, prose, buttons, tabs, nav, labels and form controls, is Inter.
 + Type scale :: =text-3xs= 8px, =2xs= 9, =xs= 10, =sm= 11, =base= 12, =md= 13 (the body), =lg= 15. Larger sizes are written inline (=text-[54px]=).
 + Animations :: =animate-fade-up= (every =Panel= fades up 5px in 0.25 s), =animate-regua-pulse= (a playing Régua dot).
 
@@ -31,7 +31,7 @@ The colours are also CSS variables (=var(--color-gold)=), which SVG attributes, 
 
 * Global rules
 
-Base layer, =layout.css=: the reset; =body= as a flex row, =min-h-screen=, =bg-bg=, mono 13px, =text-fg=; the grain (=body::after=, a fixed SVG-noise layer at 3.5% opacity, =z-index: 9999=, no pointer events); =cursor: pointer= on every button and select; the dark =select= and the flat range slider (11px square thumb); a 4px scrollbar.
+Base layer, =layout.css=: the reset; =body= as a flex row, =min-h-screen=, =bg-bg=, Inter 13px, =text-fg=; =font-family: inherit= on buttons, inputs, selects and textareas (browsers give them their own font, and preflight, which would fix that, is off); the grain (=body::after=, a fixed SVG-noise layer at 3.5% opacity, =z-index: 9999=, no pointer events); =cursor: pointer= on every button and select; the dark =select= and the flat range slider (11px square thumb); a 4px scrollbar.
 
 Utilities, for quiz answer buttons, which must override a button's own colours whatever its other classes: =state-selected= (gold), =state-correct= (green), =state-wrong= (red), all =!important=. =markClass(mark, selected)= in =src/lib/ui/types.ts= picks one.
 

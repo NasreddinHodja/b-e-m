@@ -34,7 +34,7 @@
 <Panel class="border-l-[3px] border-line-lt! border-l-gold! bg-gold/3!">
   <button
     type="button"
-    class="flex w-full cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-left font-mono text-2xs tracking-[0.2em] text-fg-faint uppercase after:h-px after:flex-1 after:bg-line after:content-[''] hover:text-fg-mid"
+    class="flex w-full cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-left text-2xs tracking-[0.2em] text-fg-faint uppercase after:h-px after:flex-1 after:bg-line after:content-[''] hover:text-fg-mid"
     aria-expanded={q.teacherOpen}
     aria-controls="teacher-panel"
     onclick={() => (q.teacherOpen = !q.teacherOpen)}

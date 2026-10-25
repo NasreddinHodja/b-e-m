@@ -27,9 +27,9 @@
   }
 
   const footerBtn =
-    'flex w-full items-center justify-center gap-1.5 border-0 border-b border-line p-1.5 font-mono text-2xs tracking-[0.1em] uppercase transition-all duration-150';
+    'flex w-full items-center justify-center gap-1.5 border-0 border-b border-line p-1.5 text-2xs tracking-[0.1em] uppercase transition-all duration-150';
   const modeBtn = (active: boolean) => [
-    'flex flex-1 items-center justify-center gap-1.5 border px-1 py-[5px] font-mono text-xs tracking-[0.04em] transition-all duration-[120ms]',
+    'flex flex-1 items-center justify-center gap-1.5 border px-1 py-[5px] text-xs tracking-[0.04em] transition-all duration-[120ms]',
     active
       ? 'border-line-lt bg-surface-2 text-accent'
       : 'border-line bg-transparent text-fg-faint hover:text-fg-mid'
@@ -45,10 +45,10 @@
   <div class="flex items-center gap-2.5 border-b border-line px-[1.2rem] pt-[1.4rem] pb-[1.2rem]">
     <BemLogo />
     <div class="flex flex-col gap-0.5">
-      <div class="font-mono text-2xs leading-[1.3] font-medium tracking-[0.14em] text-fg uppercase">
+      <div class="text-2xs leading-[1.3] font-medium tracking-[0.14em] text-fg uppercase">
         {m.app_name()}
       </div>
-      <div class="font-mono text-3xs tracking-[0.12em] text-fg-faint uppercase">
+      <div class="text-3xs tracking-[0.12em] text-fg-faint uppercase">
         {m.app_tagline()}
       </div>
     </div>
@@ -90,7 +90,7 @@
         <a
           href={resolve(item.route)}
           class={[
-            'flex w-full items-center justify-between border-l-[3px] px-[1.2rem] py-3 text-left font-mono text-sm tracking-[0.1em] uppercase no-underline transition-all duration-[140ms]',
+            'flex w-full items-center justify-between border-l-[3px] px-[1.2rem] py-3 text-left text-sm tracking-[0.1em] uppercase no-underline transition-all duration-[140ms]',
             active
               ? 'border-l-accent bg-accent/5 text-accent'
               : 'border-l-transparent text-fg-mid hover:bg-white/3 hover:text-fg'

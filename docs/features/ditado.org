@@ -58,6 +58,7 @@ Generate a short melody (or a Slonimsky pattern), hear it, pick its scale degree
 + One 240px stave per bar; the first has the treble clef, the key signature (=keySig.vexKey=) and the time signature; later bars have no start barline, the last an end barline.
 + Note names come from =spellNote()=: in-scale notes on the scale's letters, others on =FALLBACK_LETTER=; accidentals are drawn only where they differ from the signature (naturals to cancel it).
 + Dotted values get a =Dot= modifier but keep their undotted duration, so the voice is non-strict (=setStrict(false)=); beams are generated per beat group (3/8 in compound meters, 1/4 in simple); ties join split cells.
++ After drawing, =cropToDrawing()= shrinks the SVG's =viewBox= and size to the drawn bounding box plus a 12px margin, and the paper box centres it both ways with auto margins; a staff wider than the box scrolls from its clef.
 + Each optional step (barline types, dots, each beam, each tie) is wrapped so that a failure skips that element, as the legacy =try/catch= did. If the whole staff fails, its error message is shown in place of it.
 
 * LilyPond

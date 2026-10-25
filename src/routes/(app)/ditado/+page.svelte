@@ -212,7 +212,8 @@
     <div
       {@attach staff}
       class={[
-        'min-h-[170px] overflow-x-auto border border-line bg-paper p-2 transition-[filter] duration-[350ms] ease-[ease] [-webkit-overflow-scrolling:touch] [&_svg]:block',
+        // Auto margins centre the staff both ways; when it's wider than the box they drop to 0, so it scrolls from its start.
+        'flex min-h-[170px] overflow-x-auto border border-line bg-paper p-2 transition-[filter] duration-[350ms] ease-[ease] [-webkit-overflow-scrolling:touch] [&_svg]:m-auto [&_svg]:block [&_svg]:shrink-0',
         d.staffBlurred && 'pointer-events-none blur-[11px] saturate-[0.7] select-none'
       ]}
     ></div>

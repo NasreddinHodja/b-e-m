@@ -17,6 +17,8 @@ import { accToNum, accToVex, spellNote, splitSpelling } from './theory.js';
 
 const BAR_WIDTH = 240;
 const HEIGHT = 180;
+/** Paper margin around the engraving once cropped (px). */
+const CROP_PAD = 12;
 
 /** Accidental to draw given the key signature: '' when the signature covers it, 'n' to cancel. */
 function visibleAccidental(noteName: string, altered: Record<string, number>): string {
@@ -35,6 +37,24 @@ function ignoreErrors(fn: () => unknown) {
   } catch {
     // Legacy behaviour: draw what can be drawn.
   }
+}
+
+/**
+ * Shrink the SVG to what was drawn plus a margin. VexFlow draws into a fixed canvas with empty
+ * space above the stave, so without this the staff can't be centred in its box.
+ */
+function cropToDrawing(host: HTMLElement) {
+  const svg = host.querySelector('svg');
+  if (!svg) return;
+  const b = svg.getBBox();
+  if (!b.width || !b.height) return;
+  const w = Math.ceil(b.width + 2 * CROP_PAD);
+  const h = Math.ceil(b.height + 2 * CROP_PAD);
+  svg.setAttribute('viewBox', `${b.x - CROP_PAD} ${b.y - CROP_PAD} ${w} ${h}`);
+  svg.setAttribute('width', String(w));
+  svg.setAttribute('height', String(h));
+  svg.style.width = `${w}px`;
+  svg.style.height = `${h}px`;
 }
 
 /**
@@ -117,6 +137,7 @@ export function renderStaff(host: HTMLElement, model: Model, baseMidi: number) {
         );
       }
     });
+    cropToDrawing(host);
   } catch (err) {
     console.error('Ditado — erro de notação:', err);
     const box = document.createElement('div');

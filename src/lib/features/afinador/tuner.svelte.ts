@@ -4,7 +4,7 @@ import { autoCorrelate } from './autocorrelate.js';
 export type TunerMode = 'chromatic' | 'guitar' | 'voice';
 
 /** Accepted pitch range per mode, in Hz. */
-const MODE_RANGES: Record<TunerMode, { min: number; max: number }> = {
+export const MODE_RANGES: Record<TunerMode, { min: number; max: number }> = {
   chromatic: { min: 27.5, max: 4200 },
   guitar: { min: 80, max: 1400 },
   voice: { min: 85, max: 1100 }

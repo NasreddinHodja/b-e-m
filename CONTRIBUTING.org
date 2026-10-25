@@ -38,6 +38,8 @@ pnpm dev         # http://localhost:5173, signed in, no Firebase
 
 =pnpm test= runs every =src/**/*.test.ts= in Node: the pure modules (music theory, rhythm, melody generation, the counterpoint rules, LilyPond output, Harmonia 3D's spelling, pitch detection). Code that draws random numbers is tested with =Math.random= replaced by a seeded generator (=src/lib/testing/random.ts=), so runs repeat. Tests pin down legacy quirks too, each named as one.
 
+The =parity.test.ts= files compare the port with the legacy page itself: =src/lib/testing/legacy.ts= runs =index.html='s scripts in a Node =vm= sandbox with a stand-in DOM and hands back their functions, and the tests feed both the same inputs and the same seeded random draws (Ditado's spelling, key signatures, rhythms, melodies, Slonimsky lines, model, playback and LilyPond; every counterpoint rule, summary and LilyPond on 400 random sets of voices; Harmonia 3D's tables and spelling; the chord, interval and ruler tables, the synth's profiles and pitch detection). Any difference is a parity bug, unless it's a change listed in [[file:docs/parity.org][Parity]].
+
 =pnpm test:e2e= builds the app with =VITE_BACKEND=local= and serves it on port 4174, then drives it in Chromium from =e2e/*.e2e.ts=. It uses the system's =/usr/bin/chromium=; =CHROMIUM_PATH= points elsewhere, or set it empty and run =pnpm exec playwright install chromium= for Playwright's own.
 
 * Before a commit

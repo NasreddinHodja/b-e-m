@@ -58,8 +58,12 @@ A functional pass by hand through each quiz: scoring, badges and history worked,
 
 The scripts for this lived outside the repo and aren't in it.
 
+* Parity tests
+
+=pnpm test= runs the port's logic against the legacy page's own code, in a sandbox, on the same inputs and random draws (=src/**/parity.test.ts=, see [[file:../CONTRIBUTING.org][Contributing]]): Ditado (spelling, key signatures, rhythms, melodies, Slonimsky, model, playback events, LilyPond, distractors), Contraponto (parsing, classification, every rule, the summary and LilyPond, on 400 random sets of voices), Harmonia 3D (tables, spelling, chord names, colours) and the shared tables (synth profiles, chords, intervals, roots, the ruler, the pillars, tuner ranges, pitch detection). They were checked to fail when the port is changed: a max-leap comparison, a double-sharp glyph, a counterpoint warning's severity and a LilyPond octave mark.
+
 * Not checked
 
-+ Interactions, compared against the reference. A full check needs the same random draws in both apps (seeded =Math.random=), scripted flows run on both with DOM and screenshot comparison (hover and focus states included), the =AudioContext= calls recorded and compared, and Firebase mocked. Not built yet.
++ Interactions, compared against the reference: the logic is (see Parity tests), the UI flows and the =AudioContext= calls aren't. That needs scripted flows run on both pages with DOM and screenshot comparison, the audio calls recorded, and Firebase mocked.
 + Firebase in the deployed build: sign-in, the journal and stats were exercised against the local backend only.
 + Browsers other than Chromium.

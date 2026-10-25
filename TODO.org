@@ -67,11 +67,20 @@ Gold text straight on the blurred, light paper: about 1.5:1 contrast.
 ** Done
 9ffb5e2. The label sits on a dark chip (=bg-bg/90=, a =gold/40= border) centred over the staff: about 6.6:1 (gold #c8a030 on the chip's #202020 over the paper). Checked at 1280 and 390px.
 
-* TODO Ditado: LilyPond block should animate open and closed
-/Representação musical — fonte LilyPond/ is a =<details>= that snaps open.
+* DONE Ditado: LilyPond block should animate open and closed
+/Representação musical — fonte LilyPond/ was a =<details>= that snapped open.
+
+** Done
+ff204af. The header is a button (=aria-expanded=, =aria-controls=) with a ▸ that turns when open, and the contents open and close with =svelte/transition='s =slide= (220ms; instant with reduced motion); the state is =ditado.lilyOpen=. CSS =::details-content= transitions would have kept the =<details>=, but I couldn't check their browser support offline, so I used what's already used for the feedback and the teacher panel. Measured: 50 → 114px over about 200ms.
+
+* WAIT Ditado: the LilyPond block shows nothing
+Found while doing the item above: the block's =<pre>= is empty, in the legacy page too (=dLilySource= is never written). /Copiar .ly/ and /Baixar .ly/ do produce the source (=ditado.lily()=).
 
 ** Plan
-A button with =aria-expanded= and an animated height, or CSS =::details-content= transitions if the target browsers support them (check before choosing).
+Show =ditado.lily()= in the =<pre>=, updated with each exercise.
+
+** Waiting on
+The owner's OK: it's a legacy bug, kept so far for parity.
 
 * TODO Monospace everywhere
 Every text is DM Mono, including prose (Manifesto, feedback, hints, the journal), where it reads worse.

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { audio } from '#lib/audio/engine.svelte.js';
-  import { TEACHER_CHORDS, FUNCS, chordPool } from '#lib/features/acordes/chords.js';
+  import { TEACHER_CHORDS, FUNCS, chordPool, type Pool } from '#lib/features/acordes/chords.js';
   import { acordes as q } from '#lib/features/acordes/quiz.svelte.js';
   import Btn from '#lib/ui/Btn.svelte';
   import CheckBtn from '#lib/ui/CheckBtn.svelte';
@@ -11,6 +11,11 @@
   import RevealBtn from '#lib/ui/RevealBtn.svelte';
   import TabBtn from '#lib/ui/TabBtn.svelte';
   import { markClass } from '#lib/ui/types.js';
+
+  const guessCols = (pool: Pool) => (pool === 'both' ? 6 : 5);
+  const guessRows = (pool: Pool) => Math.ceil(chordPool(pool).length / guessCols(pool));
+  const GUESS_ROWS = Math.max(...(['major', 'minor', 'both'] as const).map(guessRows));
+  const guessFill = $derived(GUESS_ROWS * guessCols(q.guessPool) - chordPool(q.guessPool).length);
 
   const blur = 'transition-[filter] duration-300';
   const gridBtn =
@@ -95,7 +100,7 @@
     <TabBtn active={q.guessPool === 'minor'} onclick={() => q.setGuessPool('minor')}>Menor</TabBtn>
     <TabBtn active={q.guessPool === 'both'} onclick={() => q.setGuessPool('both')}>Ambos</TabBtn>
   </OptsRow>
-  <div class={['grid gap-1', q.guessPool === 'both' ? 'grid-cols-6' : 'grid-cols-5']}>
+  <div class={['grid gap-1', guessCols(q.guessPool) === 6 ? 'grid-cols-6' : 'grid-cols-5']}>
     {#each chordPool(q.guessPool) as chord (chord.name)}
       <button
         type="button"
@@ -104,6 +109,10 @@
       >
         {chord.name}
       </button>
+    {/each}
+    <!-- Invisible cells fill the grid to the most rows any pool needs, so switching pools keeps its height. -->
+    {#each { length: guessFill }, i (i)}
+      <span class={[gridBtn, 'invisible px-0.5 py-1.5']} aria-hidden="true">–</span>
     {/each}
   </div>
   <Feedback result={q.guessFeedback} />

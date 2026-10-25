@@ -28,6 +28,7 @@ Pinned exactly in =package.json=, no caret. Code written against them uses their
 Deliberate changes made after the port, each its own commit. The reference stays the legacy page; these are the known differences from it.
 
 + Layout :: the content column is centred in the space right of the sidebar; the legacy page left-aligned it against the sidebar.
++ Acordes :: the /A = …/ badge is always laid out, invisible until the chord is revealed, so revealing doesn't change the panel's height.
 
 * Kept on purpose
 

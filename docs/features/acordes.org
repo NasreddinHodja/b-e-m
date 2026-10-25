@@ -19,7 +19,7 @@ Hear a major or minor triad against the note A and answer two questions: which c
 =octave= (3, 4 or 5) places A at MIDI =12·(octave+1)+9= and moves the chord down or up an octave with it (=chordMidis=). =aSemis= is A's distance above the chord root.
 
 + /Novo acorde aleatório/ :: =newRandom()= picks from =chordPool(randPool)= (/Sortear/: both, major, minor) and =load()=s it: everything resets, the name and notes are blurred, and the chord plays 80 ms later.
-+ /Revelar acorde/ :: toggles =revealed=; revealed, the badge /A = <aFunc>/ shows.
++ /Revelar acorde/ :: toggles =revealed=; revealed, the badge /A = <aFunc>/ shows (it's always laid out, invisible until then, so the panel keeps its height).
 + /Qual acorde está tocando?/ :: a grid of =chordPool(guessPool)= (/Maior/, /Menor/, /Ambos/; 5 columns, 6 for both). The first click answers: the right chord is marked correct, a wrong pick wrong, the chord is revealed, and feedback explains what A is. Later clicks do nothing until a new chord. Changing =guessPool= rebuilds the grid and drops its marks, as the legacy rebuild did.
 + /Qual função o A exerce?/ :: pick a function (highlighted gold), then /Verificar função/; marks, reveal and feedback as above. The button is disabled until something is picked and after answering.
 + /Modo professor/ :: every root of the chosen quality; clicking one loads it with =teacherMode = true=: it plays and is blurred like any other, but answers aren't scored.

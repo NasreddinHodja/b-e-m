@@ -41,13 +41,15 @@
       >
         {q.chordNotes}
       </div>
-      {#if q.revealed}
-        <div
-          class="mt-[7px] inline-block border border-gold/35 bg-gold/6 px-2.5 py-0.5 text-xs tracking-[0.1em] text-gold uppercase"
-        >
-          A = {q.chord.aFunc}
-        </div>
-      {/if}
+      <!-- Always laid out, so revealing doesn't change the panel's height. -->
+      <div
+        class={[
+          'mt-[7px] inline-block border border-gold/35 bg-gold/6 px-2.5 py-0.5 text-xs tracking-[0.1em] text-gold uppercase',
+          !q.revealed && 'invisible'
+        ]}
+      >
+        A = {q.chord.aFunc}
+      </div>
     </div>
     <div class="text-right">
       <RevealBtn onclick={() => q.toggleReveal()}>

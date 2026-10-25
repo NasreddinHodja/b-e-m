@@ -219,11 +219,15 @@
     ></div>
     <div
       class={[
-        'pointer-events-none absolute inset-0 items-center justify-center bg-[radial-gradient(ellipse_at_center,rgba(12,12,12,0.35)_0%,rgba(12,12,12,0.15)_60%,transparent_85%)] text-xs tracking-[0.3em] text-gold uppercase [text-shadow:0_1px_0_rgba(0,0,0,0.6)]',
+        'pointer-events-none absolute inset-0 items-center justify-center bg-[radial-gradient(ellipse_at_center,rgba(12,12,12,0.35)_0%,rgba(12,12,12,0.15)_60%,transparent_85%)]',
         d.staffBlurred ? 'flex' : 'hidden'
       ]}
     >
-      🔒 ouça e adivinhe
+      <!-- A dark chip: gold straight on the blurred paper was unreadable. -->
+      <span
+        class="border border-gold/40 bg-bg/90 px-3.5 py-2 text-xs tracking-[0.3em] text-gold uppercase"
+        >🔒 ouça e adivinhe</span
+      >
     </div>
   </div>
 </Panel>

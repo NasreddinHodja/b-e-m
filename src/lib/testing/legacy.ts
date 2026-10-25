@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import vm from 'node:vm';
 
 /**
- * Runs one of the legacy page's scripts (index.html, the parity reference) in a sandbox with a
+ * Runs one of the legacy page's scripts (legacy/index.html, the parity reference) in a sandbox with a
  * stand-in DOM, and returns the functions it defines, so tests can compare them with the port.
  */
 
@@ -59,10 +59,10 @@ export interface Legacy {
   set(name: string, value: unknown): void;
 }
 
-const html = () => readFileSync(resolve(process.cwd(), 'index.html'), 'utf8');
+const html = () => readFileSync(resolve(process.cwd(), 'legacy/index.html'), 'utf8');
 
 /**
- * Load the `<script>` block of index.html that contains `marker`, exposing `names` (functions or
+ * Load the `<script>` block of legacy/index.html that contains `marker`, exposing `names` (functions or
  * constants declared at the top of the block's IIFE) and accessors for the `let` bindings in
  * `letNames`.
  */
@@ -144,7 +144,7 @@ function run(head: string, tail: string, names: string[], letNames: string[]): L
   };
   ctx.window = ctx;
   vm.createContext(ctx);
-  vm.runInContext(code, ctx, { filename: 'index.html' });
+  vm.runInContext(code, ctx, { filename: 'legacy/index.html' });
   const lets = ctx.__lets as Record<string, [() => unknown, (v: unknown) => void]>;
   return {
     fn: ctx.__legacy as Record<string, Fn>,

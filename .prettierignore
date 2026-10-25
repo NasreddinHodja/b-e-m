@@ -9,7 +9,7 @@ bun.lockb
 /static/
 
 # The legacy app, kept as written: the reference the port is checked against
-/index.html
+/legacy/
 
 # Paraglide: its project folder (only settings.json is tracked) and the compiled messages
 /project.inlang/

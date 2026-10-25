@@ -4,7 +4,7 @@ import { seededRandom } from '#lib/testing/random.js';
 import { contraponto, type Voice } from './contraponto.svelte.js';
 import { cls, parse, spellNear } from './rules';
 
-// The port against the legacy page's own counterpoint code (index.html): the same voices must
+// The port against the legacy page's own counterpoint code (legacy/index.html): the same voices must
 // give the same issues, summary and LilyPond.
 
 let L: Legacy;

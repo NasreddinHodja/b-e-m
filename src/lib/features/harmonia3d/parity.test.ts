@@ -14,7 +14,7 @@ import {
 } from './fields';
 import { harmonia } from './harmonia.svelte.js';
 
-// The port against the legacy page's Harmonia 3D tables and spelling (index.html, inside its
+// The port against the legacy page's Harmonia 3D tables and spelling (legacy/index.html, inside its
 // `start()`): same keys, names, colours and presets.
 
 let L: Legacy;

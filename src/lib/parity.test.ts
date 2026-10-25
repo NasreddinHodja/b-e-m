@@ -11,7 +11,7 @@ import { REGUA } from './features/regua/intervals';
 import { PC_NAMES, midiToFreq } from './music/pitch';
 
 // The port's tables and shared functions against the legacy page's top-level scripts
-// (index.html: audio and score, then the tabs).
+// (legacy/index.html: audio and score, then the tabs).
 
 let L: Legacy;
 const json = (v: unknown) => JSON.parse(JSON.stringify(v));

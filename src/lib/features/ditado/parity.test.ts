@@ -6,7 +6,7 @@ import { buildModel, flattenEvents, toLily } from './model';
 import { METER_STRUCT, rhythmDurations, type Meter, type Motor } from './rhythm';
 import { SCALES, TONICS, keySigInfo, pcOf, spellNote, type ScaleType } from './theory';
 
-// The port against the legacy page's own Ditado code (index.html), on the same inputs and the
+// The port against the legacy page's own Ditado code (legacy/index.html), on the same inputs and the
 // same random draws: any difference is a parity bug.
 
 let L: Legacy;

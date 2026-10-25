@@ -23,10 +23,10 @@ The content column sat against the sidebar on wide screens: =main= had =margin-l
 
 Done in 41cf9fc. The =(app)= wrapper pads 220px on the left from 768px up and =main= is =mx-auto=, so it centres in the space right of the sidebar; wide views (1320px) the same. Below 768px, unchanged. Checked at 1920, 800 and 390px.
 
-* STRT Acordes: reveal toggle shifts the layout
-/Revelar acorde/ in /Acorde atual/ adds the /A = <função>/ badge, so the panel grows.
+* DONE Acordes: reveal toggle shifts the layout
+/Revelar acorde/ in /Acorde atual/ added the /A = <função>/ badge, so the panel grew.
 
-Plan: keep the badge always laid out, =invisible= until revealed. Panel height must be identical before and after.
+Done in b6f7fb1. The badge is always rendered and =invisible= (=visibility: hidden=, so also hidden from screen readers) until revealed. The panel measured 188.8px before and after revealing, in headless Chromium.
 
 * TODO Acordes: /Qual acorde está tocando?/ shifts the layout
 Two causes:

@@ -2,10 +2,10 @@
 
 The work queue, from the owner's =notes.org= (which isn't tracked). Each item says what's wrong and where; under it, =Plan= for what's next, =Waiting on= for the input a =WAIT= item needs, =Done= for what was done, with the commit. Every visible change is also listed under "Changes since the port" in [[file:docs/parity.org][docs/parity.org]].
 
-* TODO Port to SvelteKit
+* DONE Port to SvelteKit
 pnpm, TypeScript, ESLint + Prettier, Tailwind with the styles ported, logic encapsulated by responsibility, 1:1 with the legacy page.
 
-** Done so far
+** Done
 + commit =2f33590= (the app)
 + commit =8656109= (Pages deploy)
 + commit =665fe09= (docs)
@@ -30,11 +30,13 @@ Playwright runs 10 end-to-end tests on the built app with the local backend (=pn
 
 Not covered: the UI flows and the audio compared against the legacy page (only the logic is), and real Firebase.
 
-* TODO Ditado: the final leap can exceed /Salto máx./
-Found by the unit tests: =candidateSequence()= checks the leap into the final tonic against the note it replaces, not the note before it, so the last interval can be larger than /Salto máx./. Legacy behaviour, kept for parity (=docs/parity.org=).
+* DONE Ditado: the final leap can exceed /Salto máx./
+Found by the unit tests: =candidateSequence()= checked the leap into the final tonic against the note it replaced, not the note before it, so the last interval could be larger than /Salto máx./. The legacy page's bug.
 
-** Plan
-Check the final tonic against =seq[length - 2]=, and retry when it's too far, like the other steps. The parity test for melodies will then differ from the legacy page on purpose: record it as a change.
+** Done
++ commit =55c74ba=
+
+The check is now from the note before; a walk that can't reach the tonic within the maximum returns =null= and is retried like any other dead end. The unit test checks every leap again. The melody parity test still requires the same walks as the legacy page and allows only this difference: when one side rejects a walk the other kept, the rejection must be for the final leap. Over 2000 seeds at a 4th with leaps: 540 melodies identical, 154 legacy ones that broke the maximum now rejected, 134 the legacy wrongly rejected now kept.
 
 * DONE Center the page
 The content column sat against the sidebar on wide screens: =main= had =margin-left: 220px= and a max width, and nothing centred it.
@@ -110,7 +112,7 @@ The label sits on a dark chip (=bg-bg/90=, a =gold/40= border) centred over the 
 The header is a button (=aria-expanded=, =aria-controls=) with a ▸ that turns when open, and the contents open and close with =svelte/transition='s =slide= (220ms; instant with reduced motion); the state is =ditado.lilyOpen=. CSS =::details-content= transitions would have kept the =<details>=, but I couldn't check their browser support offline, so I used what's already used for the feedback and the teacher panel. Measured: 50 → 114px over about 200ms.
 
 * TODO Ditado: the LilyPond block shows nothing
-Found while animating the block: its =<pre>= is empty, in the legacy page too (=dLilySource= is never written). /Copiar .ly/ and /Baixar .ly/ do produce the source (=ditado.lily()=). The owner saw it too; it stays empty for now.
+Found while animating the block: its =<pre>= is empty, in the legacy page too (=dLilySource= is never written). /Copiar .ly/ and /Baixar .ly/ do produce the source (=ditado.lily()=). The owner saw it too; it stays empty for now. The =<pre>= carries a =TODO:= comment pointing here.
 
 ** Plan
 Show =ditado.lily()= in the =<pre>=, updated with each exercise.
@@ -149,9 +151,9 @@ To make that work, state holds facts and the text is made when rendered: quiz ou
 
 Not translated, on purpose: LilyPond exports, developer-facing errors, note letters, chord symbols and degrees. In English the notes are letter names (=A → E=), in Portuguese solfège (=Lá → Mi=), as before.
 
-* WAIT Review the English
+* TODO Review the English
 The English is my draft: every message in =messages/en.json=, the Manifesto included.
 
-** Waiting on
-The owner's review. Choices worth a look: interval names and abbreviations (=m2=, =M3=, =P5=, Perfect Fourth…), "Ear Training" for /Percepção/, "Listening" for /Apreciação/, "Ruler" for /Régua/, "Harmony 3D", and the Manifesto's wording. Also: should the LilyPond exports (=.ly= headers, instrument names like =Voz 2=) follow the language?
+** Plan
+The owner reviews it later. Choices worth a look: interval names and abbreviations (=m2=, =M3=, =P5=, Perfect Fourth…), "Ear Training" for /Percepção/, "Listening" for /Apreciação/, "Ruler" for /Régua/, "Harmony 3D", and the Manifesto's wording. Also: should the LilyPond exports (=.ly= headers, instrument names like =Voz 2=) follow the language?
 

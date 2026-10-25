@@ -21,6 +21,8 @@ class AcordesQuiz {
   chord = $state<Chord>(null!);
   revealed = $state(false);
   teacherMode = $state(false);
+  /** The teacher panel is expanded. Kept across navigation, like the rest of the quiz. */
+  teacherOpen = $state(false);
 
   guessAnswered = $state(false);
   /** Marks on the guess buttons, by chord name. Cleared when the guess grid changes. */

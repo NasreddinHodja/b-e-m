@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { prefersReducedMotion } from 'svelte/motion';
+  import { slide } from 'svelte/transition';
   import { audio } from '#lib/audio/engine.svelte.js';
   import { TEACHER_CHORDS, FUNCS, chordPool, type Pool } from '#lib/features/acordes/chords.js';
   import { acordes as q } from '#lib/features/acordes/quiz.svelte.js';
@@ -21,6 +23,71 @@
   const gridBtn =
     'border border-line bg-transparent font-mono text-xs text-fg-mid transition-all duration-[120ms] text-center hover:border-fg-mid hover:text-fg';
 </script>
+
+<!-- Collapsed by default: open, it shows which chord is loaded. -->
+<Panel class="border-l-[3px] border-line-lt! border-l-gold! bg-gold/3!">
+  <button
+    type="button"
+    class="flex w-full cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-left font-mono text-2xs tracking-[0.2em] text-fg-faint uppercase after:h-px after:flex-1 after:bg-line after:content-[''] hover:text-fg-mid"
+    aria-expanded={q.teacherOpen}
+    aria-controls="teacher-panel"
+    onclick={() => (q.teacherOpen = !q.teacherOpen)}
+  >
+    <span
+      class={['inline-block transition-transform duration-150', q.teacherOpen && 'rotate-90']}
+      aria-hidden="true">▸</span
+    >
+    Modo professor
+    <span class="ml-1.5 bg-gold px-[7px] py-px text-2xs tracking-[0.1em] text-bg uppercase">
+      sem pontuação
+    </span>
+  </button>
+  {#if q.teacherOpen}
+    <div
+      id="teacher-panel"
+      class="pt-4"
+      transition:slide={{ duration: prefersReducedMotion.current ? 0 : 220 }}
+    >
+      <p
+        class="mb-2.5 border border-line bg-surface-2 px-[0.8rem] py-[0.6rem] text-sm leading-[1.6] text-fg-mid italic"
+      >
+        Selecione qualquer acorde para demonstrar em aula. O acorde é carregado oculto — os alunos
+        tentam identificar antes de revelar.
+      </p>
+      <OptsRow class="mt-0 mb-2.5">
+        <TabBtn active={q.teacherQuality === 'major'} onclick={() => (q.teacherQuality = 'major')}>
+          Maior
+        </TabBtn>
+        <TabBtn active={q.teacherQuality === 'minor'} onclick={() => (q.teacherQuality = 'minor')}>
+          Menor
+        </TabBtn>
+      </OptsRow>
+      <div class="grid grid-cols-6 gap-1 max-[500px]:grid-cols-4">
+        {#each TEACHER_CHORDS[q.teacherQuality] as chord (chord.name)}
+          {@const active = q.chord.name === chord.name}
+          <button
+            type="button"
+            class={[
+              'flex flex-col items-center gap-px border px-0.5 py-[5px] text-center font-mono text-xs transition-all duration-[120ms]',
+              active
+                ? 'border-accent bg-accent/5 text-accent'
+                : 'border-line bg-transparent text-fg-mid hover:border-fg-mid hover:text-fg'
+            ]}
+            onclick={() => q.load(chord, true)}
+          >
+            <span class="text-base font-medium text-fg">{chord.name}</span>
+            <span
+              class={[
+                'text-center text-3xs leading-[1.2] tracking-[0.04em]',
+                chord.aFunc === '—' ? 'text-fg-faint' : 'text-gold'
+              ]}>{chord.aFunc}</span
+            >
+          </button>
+        {/each}
+      </div>
+    </div>
+  {/if}
+</Panel>
 
 <Panel label="Acorde atual">
   <div class="flex items-center justify-between gap-4">
@@ -137,49 +204,4 @@
     Verificar função
   </CheckBtn>
   <Feedback result={q.funcFeedback} />
-</Panel>
-
-<Panel label="Modo professor" class="border-l-[3px] border-line-lt! border-l-gold! bg-gold/3!">
-  {#snippet labelExtra()}
-    <span class="ml-1.5 bg-gold px-[7px] py-px text-2xs tracking-[0.1em] text-bg uppercase">
-      sem pontuação
-    </span>
-  {/snippet}
-  <p
-    class="mb-2.5 border border-line bg-surface-2 px-[0.8rem] py-[0.6rem] text-sm leading-[1.6] text-fg-mid italic"
-  >
-    Selecione qualquer acorde para demonstrar em aula. O acorde é carregado oculto — os alunos
-    tentam identificar antes de revelar.
-  </p>
-  <OptsRow class="mt-0 mb-2.5">
-    <TabBtn active={q.teacherQuality === 'major'} onclick={() => (q.teacherQuality = 'major')}>
-      Maior
-    </TabBtn>
-    <TabBtn active={q.teacherQuality === 'minor'} onclick={() => (q.teacherQuality = 'minor')}>
-      Menor
-    </TabBtn>
-  </OptsRow>
-  <div class="grid grid-cols-6 gap-1 max-[500px]:grid-cols-4">
-    {#each TEACHER_CHORDS[q.teacherQuality] as chord (chord.name)}
-      {@const active = q.chord.name === chord.name}
-      <button
-        type="button"
-        class={[
-          'flex flex-col items-center gap-px border px-0.5 py-[5px] text-center font-mono text-xs transition-all duration-[120ms]',
-          active
-            ? 'border-accent bg-accent/5 text-accent'
-            : 'border-line bg-transparent text-fg-mid hover:border-fg-mid hover:text-fg'
-        ]}
-        onclick={() => q.load(chord, true)}
-      >
-        <span class="text-base font-medium text-fg">{chord.name}</span>
-        <span
-          class={[
-            'text-center text-3xs leading-[1.2] tracking-[0.04em]',
-            chord.aFunc === '—' ? 'text-fg-faint' : 'text-gold'
-          ]}>{chord.aFunc}</span
-        >
-      </button>
-    {/each}
-  </div>
 </Panel>

@@ -30,6 +30,7 @@ Deliberate changes made after the port, each its own commit. The reference stays
 + Layout :: the content column is centred in the space right of the sidebar; the legacy page left-aligned it against the sidebar.
 + Acordes :: the /A = …/ badge is always laid out, invisible until the chord is revealed, so revealing doesn't change the panel's height. The chord grid of /Qual acorde está tocando?/ is always 3 rows tall (invisible cells fill it), so /Maior/ / /Menor/ / /Ambos/ don't change its height.
 + Quizzes :: the feedback box under an answer (Acordes' two questions, Intervalos) slides open and closed instead of appearing at once.
++ Acordes :: /Modo professor/ is the first panel instead of the last, and collapsed until its header is clicked.
 
 * Kept on purpose
 

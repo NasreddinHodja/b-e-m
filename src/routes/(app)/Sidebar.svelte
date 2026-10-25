@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { language } from '#lib/i18n.svelte.js';
+  import { m } from '#lib/paraglide/messages.js';
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
   import { audio } from '#lib/audio/engine.svelte.js';
@@ -14,7 +16,7 @@
   let { open }: { open: boolean } = $props();
 
   function resetScores() {
-    if (!confirm('Zerar toda a pontuação desta sessão?')) return;
+    if (!confirm(m.score_reset_confirm())) return;
     score.reset();
   }
 
@@ -44,16 +46,16 @@
     <BemLogo />
     <div class="flex flex-col gap-0.5">
       <div class="font-mono text-2xs leading-[1.3] font-medium tracking-[0.14em] text-fg uppercase">
-        Bloco de Estudos<br />Musicais
+        {m.app_name()}
       </div>
       <div class="font-mono text-3xs tracking-[0.12em] text-fg-faint uppercase">
-        Escuta · Criação · Coletividade
+        {m.app_tagline()}
       </div>
     </div>
   </div>
 
   <div class="flex border-b border-line">
-    {#each [{ v: score.total.correct, l: 'acertos', c: 'text-green' }, { v: score.total.wrong, l: 'erros', c: 'text-red' }] as cell (cell.l)}
+    {#each [{ v: score.total.correct, l: m.score_correct(), c: 'text-green' }, { v: score.total.wrong, l: m.score_wrong(), c: 'text-red' }] as cell (cell.c)}
       <div class="flex-1 border-r border-line px-2 py-2.5 text-center last:border-r-0">
         <span class={['block font-serif text-[20px] leading-none font-bold', cell.c]}>{cell.v}</span
         >
@@ -65,23 +67,23 @@
   <button
     type="button"
     class={[footerBtn, 'bg-transparent text-fg-faint hover:bg-red/6 hover:text-red']}
-    onclick={resetScores}><RotateCcw size={13} />zerar pontuação</button
+    onclick={resetScores}><RotateCcw size={13} />{m.score_reset()}</button
   >
   <button
     type="button"
     class={[footerBtn, 'bg-red/5 text-red hover:bg-red/15']}
-    onclick={() => session.signOut()}><LogOut size={13} />Sair do App</button
+    onclick={() => session.signOut()}><LogOut size={13} />{m.sign_out()}</button
   >
 
   <nav class="flex flex-1 flex-col py-2">
-    {#each NAV as { group, items }, gi (group)}
+    {#each NAV as { group, items }, gi (gi)}
       <div
         class={[
           'px-[1.2rem] pt-4 pb-[0.35rem] text-3xs tracking-[0.22em] text-gold uppercase opacity-75',
           gi > 0 && 'mt-[0.4rem] border-t border-line'
         ]}
       >
-        {group}
+        {group()}
       </div>
       {#each items as item (item.route)}
         {@const active = page.url.pathname === resolve(item.route)}
@@ -95,7 +97,7 @@
           ]}
         >
           <span class="flex items-center gap-2.5"
-            ><item.icon size={16} class="shrink-0 opacity-70" />{item.label}</span
+            ><item.icon size={16} class="shrink-0 opacity-70" />{item.label()}</span
           >
           {#if item.badge}
             <span
@@ -116,14 +118,29 @@
       class={modeBtn(audio.mode === 'speaker')}
       onclick={() => audio.setMode('speaker')}
     >
-      <Speaker size={14} /> Caixa
+      <Speaker size={14} />
+      {m.output_speaker()}
     </button>
     <button
       type="button"
       class={modeBtn(audio.mode === 'headphone')}
       onclick={() => audio.setMode('headphone')}
     >
-      <Headphones size={14} /> Fone
+      <Headphones size={14} />
+      {m.output_headphone()}
     </button>
+  </div>
+  <div class="flex gap-1 px-4 pb-[0.8rem]" role="group" aria-label={m.language()}>
+    {#each language.all as locale (locale)}
+      <button
+        type="button"
+        class={modeBtn(language.current === locale)}
+        aria-pressed={language.current === locale}
+        lang={locale === 'en' ? 'en' : 'pt-BR'}
+        onclick={() => language.set(locale)}
+      >
+        {locale === 'en' ? 'EN' : 'PT'}
+      </button>
+    {/each}
   </div>
 </aside>

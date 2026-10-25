@@ -4,7 +4,7 @@ import { analyze, cls, pairsCheck, parse, readVoice, spellNear, tokens, type Lin
 const line = (s: string) => readVoice(s, true).out;
 const CF = line('D4 F4 E4 D4 G4 F4 A4 G4 F4 E4 D4');
 const messages = (cp: string, sp: 1 | 2 = 1, above = true) =>
-  analyze(CF, line(cp), sp, above).map((i) => `${i.s}: ${i.m}`);
+  analyze(CF, line(cp), sp, above).map((i) => `${i.s}: ${i.m()}`);
 
 describe('parse', () => {
   it('reads letter, accidentals and octave', () => {
@@ -70,7 +70,17 @@ describe('pairsCheck', () => {
   it('flags parallel octaves between two added voices', () => {
     const a: Line = line('D5 E5');
     const b: Line = line('D4 E4');
-    expect(pairsCheck(a, b, 1, 1, 'Voz 2', 'Voz 3', 2, 2)).toEqual([
+    const out = pairsCheck(
+      a,
+      b,
+      1,
+      1,
+      () => 'Voz 2',
+      () => 'Voz 3',
+      2,
+      2
+    );
+    expect(out.map((i) => ({ ...i, m: i.m() }))).toEqual([
       { v: 2, k: 1, s: 'erro', m: 'compasso 2: oitavas paralelas entre Voz 2 e Voz 3.' }
     ]);
   });

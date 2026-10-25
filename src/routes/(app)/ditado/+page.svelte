@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { m } from '#lib/paraglide/messages.js';
   import Check from '@lucide/svelte/icons/check';
   import ChevronRight from '@lucide/svelte/icons/chevron-right';
   import Copy from '@lucide/svelte/icons/copy';
@@ -38,41 +39,46 @@
       .map((x) => degreeOf(parseInt(x)))
       .join(' – ');
   const s = d.settings;
+  const HINTS = {
+    start: m.ditado_hint_start,
+    melodyFailed: m.ditado_hint_melody_failed,
+    slonimskyFailed: m.ditado_hint_slonimsky_failed
+  };
 </script>
 
-<Panel label="Configuração">
+<Panel label={m.ditado_settings()}>
   <div class={grid}>
-    <Field idx="01" label="Modo">
+    <Field idx="01" label={m.ditado_mode()}>
       <select class={ctrl} bind:value={s.mode}>
-        <option value="melody">Ditado melódico</option>
-        <option value="slonimsky">Slonimsky</option>
+        <option value="melody">{m.ditado_mode_melody()}</option>
+        <option value="slonimsky">{m.ditado_mode_slonimsky()}</option>
       </select>
     </Field>
-    <Field idx="02" label="Tonalidade">
+    <Field idx="02" label={m.ditado_key()}>
       <select class={ctrl} bind:value={s.key}>
         {#each TONICS as t, i (t)}<option value={String(i)}>{t}</option>{/each}
       </select>
     </Field>
-    <Field idx="03" label="Escala">
+    <Field idx="03" label={m.ditado_scale()}>
       <select class={ctrl} bind:value={s.scale}>
-        <option value="major">Maior</option>
-        <option value="minor">Menor natural</option>
-        <option value="harmonic">Menor harmônica</option>
-        <option value="melodic">Menor melódica</option>
-        <option value="pentMajor">Pentatônica maior</option>
-        <option value="pentMinor">Pentatônica menor</option>
-        <optgroup label="Modos gregos">
-          <option value="ionian">Jônio</option>
-          <option value="dorian">Dórico</option>
-          <option value="phrygian">Frígio</option>
-          <option value="lydian">Lídio</option>
-          <option value="mixolydian">Mixolídio</option>
-          <option value="aeolian">Eólio</option>
-          <option value="locrian">Lócrio</option>
+        <option value="major">{m.scale_major()}</option>
+        <option value="minor">{m.scale_minor()}</option>
+        <option value="harmonic">{m.scale_harmonic()}</option>
+        <option value="melodic">{m.scale_melodic()}</option>
+        <option value="pentMajor">{m.scale_pent_major()}</option>
+        <option value="pentMinor">{m.scale_pent_minor()}</option>
+        <optgroup label={m.scale_modes()}>
+          <option value="ionian">{m.scale_ionian()}</option>
+          <option value="dorian">{m.scale_dorian()}</option>
+          <option value="phrygian">{m.scale_phrygian()}</option>
+          <option value="lydian">{m.scale_lydian()}</option>
+          <option value="mixolydian">{m.scale_mixolydian()}</option>
+          <option value="aeolian">{m.scale_aeolian()}</option>
+          <option value="locrian">{m.scale_locrian()}</option>
         </optgroup>
       </select>
     </Field>
-    <Field idx="04" label="Compasso">
+    <Field idx="04" label={m.ditado_meter()}>
       <select class={ctrl} bind:value={s.meter}>
         <option>2/4</option>
         <option>3/4</option>
@@ -89,7 +95,7 @@
       class="flex cursor-pointer list-none items-center justify-between py-1 text-2xs tracking-[0.22em] text-fg-mid uppercase select-none group-open:text-gold [&::-webkit-details-marker]:hidden"
     >
       <span class="flex items-center gap-2"
-        ><SlidersHorizontal size={14} />Parâmetros avançados</span
+        ><SlidersHorizontal size={14} />{m.ditado_advanced()}</span
       >
       <ChevronRight
         size={14}
@@ -99,7 +105,7 @@
     <div class="animate-[fade-up_0.18s_ease] pt-3">
       <div class={s.mode === 'melody' ? 'block' : 'hidden'}>
         <div class={grid}>
-          <Field idx="05" label="Compassos">
+          <Field idx="05" label={m.ditado_bars()}>
             <input
               type="number"
               inputmode="numeric"
@@ -110,51 +116,51 @@
               oninput={(e) => (s.bars = e.currentTarget.value)}
             />
           </Field>
-          <Field idx="06" label="Ritmo">
+          <Field idx="06" label={m.ditado_rhythm()}>
             <select class={ctrl} bind:value={s.rhythm}>
-              <option value="basic">Básico</option>
-              <option value="eighth">Subdividido</option>
-              <option value="varied">Variado</option>
-              <option value="syncopated">Sincopado</option>
+              <option value="basic">{m.rhythm_basic()}</option>
+              <option value="eighth">{m.rhythm_eighth()}</option>
+              <option value="varied">{m.rhythm_varied()}</option>
+              <option value="syncopated">{m.rhythm_syncopated()}</option>
             </select>
           </Field>
-          <Field idx="07" label="Extensão">
+          <Field idx="07" label={m.ditado_range()}>
             <select class={ctrl} bind:value={s.range}>
-              <option value="7">5ª</option>
-              <option value="12">8ª</option>
-              <option value="16">10ª</option>
+              <option value="7">{m.interval_5th()}</option>
+              <option value="12">{m.interval_8ve()}</option>
+              <option value="16">{m.interval_10th()}</option>
             </select>
           </Field>
-          <Field idx="08" label="Salto máx.">
+          <Field idx="08" label={m.ditado_max_leap()}>
             <select class={ctrl} bind:value={s.maxLeap}>
-              <option value="5">4ª</option>
-              <option value="7">5ª</option>
-              <option value="12">8ª</option>
+              <option value="5">{m.interval_4th()}</option>
+              <option value="7">{m.interval_5th()}</option>
+              <option value="12">{m.interval_8ve()}</option>
             </select>
           </Field>
-          <Field idx="09" label="Movimento">
+          <Field idx="09" label={m.ditado_motion()}>
             <select class={ctrl} bind:value={s.motion}>
-              <option value="step">Conjunto</option>
-              <option value="mixed">Misto</option>
-              <option value="leap">Saltos</option>
+              <option value="step">{m.motion_step()}</option>
+              <option value="mixed">{m.motion_mixed()}</option>
+              <option value="leap">{m.motion_leap()}</option>
             </select>
           </Field>
-          <Field idx="10" label="Contorno">
+          <Field idx="10" label={m.ditado_contour()}>
             <select class={ctrl} bind:value={s.contour}>
-              <option value="mixed">Misto</option>
-              <option value="asc">Ascendente</option>
-              <option value="desc">Descendente</option>
-              <option value="arch">Arco</option>
-              <option value="wave">Onda</option>
+              <option value="mixed">{m.motion_mixed()}</option>
+              <option value="asc">{m.contour_asc()}</option>
+              <option value="desc">{m.contour_desc()}</option>
+              <option value="arch">{m.contour_arch()}</option>
+              <option value="wave">{m.contour_wave()}</option>
             </select>
           </Field>
-          <Field idx="11" label="Foco" full>
+          <Field idx="11" label={m.ditado_focus()} full>
             <select class={ctrl} bind:value={s.focus}>
-              <option value="scale">Escala / graus</option>
-              <option value="tonic">Tônica e dominante</option>
-              <option value="thirds">3ªs</option>
-              <option value="fourths">4ªs / 5ªs</option>
-              <option value="chromatic">Cromatismo controlado</option>
+              <option value="scale">{m.focus_scale()}</option>
+              <option value="tonic">{m.focus_tonic()}</option>
+              <option value="thirds">{m.focus_thirds()}</option>
+              <option value="fourths">{m.focus_fourths()}</option>
+              <option value="chromatic">{m.focus_chromatic()}</option>
             </select>
           </Field>
         </div>
@@ -162,10 +168,10 @@
 
       <div class={s.mode === 'slonimsky' ? 'block' : 'hidden'}>
         <div class={grid}>
-          <Field idx="12" label="Padrão (semitons)" full>
+          <Field idx="12" label={m.ditado_pattern()} full>
             <input class={ctrl} inputmode="numeric" bind:value={s.pattern} />
           </Field>
-          <Field idx="13" label="Repetições">
+          <Field idx="13" label={m.ditado_reps()}>
             <input
               type="number"
               inputmode="numeric"
@@ -176,20 +182,20 @@
               oninput={(e) => (s.reps = e.currentTarget.value)}
             />
           </Field>
-          <Field idx="14" label="Transformação">
+          <Field idx="14" label={m.ditado_transform()}>
             <select class={ctrl} bind:value={s.transform}>
-              <option value="original">Original</option>
-              <option value="retrograde">Retrógrado</option>
-              <option value="inversion">Inversão</option>
-              <option value="retro-inv">Retróg.-inv.</option>
+              <option value="original">{m.transform_original()}</option>
+              <option value="retrograde">{m.transform_retrograde()}</option>
+              <option value="inversion">{m.transform_inversion()}</option>
+              <option value="retro-inv">{m.transform_retro_inv()}</option>
             </select>
           </Field>
         </div>
-        <div class={hint}>↻ Cada clique em Gerar transpõe o padrão dentro de A2–A5</div>
+        <div class={hint}>{m.ditado_slonimsky_hint()}</div>
       </div>
 
       <div class={grid}>
-        <Field idx="15" label="Andamento ♩ =" full>
+        <Field idx="15" label={m.ditado_tempo()} full>
           <input
             type="number"
             inputmode="numeric"
@@ -205,16 +211,16 @@
   </details>
 </Panel>
 
-<Panel label="Ações">
+<Panel label={m.ditado_actions()}>
   <div class="grid grid-cols-2 gap-2">
-    <Btn primary onclick={() => d.generate()}><Shuffle size={16} />Gerar exercício</Btn>
-    <Btn onclick={() => d.play()}><Play size={16} />Ouvir</Btn>
-    <Btn onclick={() => d.playRoot()}><EighthNote size={16} />Tônica</Btn>
-    <Btn class="col-span-full" onclick={() => d.reveal()}>Revelar resposta</Btn>
+    <Btn primary onclick={() => d.generate()}><Shuffle size={16} />{m.ditado_generate()}</Btn>
+    <Btn onclick={() => d.play()}><Play size={16} />{m.ditado_listen()}</Btn>
+    <Btn onclick={() => d.playRoot()}><EighthNote size={16} />{m.ditado_tonic()}</Btn>
+    <Btn class="col-span-full" onclick={() => d.reveal()}>{m.reveal_answer()}</Btn>
   </div>
 </Panel>
 
-<Panel label="Mapa métrico">
+<Panel label={m.ditado_metric_map()}>
   {#snippet labelExtra()}
     <span
       class={[
@@ -243,15 +249,15 @@
       <!-- A dark chip: gold straight on the blurred paper was unreadable. -->
       <span
         class="flex items-center gap-2 border border-gold/40 bg-bg/90 px-3.5 py-2 text-xs tracking-[0.3em] text-gold uppercase"
-        ><Lock size={14} />ouça e adivinhe</span
+        ><Lock size={14} />{m.ditado_locked()}</span
       >
     </div>
   </div>
 </Panel>
 
-<Panel label="Desafio auditivo">
+<Panel label={m.ditado_challenge()}>
   {#if d.quiz.kind === 'hint'}
-    <div class={hint}>{d.quiz.text}</div>
+    <div class={hint}>{HINTS[d.quiz.reason]()}</div>
   {:else}
     {@const q = d.quiz}
     <div>
@@ -277,7 +283,7 @@
     </div>
     {#if q.answerShown}
       <div class="mt-3 border-t border-line pt-3">
-        <PanelLabel class="mb-2">Resposta</PanelLabel>
+        <PanelLabel class="mb-2">{m.ditado_answer()}</PanelLabel>
         <div class="mb-2 text-lg tracking-[0.12em] text-fg">
           {#each d.current?.notes ?? [] as n, i (i)}{i > 0 ? ' – ' : ''}<span class="text-gold"
               >{degreeOf(n)}</span
@@ -303,7 +309,7 @@
     aria-controls="ditado-lily"
     onclick={() => (d.lilyOpen = !d.lilyOpen)}
   >
-    <span>Representação musical — fonte LilyPond</span>
+    <span>{m.ditado_lily_title()}</span>
     <ChevronRight
       size={14}
       class={['shrink-0 transition-transform duration-150', d.lilyOpen && 'rotate-90']}
@@ -319,16 +325,18 @@
           class="[border-width:0_1px_0_0]! [border-color:var(--color-line)]!"
           pad="p-3"
           onclick={() => d.copyLily()}
-          >{#if d.copied}<Check size={16} />{:else}<Copy size={16} />{/if}{d.copyLabel}</Btn
+          >{#if d.copied}<Check size={16} />{:else}<Copy size={16} />{/if}{d.copied
+            ? m.copied()
+            : m.copy_ly()}</Btn
         >
         <Btn class="[border-width:0]!" pad="p-3" onclick={() => d.downloadLily()}
-          ><Download size={16} />Baixar .ly</Btn
+          ><Download size={16} />{m.download_ly()}</Btn
         >
       </div>
     </div>
   {/if}
 </div>
 
-<Panel label="Histórico do Ditado (sessão)">
+<Panel label={m.ditado_history()}>
   <HistoryList answers={score.recent('d')} />
 </Panel>

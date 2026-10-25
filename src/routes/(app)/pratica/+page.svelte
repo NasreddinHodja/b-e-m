@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { m } from '#lib/paraglide/messages.js';
   import Download from '@lucide/svelte/icons/download';
   import Pause from '@lucide/svelte/icons/pause';
   import Play from '@lucide/svelte/icons/play';
@@ -12,6 +13,18 @@
   import OptsRow from '#lib/ui/OptsRow.svelte';
   import Panel from '#lib/ui/Panel.svelte';
   import TabBtn from '#lib/ui/TabBtn.svelte';
+
+  // PILARES keeps the legacy page's Portuguese (the parity tests compare it); shown translated.
+  const PILLAR_TEXT = PILARES.map((_, i) => [
+    m[`pilar_${i}_title` as 'pilar_0_title'],
+    m[`pilar_${i}_desc` as 'pilar_0_desc']
+  ]);
+  const POMO_STATUS = {
+    ready: m.pomo_ready,
+    running: m.pomo_running,
+    paused: m.pomo_paused,
+    done: m.pomo_done
+  };
 
   let titulo = $state('');
   let obs = $state('');
@@ -27,7 +40,7 @@
   }
 
   function clearAll() {
-    if (!confirm('Apagar todo o diário da nuvem? Isso não pode ser desfeito.')) return;
+    if (!confirm(m.pr_clear_confirm())) return;
     void diario.clear();
   }
 
@@ -35,34 +48,25 @@
     'block w-full resize-none border border-line-lt bg-bg px-[0.7rem] py-2 font-mono text-base text-fg outline-none transition-[border-color] duration-150 focus:border-fg-mid';
 </script>
 
-<Panel label="Os 10 Pilares do B.E.M">
+<Panel label={m.pr_pillars()}>
   <div class="flex flex-col gap-2.5">
-    {#each PILARES as p (p.titulo)}
+    {#each PILARES, i (i)}
       <div class="border-l-2 border-gold px-[0.9rem] py-2">
-        <div class="text-base font-medium tracking-[0.04em] text-accent">{p.titulo}</div>
-        <div class="mt-0.5 text-sm leading-[1.5] text-fg-mid">{p.desc}</div>
+        <div class="text-base font-medium tracking-[0.04em] text-accent">{PILLAR_TEXT[i][0]()}</div>
+        <div class="mt-0.5 text-sm leading-[1.5] text-fg-mid">{PILLAR_TEXT[i][1]()}</div>
       </div>
     {/each}
   </div>
 </Panel>
 
-<Panel label="Diário de prática">
+<Panel label={m.pr_journal()}>
   <form onsubmit={save}>
-    <input
-      type="text"
-      placeholder="O que eu estudei hoje?"
-      class={[input, 'mb-1.5']}
-      bind:value={titulo}
-    />
-    <textarea
-      rows="2"
-      placeholder="Como foi meu estudo hoje?"
-      class={[input, 'mb-2']}
-      bind:value={obs}></textarea>
+    <input type="text" placeholder={m.pr_what()} class={[input, 'mb-1.5']} bind:value={titulo} />
+    <textarea rows="2" placeholder={m.pr_how()} class={[input, 'mb-2']} bind:value={obs}></textarea>
     <div class="flex gap-1.5">
-      <Btn type="submit">Registrar</Btn>
+      <Btn type="submit">{m.pr_save()}</Btn>
       <!-- The legacy inline style kept the red over the hover colors. -->
-      <Btn class="border-red! text-red!" onclick={clearAll}>Apagar tudo</Btn>
+      <Btn class="border-red! text-red!" onclick={clearAll}>{m.pr_clear_all()}</Btn>
       <Btn onclick={() => diario.exportJson()}><Download size={16} />JSON</Btn>
     </div>
   </form>
@@ -79,17 +83,17 @@
         <button
           type="button"
           class="ml-auto flex size-7 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent font-[inherit] text-md text-fg-faint opacity-50 transition-opacity duration-[120ms] hover:text-red hover:opacity-100"
-          aria-label="Apagar registro"
+          aria-label={m.pr_delete_entry()}
           onclick={() => diario.remove(e.id, idx)}><Trash size={15} /></button
         >
       </div>
     {:else}
-      <div class="py-1.5 text-sm text-fg-faint italic">Nenhum registro ainda.</div>
+      <div class="py-1.5 text-sm text-fg-faint italic">{m.pr_empty()}</div>
     {/each}
   </div>
 </Panel>
 
-<Panel label="Ciclo Pomodoro">
+<Panel label={m.pr_pomodoro()}>
   <div
     class={[
       'mb-[0.4rem] font-serif text-[56px] leading-none font-bold tracking-[-0.02em]',
@@ -98,14 +102,16 @@
   >
     {pomodoro.display}
   </div>
-  <div class="mb-[0.8rem] text-xs tracking-[0.07em] text-fg-faint">{pomodoro.status}</div>
+  <div class="mb-[0.8rem] text-xs tracking-[0.07em] text-fg-faint">
+    {POMO_STATUS[pomodoro.status]()}
+  </div>
   <OptsRow class="mt-0">
-    <Btn onclick={() => pomodoro.start()}><Play size={16} />Iniciar</Btn>
-    <Btn onclick={() => pomodoro.stop()}><Pause size={16} />Parar</Btn>
-    <Btn onclick={() => pomodoro.reset()}><RotateCcw size={16} />Reset</Btn>
+    <Btn onclick={() => pomodoro.start()}><Play size={16} />{m.start()}</Btn>
+    <Btn onclick={() => pomodoro.stop()}><Pause size={16} />{m.pause()}</Btn>
+    <Btn onclick={() => pomodoro.reset()}><RotateCcw size={16} />{m.reset()}</Btn>
   </OptsRow>
   <OptsRow>
-    <OptsLabel>Ciclo:</OptsLabel>
+    <OptsLabel>{m.pr_cycle()}</OptsLabel>
     <TabBtn active={pomodoro.cycle === 25} onclick={() => pomodoro.setCycle(25)}>25 min</TabBtn>
     <TabBtn active={pomodoro.cycle === 50} onclick={() => pomodoro.setCycle(50)}>50 min</TabBtn>
   </OptsRow>

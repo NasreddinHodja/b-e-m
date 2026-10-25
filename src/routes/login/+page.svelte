@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { m } from '#lib/paraglide/messages.js';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { session } from '#lib/backend/session.svelte.js';
@@ -15,12 +16,12 @@
 
   async function submit(e: SubmitEvent) {
     e.preventDefault();
-    error = 'Processando...';
+    error = m.login_working();
     try {
       await session.signIn(email, password);
       error = '';
     } catch {
-      error = 'Erro: Email ou senha incorretos.';
+      error = m.login_failed();
     }
   }
 
@@ -36,26 +37,26 @@
     <div class="mb-4 flex flex-col items-center gap-3">
       <BemLogo size={56} fontSize={19} />
       <div>
-        <div class="font-serif text-[24px] font-bold text-accent">Acesso B.E.M</div>
+        <div class="font-serif text-[24px] font-bold text-accent">{m.login_title()}</div>
         <div class="text-center text-xs leading-normal tracking-[0.15em] text-fg-faint uppercase">
-          Bloco de Estudos Musicais
+          {m.app_name()}
         </div>
       </div>
     </div>
     <form onsubmit={submit} class="flex flex-col gap-4">
       <div class="flex flex-col gap-1.5">
-        <label class={label} for="emailInput">E-mail</label>
+        <label class={label} for="emailInput">{m.login_email()}</label>
         <input
           type="email"
           id="emailInput"
           class={input}
-          placeholder="usuario@email.com"
+          placeholder={m.login_email_placeholder()}
           required
           bind:value={email}
         />
       </div>
       <div class="flex flex-col gap-1.5">
-        <label class={label} for="passwordInput">Senha</label>
+        <label class={label} for="passwordInput">{m.login_password()}</label>
         <input
           type="password"
           id="passwordInput"
@@ -66,7 +67,7 @@
         />
       </div>
       <div class="min-h-[15px] text-center text-xs tracking-[0.05em] text-red">{error}</div>
-      <Btn type="submit" primary class="mt-2" pad="p-4">Entrar no Sistema</Btn>
+      <Btn type="submit" primary class="mt-2" pad="p-4">{m.login_submit()}</Btn>
     </form>
   </div>
 </div>

@@ -58,6 +58,17 @@ Constructors that generate a first exercise (=acordes=, =intervalos=, =ditado=, 
 
 Reactivity: =$state= fields, =$derived= getters, =SvelteSet= for sets (Intervalos' active intervals, Régua's lit rows), =$state.raw= where a value is replaced rather than mutated (the tuner's history, Ditado's current exercise). Harmonia 3D keeps the camera and animation values as plain, non-reactive fields: the scene reads them every frame.
 
+* Languages
+
+Portuguese (the base) and English, with Paraglide (=@inlang/paraglide-js=). The strings are in =messages/pt-br.json= and =messages/en.json=; =project.inlang/settings.json= configures them, and the Vite plugin compiles them into =src/lib/paraglide/= (generated, not tracked), one function per message: =m.acordes_play_a()=, =m.semitones_count({ n })=.
+
+The language is chosen in the browser only (the app is an SPA): the one saved by the toggle (=localStorage=, =PARAGLIDE_LOCALE=), else the browser's, else Portuguese (=strategy= in =vite.config.ts=). =src/lib/i18n.svelte.ts= (=language=) holds it in a rune and makes Paraglide's =getLocale()= read it, so every =m.*()= in a template re-renders when the PT / EN toggle at the bottom of the sidebar is pressed: no reload, nothing of the session lost. It also sets =<html lang>=. The root layout imports it before anything renders.
+
+What follows from rendering text late:
++ State holds facts, not sentences: the quizzes keep the outcome of an answer (=#guessResult=, =#result=) and word the feedback in a getter; a scored answer's =prompt= and =answer= are functions (=score.svelte.ts=); the counterpoint rules return issues whose =m= is a function; the tuner keeps =stability= and =reading=, not their text.
++ Tables that the parity tests compare with the legacy page (chords, intervals, the ruler, the pillars, Harmonia 3D's presets) keep their Portuguese; the page shows them through a =labels.ts= per feature (=aFuncLabel=, =intervalName=, =reguaQuality=…). =src/lib/i18n.test.ts= checks that, in Portuguese, those labels read exactly as the tables, and that both catalogues have the same keys and parameters.
++ Not translated: LilyPond exports (Contraponto's and Ditado's =.ly= text, instrument names), developer-facing errors and console messages, note letters, chord symbols and degree numbers.
+
 * Boot and sign-in
 
 1. =src/routes/+layout.svelte= calls =session.start()= and shows /INICIANDO SISTEMA B.E.M.../ while =session.status= is =loading=.

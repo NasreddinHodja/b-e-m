@@ -2,14 +2,9 @@ import { audio } from '#lib/audio/engine.svelte.js';
 import type { AnswerMark, FeedbackResult } from '#lib/ui/types.js';
 import { midiToFreq, pcName } from '#lib/music/pitch.js';
 import { score } from '#lib/session/score.svelte.js';
-import {
-  FUNC_NAMES,
-  FUNCS,
-  chordPool,
-  type Chord,
-  type ChordQuality,
-  type Pool
-} from './chords.js';
+import { m } from '#lib/paraglide/messages.js';
+import { chordTypeLabel, funcName } from './labels.js';
+import { FUNCS, chordPool, type Chord, type ChordQuality, type Pool } from './chords.js';
 
 /** "Which chord is playing, and what is A in it?" State survives navigating away and back. */
 class AcordesQuiz {
@@ -27,15 +22,55 @@ class AcordesQuiz {
   guessAnswered = $state(false);
   /** Marks on the guess buttons, by chord name. Cleared when the guess grid changes. */
   guessMarks = $state<Record<string, AnswerMark>>({});
-  guessFeedback = $state<FeedbackResult | null>(null);
+  /** The guess's outcome; `guessFeedback` words it in the current language. */
+  #guessResult = $state<{ ok: boolean; pick: Chord; cur: Chord; semi: number } | null>(null);
 
   selectedFunc = $state<string | null>(null);
   funcAnswered = $state(false);
   funcMarks = $state<Record<string, AnswerMark>>({});
-  funcFeedback = $state<FeedbackResult | null>(null);
+  #funcResult = $state<{
+    ok: boolean;
+    picked: string;
+    correct: string;
+    cur: Chord;
+    semi: number;
+  } | null>(null);
 
   constructor() {
     this.newRandom(false);
+  }
+
+  get guessFeedback(): FeedbackResult | null {
+    const r = this.#guessResult;
+    if (!r) return null;
+    const p = {
+      chord: r.cur.name,
+      type: chordTypeLabel(r.cur),
+      func: funcName(r.semi),
+      semis: r.semi
+    };
+    return {
+      ok: r.ok,
+      title: r.ok ? m.acordes_guess_ok_title() : m.acordes_guess_wrong_title(p),
+      explanation: r.ok
+        ? r.semi === 1
+          ? m.acordes_guess_ok_text_one(p)
+          : m.acordes_guess_ok_text(p)
+        : m.acordes_guess_wrong_text({ ...p, pick: r.pick.name })
+    };
+  }
+
+  get funcFeedback(): FeedbackResult | null {
+    const r = this.#funcResult;
+    if (!r) return null;
+    const p = { chord: r.cur.name, func: funcName(r.semi), semis: r.semi };
+    return {
+      ok: r.ok,
+      title: r.ok ? m.correct() : m.wrong(),
+      explanation: r.ok
+        ? m.acordes_func_ok_text(p)
+        : m.acordes_func_wrong_text({ ...p, picked: r.picked, correct: r.correct })
+    };
   }
 
   get aMidi() {
@@ -76,11 +111,11 @@ class AcordesQuiz {
     this.teacherMode = teacherMode;
     this.guessAnswered = false;
     this.guessMarks = {};
-    this.guessFeedback = null;
+    this.#guessResult = null;
     this.selectedFunc = null;
     this.funcAnswered = false;
     this.funcMarks = {};
-    this.funcFeedback = null;
+    this.#funcResult = null;
     if (autoplay) setTimeout(() => this.playChord(), 80);
   }
 
@@ -102,19 +137,13 @@ class AcordesQuiz {
     this.guessMarks = { [cur.name]: 'correct', ...(ok ? {} : { [pick.name]: 'wrong' }) };
     this.revealed = true;
     const semi = this.aSemis;
-    this.guessFeedback = {
-      ok,
-      title: ok ? '✓ Acorde correto!' : `✗ Era ${cur.name}.`,
-      explanation: ok
-        ? `É o acorde ${cur.name} (${cur.type}). O Lá (A) é a ${FUNC_NAMES[semi]} — ${semi} semitom${semi !== 1 ? 's' : ''} acima da fundamental.`
-        : `Você escolheu ${pick.name}. O acorde correto é ${cur.name} (${cur.type}) — o Lá (A) é a ${FUNC_NAMES[semi]} dele.`
-    };
+    this.#guessResult = { ok, pick, cur, semi };
     if (!this.teacherMode) {
       score.record({
         module: 'h',
         tag: 'H·A',
-        prompt: `${pick.name} → ${cur.name}`,
-        answer: ok ? '✓' : `✗ era ${cur.name}`,
+        prompt: () => `${pick.name} → ${cur.name}`,
+        answer: () => (ok ? '✓' : m.acordes_history_wrong({ chord: cur.name })),
         correct: ok
       });
     }
@@ -135,19 +164,13 @@ class AcordesQuiz {
     const ok = picked === correct;
     this.funcMarks = { [correct]: 'correct', ...(ok ? {} : { [picked]: 'wrong' }) };
     this.revealed = true;
-    this.funcFeedback = {
-      ok,
-      title: ok ? '✓ Correto!' : '✗ Errado.',
-      explanation: ok
-        ? `O Lá (A) é a ${FUNC_NAMES[semi]} do acorde ${cur.name}. (${semi} semitons acima da fundamental)`
-        : `Você respondeu "${picked}", mas o correto é "${correct}". O Lá (A) é a ${FUNC_NAMES[semi]} do acorde ${cur.name} — ${semi} semitons acima da fundamental ${cur.name}.`
-    };
+    this.#funcResult = { ok, picked, correct, cur, semi };
     if (!this.teacherMode) {
       score.record({
         module: 'h',
         tag: 'H·F',
-        prompt: cur.name,
-        answer: `A = ${picked}${ok ? '' : ' → ' + correct}`,
+        prompt: () => cur.name,
+        answer: () => `A = ${picked}${ok ? '' : ' → ' + correct}`,
         correct: ok
       });
     }

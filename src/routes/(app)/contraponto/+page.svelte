@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { m } from '#lib/paraglide/messages.js';
   import Check from '@lucide/svelte/icons/check';
   import Copy from '@lucide/svelte/icons/copy';
   import Download from '@lucide/svelte/icons/download';
@@ -28,37 +29,50 @@
     'w-full border border-line-lt bg-well font-mono text-fg focus:border-gold focus:outline-none';
 </script>
 
-<Panel label="Conferidor de contraponto — 1ª e 2ª espécies de Fux">
+<Panel label={m.ct_title()}>
   <p class={[hint, 'mt-0!']}>
-    Escreva ou desenhe as vozes, ouça o resultado e veja as regras apontando cada problema.
+    {m.ct_intro()}
   </p>
   <div class="mt-2.5 flex flex-wrap items-center gap-x-3.5 gap-y-2">
-    <button type="button" class={primary} onclick={() => c.play()}><Play size={14} />Tocar</button>
-    <button type="button" class={plain} onclick={() => c.stop()}><Square size={14} />Parar</button>
+    <button type="button" class={primary} onclick={() => c.play()}
+      ><Play size={14} />{m.play()}</button
+    >
+    <button type="button" class={plain} onclick={() => c.stop()}
+      ><Square size={14} />{m.stop()}</button
+    >
     <label class={barLabel}
-      >Andamento
+      >{m.tempo()}
       <input type="range" min="40" max="160" class="w-[100px]" bind:value={c.bpm} />
       <span>{c.bpm}</span>
     </label>
-    <label class={barLabel}><input type="checkbox" bind:checked={c.loop} /> repetir</label>
     <label class={barLabel}
-      >Ao inserir nota
+      ><input type="checkbox" bind:checked={c.loop} />
+      {m.ct_loop()}</label
+    >
+    <label class={barLabel}
+      >{m.ct_accidental()}
       <select class="w-auto text-sm" bind:value={c.acc}>
-        <option value="">natural</option>
-        <option value="#">sustenido</option>
-        <option value="b">bemol</option>
+        <option value="">{m.ct_natural()}</option>
+        <option value="#">{m.ct_sharp()}</option>
+        <option value="b">{m.ct_flat()}</option>
       </select>
     </label>
-    <button type="button" class={plain} onclick={() => c.addMeasure()}>+ compasso</button>
-    <button type="button" class={plain} onclick={() => c.removeMeasure()}>− compasso</button>
-    <button type="button" class={plain} onclick={() => c.setExample(1)}>Exemplo 1ª esp.</button>
-    <button type="button" class={plain} onclick={() => c.setExample(2)}>Exemplo 2ª esp.</button>
-    <button type="button" class={plain} onclick={() => c.generateLily()}>Gerar LilyPond</button>
+    <button type="button" class={plain} onclick={() => c.addMeasure()}>{m.ct_add_bar()}</button>
+    <button type="button" class={plain} onclick={() => c.removeMeasure()}
+      >{m.ct_remove_bar()}</button
+    >
+    <button type="button" class={plain} onclick={() => c.setExample(1)}>{m.ct_example_1()}</button>
+    <button type="button" class={plain} onclick={() => c.setExample(2)}>{m.ct_example_2()}</button>
+    <button type="button" class={plain} onclick={() => c.generateLily()}
+      >{m.ct_generate_ly()}</button
+    >
     <button type="button" class={plain} onclick={() => c.copyLily()}
-      >{#if c.copied}<Check size={14} />{:else}<Copy size={14} />{/if}{c.copyLabel}</button
+      >{#if c.copied}<Check size={14} />{:else}<Copy size={14} />{/if}{c.copied
+        ? m.copied()
+        : m.copy_ly()}</button
     >
     <button type="button" class={plain} onclick={() => c.saveLily()}
-      ><Download size={14} />Salvar .ly</button
+      ><Download size={14} />{m.ct_save_ly()}</button
     >
   </div>
 </Panel>
@@ -82,7 +96,7 @@
               type="radio"
               name="ct-av"
               checked={i === c.active}
-              aria-label="Editar {voiceLabel(i)}"
+              aria-label={m.ct_edit_voice({ voice: voiceLabel(i) })}
               onchange={() => (c.active = i)}
             />
             <i
@@ -93,25 +107,25 @@
             {#if !v.cf}
               <select
                 class="w-auto px-1.5 py-0.5 text-sm"
-                aria-label="Espécie"
+                aria-label={m.ct_species()}
                 value={String(v.sp)}
                 onchange={(e) => c.setSpecies(i, +e.currentTarget.value as Species)}
               >
-                <option value="1">1ª espécie</option>
-                <option value="2">2ª espécie</option>
+                <option value="1">{m.ct_species_1()}</option>
+                <option value="2">{m.ct_species_2()}</option>
               </select>
             {/if}
             <label
               class="m-0 inline-flex cursor-pointer items-center gap-[5px] font-mono text-xs font-medium tracking-[0.06em] text-fg-mid uppercase"
-              ><input type="checkbox" bind:checked={v.on} />som</label
+              ><input type="checkbox" bind:checked={v.on} />{m.ct_sound()}</label
             >
             {#if !v.cf}
               <button
                 type="button"
                 class={plain}
                 style:padding="4px 6px"
-                title="Remover voz"
-                aria-label="Remover {voiceLabel(i)}"
+                title={m.ct_remove_voice_title()}
+                aria-label={m.ct_remove_voice({ voice: voiceLabel(i) })}
                 onclick={() => c.removeVoice(i)}><X size={14} /></button
               >
             {/if}
@@ -119,20 +133,17 @@
           <textarea
             class={[well, 'min-h-[60px] resize-y p-2 text-base leading-[1.4]']}
             spellcheck="false"
-            aria-label="Notas de {voiceLabel(i)}"
+            aria-label={m.ct_voice_notes({ voice: voiceLabel(i) })}
             value={v.txt}
             oninput={(e) => c.setText(i, e.currentTarget.value)}></textarea>
         </div>
       {/each}
     </div>
     <button type="button" class={plain} disabled={c.voices.length >= 4} onclick={() => c.addVoice()}
-      >+ voz (até 4)</button
+      >{m.ct_add_voice()}</button
     >
     <p class={hint}>
-      Notas separadas por espaço: letra, alteração (# ou b) e oitava; C4 é o dó central; r é pausa
-      (só no início da 2ª espécie). Na 2ª espécie, duas notas por nota do cantus firmus, menos na
-      última. Cada voz nova é conferida contra o cantus firmus, e as vozes novas entre si são
-      conferidas quanto a paralelas.
+      {m.ct_entry_help()}
     </p>
   </Panel>
 
@@ -150,9 +161,7 @@
       <Roll />
     </div>
     <p class={hint}>
-      Clique ou arraste numa coluna para colocar ou mover a nota da voz selecionada; clicar perto de
-      uma nota de outra voz seleciona essa voz. Anéis vermelhos são erros, âmbar são avisos. Números
-      embaixo: intervalos da voz selecionada com o cantus firmus.
+      {m.ct_roll_help()}
     </p>
     <ul class="m-0 mt-3.5 list-none p-0">
       {#each c.issues as issue, j (j)}
@@ -166,22 +175,22 @@
             class={[
               'mr-1.5 font-mono text-xs font-semibold tracking-[0.1em] uppercase',
               issue.s === 'erro' ? 'text-red' : 'text-gold'
-            ]}>{issue.s === 'erro' ? 'Erro' : 'Aviso'}</b
-          >{issue.m}
+            ]}>{issue.s === 'erro' ? m.ct_error() : m.ct_warning()}</b
+          >{issue.m()}
         </li>
       {/each}
     </ul>
   </Panel>
 </div>
 
-<Panel label="Código LilyPond">
+<Panel label={m.ct_lily_code()}>
   <textarea
     class={[well, 'min-h-[260px] resize-y p-2.5 text-sm leading-[1.5] tracking-normal']}
     spellcheck="false"
-    aria-label="Código LilyPond"
+    aria-label={m.ct_lily_code()}
     bind:value={c.lily}></textarea>
   <p class={hint}>
-    O código usa notas absolutas, 2/2 e converte automaticamente 1ª espécie em semibreves e 2ª
-    espécie em mínimas. O bloco <code>\midi {'{}'}</code> permite gerar MIDI ao compilar no LilyPond.
+    {m.ct_lily_help_before()} <code>\midi {'{}'}</code>
+    {m.ct_lily_help_after()}
   </p>
 </Panel>

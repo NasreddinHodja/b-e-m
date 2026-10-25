@@ -7,7 +7,7 @@ class Pomodoro {
   secs = $state(DEFAULT_SECS);
   /** Which cycle button is lit. */
   cycle = $state<25 | 50>(25);
-  status = $state('Pronto para começar');
+  status = $state<'ready' | 'running' | 'paused' | 'done'>('ready');
   running = $state(false);
   /** Set when a cycle ends; cleared only by reset (the legacy `done` class). */
   done = $state(false);
@@ -30,13 +30,13 @@ class Pomodoro {
   start() {
     if (this.running) return;
     this.running = true;
-    this.status = 'Sessão em andamento…';
+    this.status = 'running';
     this.#interval = setInterval(() => {
       if (this.secs <= 0) {
         clearInterval(this.#interval!);
         this.running = false;
         this.done = true;
-        this.status = 'Ciclo concluído! Faça uma pausa.';
+        this.status = 'done';
         this.#chime();
       } else {
         this.secs--;
@@ -50,14 +50,14 @@ class Pomodoro {
       this.#interval = null;
     }
     this.running = false;
-    this.status = 'Pausado.';
+    this.status = 'paused';
   }
 
   reset() {
     this.stop();
     this.secs = DEFAULT_SECS;
     this.done = false;
-    this.status = 'Pronto para começar';
+    this.status = 'ready';
     this.cycle = 25;
   }
 

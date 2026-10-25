@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { intervalName, intervalShort, intervalSymbol } from '#lib/features/intervalos/labels.js';
+  import { m } from '#lib/paraglide/messages.js';
   import EighthNote from '@lucide/svelte/icons/eighth-note';
   import EighthNotes from '@lucide/svelte/icons/eighth-notes';
   import Piano from '@lucide/svelte/icons/piano';
@@ -29,13 +31,13 @@
     pct >= 70 ? 'text-green' : pct >= 40 ? 'text-gold' : 'text-red';
 </script>
 
-<Panel label="Intervalo atual">
+<Panel label={m.intervalos_current()}>
   <div class="flex items-center justify-between gap-4">
     <div>
       <div class="flex items-center gap-4">
         <div class="flex flex-col items-center gap-[3px]">
           <div class="font-serif text-[48px] leading-none font-bold text-accent">{q.noteA}</div>
-          <div class="text-xs tracking-[0.08em] text-fg-faint">nota 1</div>
+          <div class="text-xs tracking-[0.08em] text-fg-faint">{m.intervalos_note1()}</div>
         </div>
         <div class="text-[20px] text-fg-faint">→</div>
         <div class="flex flex-col items-center gap-[3px]">
@@ -48,7 +50,7 @@
           >
             {q.noteB}
           </div>
-          <div class="text-xs tracking-[0.08em] text-fg-faint">nota 2</div>
+          <div class="text-xs tracking-[0.08em] text-fg-faint">{m.intervalos_note2()}</div>
         </div>
       </div>
       <div
@@ -57,7 +59,7 @@
           q.directionShown ? 'inline-block' : 'hidden'
         ]}
       >
-        {q.current.actualDir === 'asc' ? '↑ ascendente' : '↓ descendente'}
+        {q.current.actualDir === 'asc' ? m.intervalos_asc_tag() : m.intervalos_desc_tag()}
       </div>
     </div>
     <div class="text-right">
@@ -68,52 +70,55 @@
           !q.revealed && 'blur-[8px] select-none'
         ]}
       >
-        {q.current.interval.name}
+        {intervalName(q.current.interval)}
       </div>
       <div class={['mt-[3px] text-sm text-fg-faint', blur, !q.revealed && 'blur-[5px]']}>
-        {q.current.interval.semitones} semitons
+        {m.semitones_count({ n: q.current.interval.semitones })}
       </div>
       <div class="mt-2">
         <RevealBtn onclick={() => q.toggleReveal()}>
-          {q.revealed ? 'Ocultar' : 'Revelar resposta'}
+          {q.revealed ? m.intervalos_hide() : m.intervalos_reveal()}
         </RevealBtn>
       </div>
     </div>
   </div>
 </Panel>
 
-<Panel label="Reprodução">
+<Panel label={m.playback()}>
   <div class="grid grid-cols-4 gap-2">
-    <Btn onclick={() => q.playNote1()}><EighthNote size={16} />Nota 1</Btn>
-    <Btn onclick={() => q.playNote2()}><EighthNote size={16} />Nota 2</Btn>
-    <Btn onclick={() => q.playSequence()}><EighthNotes size={16} />Seq.</Btn>
-    <Btn onclick={() => q.playHarmonic()}><Piano size={16} />Harm.</Btn>
+    <Btn onclick={() => q.playNote1()}><EighthNote size={16} />{m.intervalos_play1()}</Btn>
+    <Btn onclick={() => q.playNote2()}><EighthNote size={16} />{m.intervalos_play2()}</Btn>
+    <Btn onclick={() => q.playSequence()}><EighthNotes size={16} />{m.intervalos_play_seq()}</Btn>
+    <Btn onclick={() => q.playHarmonic()}><Piano size={16} />{m.intervalos_play_harm()}</Btn>
     <Btn primary class="col-span-full" onclick={() => q.next()}
-      ><Shuffle size={16} />Novo intervalo</Btn
+      ><Shuffle size={16} />{m.intervalos_new()}</Btn
     >
   </div>
   <OptsRow>
-    <OptsLabel>Direção:</OptsLabel>
-    <TabBtn active={q.direction === 'asc'} onclick={() => (q.direction = 'asc')}>Ascendente</TabBtn>
+    <OptsLabel>{m.intervalos_direction()}</OptsLabel>
+    <TabBtn active={q.direction === 'asc'} onclick={() => (q.direction = 'asc')}
+      >{m.intervalos_asc()}</TabBtn
+    >
     <TabBtn active={q.direction === 'desc'} onclick={() => (q.direction = 'desc')}>
-      Descendente
+      {m.intervalos_desc()}
     </TabBtn>
-    <TabBtn active={q.direction === 'both'} onclick={() => (q.direction = 'both')}>Aleatória</TabBtn
+    <TabBtn active={q.direction === 'both'} onclick={() => (q.direction = 'both')}
+      >{m.intervalos_random_dir()}</TabBtn
     >
   </OptsRow>
   <OptsRow>
-    <OptsLabel>Raiz:</OptsLabel>
+    <OptsLabel>{m.intervalos_root()}</OptsLabel>
     <select bind:value={q.rootMode}>
-      <option value="fixed_A">Fixo: Lá (A)</option>
-      <option value="fixed_C">Fixo: Dó (C)</option>
-      <option value="random">Aleatório</option>
+      <option value="fixed_A">{m.intervalos_root_a()}</option>
+      <option value="fixed_C">{m.intervalos_root_c()}</option>
+      <option value="random">{m.intervalos_root_random()}</option>
     </select>
-    <OptsLabel class="ml-2">Vol:</OptsLabel>
+    <OptsLabel class="ml-2">{m.volume()}</OptsLabel>
     <input type="range" min="0" max="100" bind:value={audio.volume} />
   </OptsRow>
 </Panel>
 
-<Panel label="Intervalos ativos">
+<Panel label={m.intervalos_active()}>
   <div class="grid grid-cols-4 gap-1">
     {#each INTERVALS as iv (iv.semitones)}
       {@const on = q.active.has(iv.semitones)}
@@ -134,21 +139,21 @@
             on ? 'border-accent bg-accent text-bg' : 'border-line-lt text-transparent'
           ]}>{on ? '✓' : ''}</span
         >
-        <span>{iv.symbol}</span>
+        <span>{intervalSymbol(iv)}</span>
         <span class="ml-auto text-2xs text-fg-faint">{iv.semitones}st</span>
       </button>
     {/each}
   </div>
   <OptsRow>
     <!-- The legacy markup lit "Todos" and never moved the highlight. -->
-    <TabBtn active onclick={() => q.filterAll()}>Todos</TabBtn>
-    <TabBtn onclick={() => q.filterGroup('consonant')}>Consonantes</TabBtn>
-    <TabBtn onclick={() => q.filterGroup('dissonant')}>Dissonantes</TabBtn>
-    <TabBtn onclick={() => q.filterGroup('diatonic')}>Diatônicos</TabBtn>
+    <TabBtn active onclick={() => q.filterAll()}>{m.intervalos_all()}</TabBtn>
+    <TabBtn onclick={() => q.filterGroup('consonant')}>{m.intervalos_consonant()}</TabBtn>
+    <TabBtn onclick={() => q.filterGroup('dissonant')}>{m.intervalos_dissonant()}</TabBtn>
+    <TabBtn onclick={() => q.filterGroup('diatonic')}>{m.intervalos_diatonic()}</TabBtn>
   </OptsRow>
 </Panel>
 
-<Panel label="Qual é o intervalo?">
+<Panel label={m.intervalos_which()}>
   <div class="mb-3.5 grid gap-[5px]" style:grid-template-columns="repeat({answerCols}, 1fr)">
     {#each q.activeIntervals as iv (iv.semitones)}
       <button
@@ -159,18 +164,18 @@
         ]}
         onclick={() => q.select(iv.semitones)}
       >
-        <span class="block text-base font-medium text-fg">{iv.symbol}</span>
+        <span class="block text-base font-medium text-fg">{intervalSymbol(iv)}</span>
         <span class="mt-px block text-2xs text-fg-faint">{iv.semitones}st</span>
       </button>
     {/each}
   </div>
   <CheckBtn disabled={q.answered || q.selected === null} onclick={() => q.check()}>
-    Verificar
+    {m.check()}
   </CheckBtn>
   <Feedback result={q.feedback} />
 </Panel>
 
-<Panel label="Desempenho por intervalo">
+<Panel label={m.intervalos_stats()}>
   <div
     class="mb-2.5 grid gap-px"
     style:grid-template-columns={q.statCols ? `repeat(${q.statCols}, 1fr)` : undefined}
@@ -178,12 +183,14 @@
     {#each q.stats as { interval, pct } (interval.semitones)}
       <div class="border border-line bg-surface-2 px-2 py-[7px] text-center">
         <div class={['font-serif text-[18px] font-bold', pctColor(pct)]}>{pct}%</div>
-        <div class="mt-px text-2xs tracking-[0.1em] text-fg-faint uppercase">{interval.short}</div>
+        <div class="mt-px text-2xs tracking-[0.1em] text-fg-faint uppercase">
+          {intervalShort(interval)}
+        </div>
       </div>
     {:else}
-      <div class="text-sm text-fg-faint italic">Nenhum intervalo treinado ainda.</div>
+      <div class="text-sm text-fg-faint italic">{m.intervalos_no_stats()}</div>
     {/each}
   </div>
-  <PanelLabel class="my-4">Histórico desta sessão</PanelLabel>
+  <PanelLabel class="my-4">{m.session_history()}</PanelLabel>
   <HistoryList answers={score.recent('i')} />
 </Panel>

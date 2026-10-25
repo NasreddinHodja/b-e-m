@@ -65,6 +65,7 @@ All five pass on every commit.
 + Svelte 5 runes only (=vite.config.ts= forces runes mode); props are typed.
 + Styles are Tailwind utilities with this repo's tokens; see [[file:docs/design/system.org][Design system]] for what exists (Tailwind's default colours and sizes don't) and why preflight is off.
 + Comments say why, or what a non-obvious value is; doc comments (=/** */=) on exported functions, classes and non-obvious fields.
++ Every string a user sees is a message in =messages/pt-br.json= and =messages/en.json= (same key in both, same ={params}=), called as =m.key()= where it's rendered, never stored as text in state ([[file:docs/architecture/overview.org][Overview]], Languages). =pnpm test= fails if the two catalogues differ in keys or parameters.
 + Docs are Org, under =docs/=; a change to behaviour or structure updates the doc that describes it.
 
 * Commits

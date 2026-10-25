@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { getLocale } from '#lib/paraglide/runtime.js';
+  import { m } from '#lib/paraglide/messages.js';
   import Play from '@lucide/svelte/icons/play';
   import Square from '@lucide/svelte/icons/square';
   import { onMount } from 'svelte';
@@ -13,7 +15,9 @@
   let stage = $state<HTMLDivElement>();
   let canvas = $state<HTMLCanvasElement>();
   let labels = $state<HTMLDivElement>();
-  let message = $state<string | null>('Carregando a projeção 3D…');
+  /** What covers the stage instead of the scene, if anything. */
+  let message = $state<'loading' | 'webgl' | 'library' | null>('loading');
+  const MESSAGES = { loading: m.hg_loading, webgl: m.hg_no_webgl, library: m.hg_no_library };
 
   onMount(() => {
     let scene: HarmoniaScene | null = null;
@@ -25,13 +29,11 @@
           scene = new HarmoniaScene(h, stage!, canvas!, labels!);
           message = null;
         } catch {
-          message =
-            'Este navegador não conseguiu iniciar o WebGL, então a cena 3D não pode ser exibida.';
+          message = 'webgl';
         }
       })
       .catch(() => {
-        message =
-          'Não foi possível carregar a biblioteca 3D. Verifique a conexão e abra a aba de novo.';
+        message = 'library';
       });
     return () => {
       gone = true;
@@ -41,11 +43,11 @@
     };
   });
 
-  const VIEW_BUTTONS: [ViewName, string][] = [
-    ['front', 'Frente'],
-    ['diag', 'Diagonal'],
-    ['side', 'Lado'],
-    ['top', 'Cima']
+  const VIEW_BUTTONS: [ViewName, () => string][] = [
+    ['front', m.hg_view_front],
+    ['diag', m.hg_view_diag],
+    ['side', m.hg_view_side],
+    ['top', m.hg_view_top]
   ];
   const COLOR_VAR = {
     gold: 'var(--color-gold)',
@@ -58,29 +60,30 @@
     if (!h.prog.length) return '';
     const total = h.timeline.total;
     const bars = total / 4;
-    return (
-      total +
-      ' tempos, ' +
-      (Number.isInteger(bars) ? bars : bars.toFixed(1).replace('.', ',')) +
-      (bars === 1 ? ' compasso' : ' compassos') +
-      ' em 4/4.'
-    );
+    const p = {
+      beats: total,
+      // A decimal comma in Portuguese, a point in English.
+      bars: Number.isInteger(bars)
+        ? String(bars)
+        : bars.toFixed(1).replace('.', getLocale() === 'pt-br' ? ',' : '.')
+    };
+    return bars === 1 ? m.hg_prog_info_one(p) : m.hg_prog_info(p);
   });
 
   const legend = $derived.by(() => {
     const dr = FIELDS[h.field].roman[h.degrees.findIndex((d) => d.dom)];
     return h.tetra
       ? [
-          ['green', 'Maior com sétima maior', '3ª M + 3ª m + 3ª M'],
-          ['gold', 'Menor com sétima', '3ª m + 3ª M + 3ª m'],
-          ['red', 'Dominante (' + dr + '7)', '3ª M + 3ª m + 3ª m'],
-          ['ivory', 'Meio-diminuto (m7♭5)', '3ª m + 3ª m + 3ª M']
+          ['green', m.hg_legend_maj7(), m.hg_shape_maj7()],
+          ['gold', m.hg_legend_m7(), m.hg_shape_m7()],
+          ['red', m.hg_legend_dom7({ roman: dr }), m.hg_shape_dom7()],
+          ['ivory', m.hg_legend_half_dim(), m.hg_shape_half_dim()]
         ]
       : [
-          ['green', 'Maior', '3ª M + 3ª m'],
-          ['gold', 'Menor', '3ª m + 3ª M'],
-          ['red', 'Dominante (' + dr + ')', '3ª M + 3ª m, o mesmo formato do maior'],
-          ['ivory', 'Diminuto', '3ª m + 3ª m']
+          ['green', m.hg_legend_major(), m.hg_shape_major()],
+          ['gold', m.hg_legend_minor(), m.hg_shape_minor()],
+          ['red', m.hg_legend_dom({ roman: dr }), m.hg_shape_dom()],
+          ['ivory', m.hg_legend_dim(), m.hg_shape_dim()]
         ];
   });
 
@@ -101,13 +104,12 @@
   const hudBox = 'border border-line bg-[rgba(12,12,12,0.74)]';
 </script>
 
-<Panel label="Harmonia Geométrica">
+<Panel label={m.hg_title()}>
   <p class="max-w-[680px] text-base leading-[1.8] text-fg-mid">
-    A harmonia em 3D. Cada acorde é um bloco geométrico definido por intervalos (X e Y), e cada
-    sucessão de acordes é uma trajetória no tempo (Z).
+    {m.hg_intro()}
   </p>
   <p class="mt-[0.7rem] max-w-[680px] text-xs leading-[1.8] tracking-[0.14em] text-gold uppercase">
-    Mesma lógica. Mais dimensões.
+    {m.hg_motto()}
   </p>
 </Panel>
 
@@ -115,7 +117,7 @@
   <div
     bind:this={stage}
     class="relative h-[660px] cursor-grab touch-none overflow-hidden border border-line bg-bg active:cursor-grabbing max-[1100px]:h-[520px]"
-    aria-label="Espaço 3D da Harmonia Geométrica"
+    aria-label={m.hg_stage()}
   >
     <canvas bind:this={canvas} class="absolute inset-0 block size-full"></canvas>
     <div bind:this={labels} class="pointer-events-none absolute inset-0 overflow-hidden"></div>
@@ -126,47 +128,47 @@
       ]}
     >
       <b class="mb-1 block text-2xs font-medium tracking-[0.2em] text-fg-mid uppercase"
-        >Eixos do sistema</b
+        >{m.hg_axes()}</b
       >
-      {#each [['accent', 'X (vertical): fundamental → 3ª'], ['accent', 'Y (horizontal): 3ª → 5ª'], ['gold', 'Z (tempo): sucessão dos acordes']] as [c, text] (text)}
+      {#each [['accent', m.hg_axis_x()], ['accent', m.hg_axis_y()], ['gold', m.hg_axis_z()]] as [c, text] (text)}
         <div>
           <i class="mr-2 inline-block size-2 rounded-full" style:background="var(--color-{c})"
           ></i>{text}
         </div>
       {/each}
-      <div class="mt-1 text-fg-mid">A 7ª é a terceira perna: 5ª → 7ª.</div>
+      <div class="mt-1 text-fg-mid">{m.hg_seventh_leg()}</div>
     </div>
     {#if message}
       <div
         class="absolute inset-0 z-2 grid place-items-center bg-bg p-6 text-center text-sm leading-[1.8] tracking-[0.08em] text-fg-mid"
       >
-        {message}
+        {MESSAGES[message]()}
       </div>
     {/if}
     <p class={[hudBox, 'absolute right-3 bottom-2.5 left-3 px-2.5 py-1 text-xs text-fg-mid']}>
-      Arraste para girar · role para aproximar · Shift + arraste para mover
+      {m.hg_controls()}
     </p>
   </div>
 
   <div class="flex flex-col gap-[1.2rem]">
-    <Panel label="Campo e tonalidade">
+    <Panel label={m.hg_field_key()}>
       <OptsRow class="mt-0">
         <TabBtn
           active={h.field === 'maj'}
           aria-pressed={h.field === 'maj'}
           onclick={() => h.setField('maj')}
         >
-          Campo maior
+          {m.hg_field_major()}
         </TabBtn>
         <TabBtn
           active={h.field === 'min'}
           aria-pressed={h.field === 'min'}
           onclick={() => h.setField('min')}
         >
-          Campo menor
+          {m.hg_field_minor()}
         </TabBtn>
       </OptsRow>
-      <p class={sub}><label for="hgTonic">Tonalidade</label></p>
+      <p class={sub}><label for="hgTonic">{m.hg_key()}</label></p>
       <select
         id="hgTonic"
         class={sideSelect}
@@ -174,22 +176,26 @@
         onchange={(e) => h.setTonic(e.currentTarget.value)}
       >
         {#each FIELDS[h.field].tonics as t (t)}
-          <option value={t}>{pretty(t) + ' ' + FIELDS[h.field].label}</option>
+          <option value={t}
+            >{pretty(t) +
+              ' ' +
+              (h.field === 'maj' ? m.acordes_type_major() : m.acordes_type_minor())}</option
+          >
         {/each}
       </select>
-      <p class={sub}>Acordes</p>
+      <p class={sub}>{m.hg_chords()}</p>
       <OptsRow class="mt-0">
         <TabBtn active={!h.tetra} aria-pressed={!h.tetra} onclick={() => h.setTetra(false)}>
-          Tríades
+          {m.hg_triads()}
         </TabBtn>
         <TabBtn active={h.tetra} aria-pressed={h.tetra} onclick={() => h.setTetra(true)}>
-          Tétrades
+          {m.hg_sevenths()}
         </TabBtn>
       </OptsRow>
-      <p class={note}>Em tétrades surge a terceira perna do bloco, de 5ª a 7ª, descendo.</p>
+      <p class={note}>{m.hg_sevenths_note()}</p>
     </Panel>
 
-    <Panel label="Graus do campo">
+    <Panel label={m.hg_degrees()}>
       <div class="grid grid-cols-4 gap-1.5">
         {#each h.degrees, i (i)}
           {@const c = COLOR_VAR[h.colorOf(i)]}
@@ -218,36 +224,33 @@
           </button>
         {/each}
       </div>
-      <p class={note}>Clique num grau para ouvi-lo e acrescentá-lo ao tempo.</p>
+      <p class={note}>{m.hg_degrees_note()}</p>
     </Panel>
 
-    <Panel label="Progressão no tempo">
+    <Panel label={m.hg_progression()}>
       <select
         class={sideSelect}
-        aria-label="Progressão pronta"
+        aria-label={m.hg_preset()}
         value={h.preset}
         onchange={(e) => h.choosePreset(e.currentTarget.value)}
       >
         {#each PRESETS, i (i)}<option value={String(i)}>{h.presetLabel(i)}</option>{/each}
-        <option value="c">Personalizada (clique nos graus)</option>
+        <option value="c">{m.hg_custom()}</option>
       </select>
       <p class="mt-3 min-h-10 text-base leading-[1.5] font-medium" aria-live="polite">
-        {h.prog.length
-          ? h.prog.map((e) => h.chordName(e.d)).join(' → ')
-          : 'Clique nos graus para montar uma progressão no tempo.'}
+        {h.prog.length ? h.prog.map((e) => h.chordName(e.d)).join(' → ') : m.hg_empty()}
       </p>
       <p class={[note, 'mt-0!']}>{progInfo}</p>
-      <p class={sub}>Duração do próximo acorde</p>
+      <p class={sub}>{m.hg_next_length()}</p>
       <OptsRow class="mt-0">
         {#each [1, 2, 4] as b (b)}
           <TabBtn active={h.dur === b} aria-pressed={h.dur === b} onclick={() => (h.dur = b)}>
-            {b}
-            {b === 1 ? 'tempo' : 'tempos'}
+            {(b === 1 ? m.hg_beat : m.hg_beats)({ n: b })}
           </TabBtn>
         {/each}
       </OptsRow>
       <p class={sub}>
-        <label for="hgBpm">Andamento: <output>{h.bpm}</output> BPM</label>
+        <label for="hgBpm">{m.hg_tempo()} <output>{h.bpm}</output> BPM</label>
       </p>
       <input
         type="range"
@@ -259,7 +262,7 @@
         oninput={(e) => h.setBpm(+e.currentTarget.value)}
       />
       <OptsRow>
-        {#each [['play', h.playing ? 'Parar' : 'Tocar'], ['undo', 'Desfazer'], ['clear', 'Limpar']] as [id, text] (id)}
+        {#each [['play', h.playing ? m.stop() : m.play()], ['undo', m.undo()], ['clear', m.clear()]] as [id, text] (id)}
           <Btn
             primary={id === 'play'}
             class="flex-auto disabled:cursor-not-allowed disabled:opacity-30"
@@ -273,7 +276,7 @@
       </OptsRow>
     </Panel>
 
-    <Panel label="Vista">
+    <Panel label={m.hg_view()}>
       <OptsRow class="mt-0">
         {#each VIEW_BUTTONS as [name, text] (name)}
           <TabBtn
@@ -281,7 +284,7 @@
             aria-pressed={h.view === name}
             onclick={() => h.setView(name)}
           >
-            {text}
+            {text()}
           </TabBtn>
         {/each}
       </OptsRow>
@@ -291,20 +294,21 @@
           class="size-3.5 accent-gold"
           checked={h.showMeasures}
           onchange={(e) => h.setShowMeasures(e.currentTarget.checked)}
-        /> Mostrar medidas em semitons</label
+        />
+        {m.hg_measures()}</label
       >
     </Panel>
 
-    <Panel label="Como ler">
+    <Panel label={m.hg_how_to_read()}>
       <ul
         class="flex list-none flex-col gap-2 text-sm leading-[1.6] text-fg-soft [&_b]:font-medium [&_b]:text-fg"
       >
-        <li><b>X (vertical):</b> fundamental → 3ª.</li>
-        <li><b>Y (horizontal):</b> 3ª → 5ª.</li>
-        <li><b>Z (tempo):</b> cada acorde ocupa um trecho do eixo.</li>
+        <li><b>X (vertical):</b> {m.hg_read_x()}</li>
+        <li><b>Y (horizontal):</b> {m.hg_read_y()}</li>
+        <li><b>{m.hg_read_z_label()}</b> {m.hg_read_z()}</li>
       </ul>
       <p class={note}>
-        A 7ª não é um eixo: é a terceira perna do bloco (5ª → 7ª), descendo a partir da 5ª.
+        {m.hg_read_seventh()}
       </p>
       <ul class="mt-3.5 flex list-none flex-col gap-2.5">
         {#each legend as [c, title, detail] (c)}

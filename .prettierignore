@@ -10,3 +10,7 @@ bun.lockb
 
 # The legacy app, kept as written: the reference the port is checked against
 /index.html
+
+# Paraglide: its project folder (only settings.json is tracked) and the compiled messages
+/project.inlang/
+/src/lib/paraglide/

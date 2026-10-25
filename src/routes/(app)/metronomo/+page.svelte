@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { m } from '#lib/paraglide/messages.js';
   import Play from '@lucide/svelte/icons/play';
   import Square from '@lucide/svelte/icons/square';
   import { metronome } from '#lib/features/pratica/metronome.svelte.js';
@@ -7,7 +8,7 @@
   import Panel from '#lib/ui/Panel.svelte';
 </script>
 
-<Panel label="Metrônomo" class="max-w-[520px]">
+<Panel label={m.metro_title()} class="max-w-[520px]">
   <div
     class="mb-[0.3rem] font-serif text-[64px] leading-none font-bold tracking-[-0.03em] text-accent"
   >
@@ -34,8 +35,10 @@
   />
   <OptsRow class="mt-0">
     <Btn onclick={() => metronome.toggle()}
-      >{#if metronome.active}<Square size={16} />Parar{:else}<Play size={16} />Iniciar{/if}</Btn
+      >{#if metronome.active}<Square size={16} />{m.stop()}{:else}<Play
+          size={16}
+        />{m.start()}{/if}</Btn
     >
-    <Btn onclick={() => metronome.tap()}>Tap Tempo</Btn>
+    <Btn onclick={() => metronome.tap()}>{m.metro_tap()}</Btn>
   </OptsRow>
 </Panel>

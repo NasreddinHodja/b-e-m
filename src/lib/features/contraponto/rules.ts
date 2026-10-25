@@ -1,3 +1,5 @@
+import { m } from '#lib/paraglide/messages.js';
+
 /** A parsed note: its spelling, diatonic step number (octave * 7 + letter) and MIDI number. */
 export interface Note {
   n: string;
@@ -15,7 +17,8 @@ export interface Issue {
   /** Index of the offending note in the voice, or -1 for the whole voice. */
   k: number;
   s: Severity;
-  m: string;
+  /** The message, worded in the current language when called. */
+  m: () => string;
 }
 
 const L7: Record<string, number> = { C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6 };
@@ -79,50 +82,41 @@ export function cls(st: number, se: number): Consonance {
 const isPerf = (c: Consonance | null) => c === 'uni' || c === 'oct' || c === 'per';
 
 /** What's wrong with the melodic step a → b, if anything; `w` marks a warning. */
-function leapMsg(a: Note, b: Note): { w?: 1; m: string } | null {
+function leapMsg(a: Note, b: Note): { w?: 1; m: () => string } | null {
   const st = Math.abs(b.dia - a.dia);
   const se = Math.abs(b.midi - a.midi);
   const up = b.midi > a.midi;
-  if (st === 0) return se ? { w: 1, m: 'passo cromático sobre a mesma nota' } : null;
-  if (st === 1) return se >= 1 && se <= 2 ? null : { m: 'segunda aumentada ou diminuta' };
-  if (st === 2) return se === 3 || se === 4 ? null : { m: 'terça aumentada ou diminuta' };
-  if (st === 3)
-    return se === 5
-      ? null
-      : { m: se === 6 ? 'trítono (mi contra fa), difícil de cantar' : 'quarta diminuta' };
-  if (st === 4) return se === 7 ? null : { m: 'quinta ' + (se < 7 ? 'diminuta' : 'aumentada') };
+  if (st === 0) return se ? { w: 1, m: m.ct_leap_chromatic } : null;
+  if (st === 1) return se >= 1 && se <= 2 ? null : { m: m.ct_leap_second };
+  if (st === 2) return se === 3 || se === 4 ? null : { m: m.ct_leap_third };
+  if (st === 3) return se === 5 ? null : { m: se === 6 ? m.ct_leap_tritone : m.ct_leap_dim_fourth };
+  if (st === 4) return se === 7 ? null : { m: se < 7 ? m.ct_leap_dim_fifth : m.ct_leap_aug_fifth };
   if (st === 5)
     return up && se === 8
       ? null
       : {
-          m:
-            se === 8
-              ? 'sexta menor descendente (só é admitida subindo)'
-              : 'sexta maior ou aumentada (proibida)'
+          m: se === 8 ? m.ct_leap_minor_sixth_down : m.ct_leap_major_sixth
         };
-  if (st === 6) return { m: 'salto de sétima (proibido)' };
-  if (st === 7) return se === 12 ? null : { m: 'oitava aumentada ou diminuta' };
-  return { m: 'salto maior que a oitava' };
+  if (st === 6) return { m: m.ct_leap_seventh };
+  if (st === 7) return se === 12 ? null : { m: m.ct_leap_octave };
+  return { m: m.ct_leap_beyond };
 }
 
 /** Check counterpoint `cp` of species `sp` against cantus firmus `cf`; `above` if cp is the upper voice. */
 export function analyze(cf: Line, cp: Line, sp: Species, above: boolean): Issue[] {
   const I: Issue[] = [];
-  const add = (k: number, s: Severity, m: string) => I.push({ k, s, m });
+  const add = (k: number, s: Severity, msg: () => string) => I.push({ k, s, m: msg });
   const n = cf.length;
   const per = sp === 1 ? 1 : 2;
   const need = sp === 1 ? n : 2 * n - 1;
 
   if (n < 2) {
-    add(-1, 'erro', 'O cantus firmus precisa de pelo menos duas notas.');
+    add(-1, 'erro', m.ct_cf_too_short);
     return I;
   }
   if (cp.length !== need) {
-    add(
-      -1,
-      'erro',
-      `Esperava ${need} notas no contraponto (${sp === 1 ? 'uma por nota do cantus firmus' : 'duas por nota, menos a última'}); há ${cp.length}.`
-    );
+    const p = { need, have: cp.length };
+    add(-1, 'erro', () => (sp === 1 ? m.ct_count_1(p) : m.ct_count_2(p)));
     return I;
   }
 
@@ -137,30 +131,30 @@ export function analyze(cf: Line, cp: Line, sp: Species, above: boolean): Issue[
   };
   const pos = (k: number) =>
     sp === 1
-      ? `compasso ${k + 1}`
-      : `compasso ${Math.floor(k / 2) + 1}, tempo ${k % 2 ? 'fraco' : 'forte'}`;
+      ? m.ct_pos_bar({ bar: k + 1 })
+      : (k % 2 ? m.ct_pos_weak : m.ct_pos_strong)({ bar: Math.floor(k / 2) + 1 });
   const nm = (c: Consonance | null) =>
     ({
-      uni: 'uníssono',
-      oct: 'oitava',
-      per: 'quinta',
-      imp: 'consonância imperfeita',
-      dis: 'dissonância'
-    })[c!];
+      uni: m.ct_cls_uni,
+      oct: m.ct_cls_oct,
+      per: m.ct_cls_per,
+      imp: m.ct_cls_imp,
+      dis: m.ct_cls_dis
+    })[c!]();
   const strong = (k: number) => sp === 1 || k % 2 === 0;
   const idx = cp.map((_, k) => k).filter((k) => cp[k]);
   const at = (k: number) => cp[k]!;
 
   cp.forEach((x, k) => {
-    if (!x && k > 0) add(k, 'erro', `${pos(k)}: a pausa só é admitida no início.`);
+    if (!x && k > 0) add(k, 'erro', () => m.ct_rest_late({ pos: pos(k) }));
   });
 
   idx.forEach((k) => {
     const isAbove = at(k).midi >= cfAt(k).midi;
     if (above !== isAbove && at(k).midi !== cfAt(k).midi)
-      add(k, 'aviso', `${pos(k)}: cruzamento de vozes.`);
+      add(k, 'aviso', () => m.ct_crossing({ pos: pos(k) }));
     if (strong(k) && c(k) === 'dis')
-      add(k, 'erro', `${pos(k)}: dissonância (${iv(k)!.st + 1}) no tempo forte.`);
+      add(k, 'erro', () => m.ct_strong_dissonance({ pos: pos(k), n: iv(k)!.st + 1 }));
     if (sp === 2 && !strong(k) && c(k) === 'dis') {
       const a = cp[k - 1];
       const b = cp[k + 1];
@@ -170,26 +164,21 @@ export function analyze(cf: Line, cp: Line, sp: Species, above: boolean): Issue[
         Math.abs(at(k).dia - a.dia) === 1 &&
         Math.abs(b.dia - at(k).dia) === 1 &&
         Math.sign(at(k).dia - a.dia) === Math.sign(b.dia - at(k).dia);
-      if (!ok)
-        add(
-          k,
-          'erro',
-          `${pos(k)}: dissonância no tempo fraco só como nota de passagem (grau conjunto, mesma direção).`
-        );
+      if (!ok) add(k, 'erro', () => m.ct_weak_dissonance({ pos: pos(k) }));
     }
     if (strong(k) && c(k) === 'uni' && k !== idx[0] && k !== need - 1)
-      add(k, 'erro', `${pos(k)}: uníssono só no início e no fim.`);
+      add(k, 'erro', () => m.ct_unison_inside({ pos: pos(k) }));
   });
 
   const k0 = idx[0];
   if (k0 !== undefined && c(k0) && !isPerf(c(k0)))
-    add(k0, 'erro', `${pos(k0)}: comece com consonância perfeita (uníssono, quinta ou oitava).`);
+    add(k0, 'erro', () => m.ct_start_perfect({ pos: pos(k0) }));
 
   const last = need - 1;
   if (cp[last]) {
     const cl = c(last);
-    if (cl === 'per') add(last, 'aviso', 'A quinta no final é fraca; prefira oitava ou uníssono.');
-    else if (cl !== 'uni' && cl !== 'oct') add(last, 'erro', 'Termine em uníssono ou oitava.');
+    if (cl === 'per') add(last, 'aviso', m.ct_end_fifth);
+    else if (cl !== 'uni' && cl !== 'oct') add(last, 'erro', m.ct_end_perfect);
   }
 
   // The cadence wants a major sixth above (or minor third below) before the final note.
@@ -197,15 +186,15 @@ export function analyze(cf: Line, cp: Line, sp: Species, above: boolean): Issue[
     const v = iv(k);
     return v && (above ? v.st % 7 === 5 && v.se % 12 === 9 : v.st % 7 === 2 && v.se % 12 === 3);
   };
-  const wantTxt = above ? 'sexta maior' : 'terça menor';
+  const want = () => (above ? m.ct_want_sixth() : m.ct_want_third());
 
   if (sp === 1 && n > 2 && cp[n - 2] && !sixth(n - 2))
-    add(n - 2, 'aviso', `${pos(n - 2)}: o penúltimo compasso pede ${wantTxt} (cadência).`);
+    add(n - 2, 'aviso', () => m.ct_cadence_1({ pos: pos(n - 2), want: want() }));
   if (sp === 2 && n > 2) {
     if (cp[last - 2] && c(last - 2) !== 'per')
-      add(last - 2, 'aviso', `${pos(last - 2)}: o penúltimo compasso começa com quinta.`);
+      add(last - 2, 'aviso', () => m.ct_cadence_2_fifth({ pos: pos(last - 2) }));
     if (cp[last - 1] && !sixth(last - 1))
-      add(last - 1, 'aviso', `${pos(last - 1)}: depois da quinta vem ${wantTxt}.`);
+      add(last - 1, 'aviso', () => m.ct_cadence_2_after({ pos: pos(last - 1), want: want() }));
   }
 
   // Parallel and direct motion into perfect intervals, strong beat to strong beat.
@@ -223,17 +212,14 @@ export function analyze(cf: Line, cp: Line, sp: Species, above: boolean): Issue[
     if (sp === 2 && cp[p + 1] && Math.abs(cp[p + 1]!.dia - at(p).dia) >= 3) continue;
     if (isPerf(cpv)) {
       const same = cpv === ck || (cpv === 'uni' && ck === 'oct') || (cpv === 'oct' && ck === 'uni');
-      add(
-        k,
-        'erro',
-        `${pos(k)}: ${same ? (ck === 'per' ? 'quintas paralelas' : 'oitavas paralelas') : 'movimento direto entre perfeitas'}.`
-      );
+      const what = same
+        ? ck === 'per'
+          ? m.ct_parallel_fifths
+          : m.ct_parallel_octaves
+        : m.ct_direct_perfects;
+      add(k, 'erro', () => m.ct_motion({ pos: pos(k), what: what() }));
     } else if (cpv === 'imp') {
-      add(
-        k,
-        'erro',
-        `${pos(k)}: movimento direto de imperfeita para ${nm(ck)}; use movimento contrário ou oblíquo.`
-      );
+      add(k, 'erro', () => m.ct_direct_from_imperfect({ pos: pos(k), to: nm(ck) }));
     }
   }
 
@@ -241,8 +227,12 @@ export function analyze(cf: Line, cp: Line, sp: Species, above: boolean): Issue[
     const a = at(idx[j - 1]);
     const b = at(idx[j]);
     const r = leapMsg(a, b);
-    if (r) add(idx[j], r.w ? 'aviso' : 'erro', `${pos(idx[j])}: ${a.n} → ${b.n}, ${r.m}.`);
-    if (a.midi === b.midi && sp === 2) add(idx[j], 'aviso', `${pos(idx[j])}: nota repetida.`);
+    const k = idx[j];
+    if (r)
+      add(k, r.w ? 'aviso' : 'erro', () =>
+        m.ct_melodic({ pos: pos(k), from: a.n, to: b.n, what: r.m() })
+      );
+    if (a.midi === b.midi && sp === 2) add(k, 'aviso', () => m.ct_repeated({ pos: pos(k) }));
   }
 
   for (let j = 2; j < idx.length; j++) {
@@ -252,17 +242,15 @@ export function analyze(cf: Line, cp: Line, sp: Species, above: boolean): Issue[
     const s1 = Math.abs(b.dia - a.dia);
     const s2 = Math.abs(d.dia - b.dia);
     const same = Math.sign(b.midi - a.midi) === Math.sign(d.midi - b.midi) && b.midi !== a.midi;
+    const k = idx[j];
     if (a.midi === b.midi && b.midi === d.midi && sp === 1)
-      add(idx[j], 'aviso', `${pos(idx[j])}: a mesma nota três vezes seguidas.`);
-    else if (same && s1 >= 2 && s2 >= 2)
-      add(idx[j], 'aviso', `${pos(idx[j])}: dois saltos seguidos na mesma direção.`);
-    else if (same && s1 >= 3 && s2 >= 1)
-      add(idx[j], 'aviso', `${pos(idx[j])}: salto sem compensação (volte em sentido contrário).`);
+      add(k, 'aviso', () => m.ct_three_same({ pos: pos(k) }));
+    else if (same && s1 >= 2 && s2 >= 2) add(k, 'aviso', () => m.ct_two_leaps({ pos: pos(k) }));
+    else if (same && s1 >= 3 && s2 >= 1) add(k, 'aviso', () => m.ct_uncompensated({ pos: pos(k) }));
   }
 
   const ms = idx.map((k) => at(k).midi);
-  if (Math.max(...ms) - Math.min(...ms) > 16)
-    add(-1, 'aviso', 'O contraponto ultrapassa uma décima; mantenha a linha cantável.');
+  if (Math.max(...ms) - Math.min(...ms) > 16) add(-1, 'aviso', m.ct_range);
 
   return I.sort((a, b) => a.k - b.k);
 }
@@ -273,18 +261,18 @@ export function pairsCheck(
   b: Line,
   sa: Species,
   sb: Species,
-  la: string,
-  lb: string,
+  la: () => string,
+  lb: () => string,
   n: number,
   vb: number
 ): (Issue & { v: number })[] {
   const out: (Issue & { v: number })[] = [];
-  const at = (r: Line, s: Species, m: number) => r[s === 1 ? m : 2 * m];
-  for (let m = 1; m < n; m++) {
-    const p0 = at(a, sa, m - 1);
-    const p1 = at(a, sa, m);
-    const q0 = at(b, sb, m - 1);
-    const q1 = at(b, sb, m);
+  const at = (r: Line, s: Species, i: number) => r[s === 1 ? i : 2 * i];
+  for (let bar = 1; bar < n; bar++) {
+    const p0 = at(a, sa, bar - 1);
+    const p1 = at(a, sa, bar);
+    const q0 = at(b, sb, bar - 1);
+    const q1 = at(b, sb, bar);
     if (!p0 || !p1 || !q0 || !q1) continue;
     const d1 = Math.sign(p1.midi - p0.midi);
     const d2 = Math.sign(q1.midi - q0.midi);
@@ -292,21 +280,26 @@ export function pairsCheck(
     const c1 = cls(Math.abs(p1.dia - q1.dia), Math.abs(p1.midi - q1.midi));
     if (!isPerf(c1)) continue;
     const c0 = cls(Math.abs(p0.dia - q0.dia), Math.abs(p0.midi - q0.midi));
-    const k = sb === 1 ? m : 2 * m;
+    const k = sb === 1 ? bar : 2 * bar;
     if (isPerf(c0)) {
       const same = c0 === c1 || (c0 !== 'per' && c1 !== 'per');
+      const what = same
+        ? c1 === 'per'
+          ? m.ct_parallel_fifths
+          : m.ct_parallel_octaves
+        : m.ct_direct_perfects;
       out.push({
         v: vb,
         k,
         s: 'erro',
-        m: `compasso ${m + 1}: ${same ? (c1 === 'per' ? 'quintas paralelas' : 'oitavas paralelas') : 'movimento direto entre perfeitas'} entre ${la} e ${lb}.`
+        m: () => m.ct_pair_motion({ bar: bar + 1, what: what(), a: la(), b: lb() })
       });
     } else if (c0 === 'imp') {
       out.push({
         v: vb,
         k,
         s: 'aviso',
-        m: `compasso ${m + 1}: movimento direto para perfeita entre ${la} e ${lb}.`
+        m: () => m.ct_pair_direct({ bar: bar + 1, a: la(), b: lb() })
       });
     }
   }

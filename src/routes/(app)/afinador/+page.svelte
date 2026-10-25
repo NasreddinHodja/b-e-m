@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { m } from '#lib/paraglide/messages.js';
   import Mic from '@lucide/svelte/icons/mic';
   import MicOff from '@lucide/svelte/icons/mic-off';
   import { tuner, type TunerMode } from '#lib/features/afinador/tuner.svelte.js';
@@ -6,11 +7,17 @@
   import OptsRow from '#lib/ui/OptsRow.svelte';
   import Panel from '#lib/ui/Panel.svelte';
 
-  const MODES: [TunerMode, string][] = [
-    ['chromatic', 'Cromático'],
-    ['guitar', 'Violão/Guitarra'],
-    ['voice', 'Voz']
+  const MODES: [TunerMode, () => string][] = [
+    ['chromatic', m.tuner_chromatic],
+    ['guitar', m.tuner_guitar],
+    ['voice', m.tuner_voice]
   ];
+  const READING = {
+    blocked: { text: m.tuner_blocked, color: 'red' },
+    inTune: { text: m.tuner_in_tune, color: 'green' },
+    sharp: { text: m.tuner_sharp, color: 'gold' },
+    flat: { text: m.tuner_flat, color: 'red' }
+  } as const;
   const COLOR = { green: 'var(--color-green)', gold: 'var(--color-gold)', red: 'var(--color-red)' };
 
   const inTune = $derived(tuner.cents !== null && Math.abs(tuner.cents) < 5);
@@ -56,12 +63,12 @@
 
 <div class="flex flex-col gap-[1.2rem]">
   {#if !tuner.on}
-    <Panel label="Afinador Cromático" padding="px-4 py-8" class="text-center">
+    <Panel label={m.tuner_title()} padding="px-4 py-8" class="text-center">
       <p class="mb-[1.2rem] text-base leading-[1.7] text-fg-mid">
-        O afinador usa o microfone do dispositivo para detectar a nota tocada em tempo real.<br />
-        Funciona com qualquer instrumento ou voz.
+        {m.tuner_intro_1()}<br />
+        {m.tuner_intro_2()}
       </p>
-      <Btn primary onclick={() => tuner.start()}><Mic size={16} />Ativar microfone</Btn>
+      <Btn primary onclick={() => tuner.start()}><Mic size={16} />{m.tuner_start()}</Btn>
     </Panel>
   {:else}
     <!-- The legacy panels here sat in a plain block, without the column gap. -->
@@ -78,10 +85,14 @@
             >{:else}—{/if}
         </div>
         <div class="mt-[0.4rem] font-mono text-md tracking-[0.18em] text-fg-mid">
-          {tuner.centsText}
+          {tuner.cents === null
+            ? m.tuner_no_cents()
+            : m.tuner_cents({
+                cents: `${tuner.cents >= 0 ? '+' : ''}${Math.round(tuner.cents)}`
+              })}
         </div>
         <div class="mt-1 text-xs tracking-[0.14em] text-fg-faint uppercase">
-          {tuner.stabilityText}
+          {tuner.stability === null ? m.tuner_waiting() : m.tuner_stability({ n: tuner.stability })}
         </div>
         <div class="relative mx-auto mt-[1.4rem] mb-[0.6rem] max-w-[360px]">
           <div
@@ -100,19 +111,23 @@
           </div>
         </div>
         <div class="mt-[0.8rem] flex items-center justify-between">
-          <span class="text-xs tracking-[0.14em] text-fg-faint uppercase">{tuner.status}</span>
+          <span class="text-xs tracking-[0.14em] text-fg-faint uppercase"
+            >{tuner.micOn ? m.tuner_mic_on() : m.tuner_mic_off()}</span
+          >
           <span
             class="text-base font-medium tracking-[0.06em]"
-            style:color={tuner.infoColor ? COLOR[tuner.infoColor] : undefined}>{tuner.info}</span
+            style:color={tuner.reading && tuner.reading !== 'blocked'
+              ? COLOR[READING[tuner.reading].color]
+              : undefined}>{tuner.reading ? READING[tuner.reading].text() : '—'}</span
           >
         </div>
       </Panel>
-      <Panel label="Histórico de afinação" padding="px-[1.2rem] py-[0.8rem]">
+      <Panel label={m.tuner_history()} padding="px-[1.2rem] py-[0.8rem]">
         <div class="relative h-10 overflow-hidden border border-line bg-surface-2">
           <canvas {@attach sparkline} class="block size-full"></canvas>
         </div>
       </Panel>
-      <Panel label="Configurações">
+      <Panel label={m.tuner_settings()}>
         <div class="flex flex-wrap items-center gap-2">
           <div class="flex flex-wrap items-center gap-2">
             <span class="text-xs tracking-[0.08em] text-fg-faint">Ref. A =</span>
@@ -139,13 +154,13 @@
                 ]}
                 onclick={() => tuner.setMode(mode)}
               >
-                {label}
+                {label()}
               </button>
             {/each}
           </div>
         </div>
         <OptsRow>
-          <Btn onclick={() => tuner.stop()}><MicOff size={16} />Desligar microfone</Btn>
+          <Btn onclick={() => tuner.stop()}><MicOff size={16} />{m.tuner_stop()}</Btn>
         </OptsRow>
       </Panel>
     </div>

@@ -1,4 +1,5 @@
 import process from 'node:process';
+import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import tailwindcss from '@tailwindcss/vite';
 import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
@@ -22,6 +23,14 @@ export default defineConfig({
           ? ''
           : ((process.env.BASE_PATH ?? '') as '' | `/${string}`)
       }
+    }),
+
+    // Client-side only (the app is an SPA): the saved choice, then the browser's, then Portuguese.
+    paraglideVitePlugin({
+      project: './project.inlang',
+      outdir: './src/lib/paraglide',
+      emitTsDeclarations: true,
+      strategy: ['localStorage', 'preferredLanguage', 'baseLocale']
     })
   ],
   test: {

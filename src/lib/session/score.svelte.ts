@@ -8,10 +8,10 @@ export interface Answer {
   module: QuizModule;
   /** Short tag for the full history list: `H·A`, `H·F`, `I`, `D`. */
   tag: string;
-  /** What was asked, e.g. `Lá → Mi`. */
-  prompt: string;
-  /** What was answered, e.g. `3M` or `✗ era Dm`. */
-  answer: string;
+  /** What was asked, e.g. `Lá → Mi`; a function, so it's shown in the current language. */
+  prompt: () => string;
+  /** What was answered, e.g. `3M` or `✗ era Dm`; also a function. */
+  answer: () => string;
   correct: boolean;
   /** `HH:MM` when it was answered. */
   time: string;

@@ -25,11 +25,12 @@ class Tuner {
 
   noteName = $state<string | null>(null);
   octave = $state(0);
-  centsText = $state('— CENTS');
-  stabilityText = $state('AGUARDANDO SOM...');
-  status = $state('MICROFONE ATIVO');
-  info = $state('—');
-  infoColor = $state<'green' | 'gold' | 'red' | null>(null);
+  /** 0–100 (0 until six readings), null before the first one. */
+  stability = $state<number | null>(null);
+  /** Whether the microphone is on, for the status line. */
+  micOn = $state(true);
+  /** The verdict on the last reading (or a refused microphone), null before any. */
+  reading = $state<'blocked' | 'inTune' | 'sharp' | 'flat' | null>(null);
   /** Last measured offset, or null before any reading. */
   cents = $state<number | null>(null);
   /** Needle position, 0–100 % of the meter. */
@@ -71,20 +72,20 @@ class Tuner {
       hpf.connect(analyser);
       this.#analyser = analyser;
       this.on = true;
-      this.status = 'MICROFONE ATIVO';
+      this.micOn = true;
       this.#smoothed = null;
       this.#stability = [];
       this.history = [];
       this.#loop();
     } catch {
-      this.info = '❌ Microfone bloqueado';
+      this.reading = 'blocked';
     }
   }
 
   stop() {
     this.#close();
     this.on = false;
-    this.status = 'MICROFONE DESLIGADO';
+    this.micOn = false;
   }
 
   setMode(mode: TunerMode) {
@@ -151,19 +152,9 @@ class Tuner {
     this.noteName = PC_NAMES[mod12(rounded)];
     this.octave = Math.floor(rounded / 12) - 1;
     this.cents = cents;
-    this.centsText = `${cents >= 0 ? '+' : ''}${Math.round(cents)} CENTS`;
-    this.stabilityText = `ESTABILIDADE ${stability}%`;
+    this.stability = stability;
     const abs = Math.abs(cents);
-    if (abs < IN_TUNE_CENTS) {
-      this.info = '✓ Afinado';
-      this.infoColor = 'green';
-    } else if (cents > 0) {
-      this.info = '↑ Muito agudo';
-      this.infoColor = 'gold';
-    } else {
-      this.info = '↓ Muito grave';
-      this.infoColor = 'red';
-    }
+    this.reading = abs < IN_TUNE_CENTS ? 'inTune' : cents > 0 ? 'sharp' : 'flat';
   }
 }
 

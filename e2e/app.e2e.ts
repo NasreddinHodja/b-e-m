@@ -147,3 +147,25 @@ test.describe('on a phone', () => {
     await expect(sidebar(page)).not.toBeInViewport();
   });
 });
+
+test('the language toggle switches to English and back, keeping the session', async ({ page }) => {
+  await page.goto('/intervalos');
+  await page.getByRole('button', { name: /^5ª J\s*7st$/ }).click();
+  await page.getByRole('button', { name: 'Verificar', exact: true }).click();
+  await expect(badge(page, 'Intervalos')).toHaveText(/^[01]\/1$/);
+
+  await sidebar(page).getByRole('button', { name: 'EN', exact: true }).click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(sidebar(page)).toContainText('Intervals');
+  await expect(page.locator('main')).toContainText('Current interval');
+  await expect(page.locator('main')).toContainText(/✓ Correct!|✗ It was a /);
+  // The score survived the switch: no reload.
+  await expect(badge(page, 'Intervals')).toHaveText(/^[01]\/1$/);
+
+  await page.reload();
+  await expect(sidebar(page)).toContainText('Intervals');
+
+  await sidebar(page).getByRole('button', { name: 'PT', exact: true }).click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
+  await expect(page.locator('main')).toContainText('Intervalo atual');
+});

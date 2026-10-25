@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { m } from '#lib/paraglide/messages.js';
   import {
     CW,
     RH,
@@ -88,7 +89,7 @@
 <svg
   bind:this={svg}
   role="img"
-  aria-label="Gráfico das vozes"
+  aria-label={m.ct_roll()}
   class="block cursor-crosshair touch-pan-x [&_text]:fill-fg-faint [&_text]:[font:10px_var(--font-mono)]"
   width={geo?.W ?? 10}
   height={geo?.H ?? 10}

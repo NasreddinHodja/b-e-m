@@ -2,15 +2,10 @@ import { audio } from '#lib/audio/engine.svelte.js';
 import { midiToFreq, pcName } from '#lib/music/pitch.js';
 import { score } from '#lib/session/score.svelte.js';
 import type { AnswerMark, FeedbackResult } from '#lib/ui/types.js';
+import { m } from '#lib/paraglide/messages.js';
 import { SvelteSet } from 'svelte/reactivity';
-import {
-  INTERVALS,
-  ROOTS,
-  notePt,
-  type Interval,
-  type IntervalGroup,
-  type RootMode
-} from './intervals.js';
+import { intervalName, intervalShort, intervalTheory, noteName } from './labels.js';
+import { INTERVALS, ROOTS, type Interval, type IntervalGroup, type RootMode } from './intervals.js';
 
 export type Direction = 'asc' | 'desc' | 'both';
 
@@ -36,7 +31,8 @@ class IntervalosQuiz {
   /** Mirrors the legacy direction tag's display toggling exactly, see `next` and `toggleReveal`. */
   directionShown = $state(true);
   marks = $state<Record<number, AnswerMark>>({});
-  feedback = $state<FeedbackResult | null>(null);
+  /** The answer's outcome; `feedback` words it in the current language. */
+  #result = $state<{ ok: boolean; iv: Interval; picked: number } | null>(null);
   readonly activeIntervals = $derived(INTERVALS.filter((iv) => this.active.has(iv.semitones)));
 
   /** Hit rate per interval asked this session, for intervals asked at least once. */
@@ -65,17 +61,35 @@ class IntervalosQuiz {
     this.next(false);
   }
 
+  get feedback(): FeedbackResult | null {
+    const r = this.#result;
+    if (!r) return null;
+    const p = { name: intervalName(r.iv), n: r.iv.semitones };
+    const wrong = INTERVALS.find((i) => i.semitones === r.picked);
+    return {
+      ok: r.ok,
+      title: r.ok ? m.correct() : m.intervalos_wrong_title(p),
+      explanation: r.ok
+        ? m.intervalos_ok_text(p)
+        : m.intervalos_wrong_text({
+            ...p,
+            picked: wrong ? intervalName(wrong) : m.intervalos_picked_st({ n: r.picked })
+          }),
+      theory: intervalTheory(r.iv)
+    };
+  }
+
   get secondMidi() {
     const c = this.current;
     return c.rootMidi + (c.actualDir === 'asc' ? c.interval.semitones : -c.interval.semitones);
   }
 
   get noteA() {
-    return notePt(this.current.rootName);
+    return noteName(this.current.rootName);
   }
 
   get noteB() {
-    return notePt(pcName(this.secondMidi));
+    return noteName(pcName(this.secondMidi));
   }
 
   #freqs(): [number, number] {
@@ -110,7 +124,7 @@ class IntervalosQuiz {
     this.selectedShown = false;
     this.revealed = false;
     this.marks = {};
-    this.feedback = null;
+    this.#result = null;
     const pool = this.activeIntervals;
     const interval = pool[Math.floor(Math.random() * pool.length)];
     const roots = ROOTS[this.rootMode];
@@ -176,19 +190,15 @@ class IntervalosQuiz {
     this.selectedShown = false;
     this.#revealAll();
     const wrong = INTERVALS.find((i) => i.semitones === picked);
-    this.feedback = {
-      ok,
-      title: ok ? '✓ Correto!' : `✗ Era uma ${iv.name}.`,
-      explanation: ok
-        ? `É uma ${iv.name} (${iv.semitones} semitons).`
-        : `Você respondeu ${wrong ? wrong.name : picked + ' st'}. O correto é ${iv.name} (${iv.semitones} st).`,
-      theory: iv.theory
-    };
+    this.#result = { ok, iv, picked };
+    const root = this.current.rootName;
+    const second = pcName(this.secondMidi);
     score.record({
       module: 'i',
       tag: 'I',
-      prompt: `${this.noteA} → ${this.noteB}`,
-      answer: ok ? iv.short : `${wrong ? wrong.short : '?'} → ${iv.short}`,
+      prompt: () => `${noteName(root)} → ${noteName(second)}`,
+      answer: () =>
+        ok ? intervalShort(iv) : `${wrong ? intervalShort(wrong) : '?'} → ${intervalShort(iv)}`,
       correct: ok,
       semitones: iv.semitones
     });

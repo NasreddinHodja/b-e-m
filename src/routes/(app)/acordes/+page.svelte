@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { aFuncLabel, chordTypeLabel } from '#lib/features/acordes/labels.js';
+  import { m } from '#lib/paraglide/messages.js';
   import ChevronRight from '@lucide/svelte/icons/chevron-right';
   import EighthNote from '@lucide/svelte/icons/eighth-note';
   import Piano from '@lucide/svelte/icons/piano';
@@ -41,9 +43,9 @@
       size={14}
       class={['shrink-0 transition-transform duration-150', q.teacherOpen && 'rotate-90']}
     />
-    Modo professor
+    {m.acordes_teacher()}
     <span class="ml-1.5 bg-gold px-[7px] py-px text-2xs tracking-[0.1em] text-bg uppercase">
-      sem pontuação
+      {m.acordes_no_score()}
     </span>
   </button>
   {#if q.teacherOpen}
@@ -55,15 +57,14 @@
       <p
         class="mb-2.5 border border-line bg-surface-2 px-[0.8rem] py-[0.6rem] text-sm leading-[1.6] text-fg-mid italic"
       >
-        Selecione qualquer acorde para demonstrar em aula. O acorde é carregado oculto — os alunos
-        tentam identificar antes de revelar.
+        {m.acordes_teacher_help()}
       </p>
       <OptsRow class="mt-0 mb-2.5">
         <TabBtn active={q.teacherQuality === 'major'} onclick={() => (q.teacherQuality = 'major')}>
-          Maior
+          {m.major()}
         </TabBtn>
         <TabBtn active={q.teacherQuality === 'minor'} onclick={() => (q.teacherQuality = 'minor')}>
-          Menor
+          {m.minor()}
         </TabBtn>
       </OptsRow>
       <div class="grid grid-cols-6 gap-1 max-[500px]:grid-cols-4">
@@ -84,7 +85,7 @@
               class={[
                 'text-center text-3xs leading-[1.2] tracking-[0.04em]',
                 chord.aFunc === '—' ? 'text-fg-faint' : 'text-gold'
-              ]}>{chord.aFunc}</span
+              ]}>{aFuncLabel(chord)}</span
             >
           </button>
         {/each}
@@ -93,7 +94,7 @@
   {/if}
 </Panel>
 
-<Panel label="Acorde atual">
+<Panel label={m.acordes_current()}>
   <div class="flex items-center justify-between gap-4">
     <div>
       <div
@@ -106,7 +107,7 @@
         {q.chord.name}
       </div>
       <div class="mt-[3px] text-xs tracking-[0.1em] text-fg-mid uppercase">
-        {q.chord.type.toUpperCase()}
+        {chordTypeLabel(q.chord).toUpperCase()}
       </div>
       <div
         class={[
@@ -124,52 +125,58 @@
           !q.revealed && 'invisible'
         ]}
       >
-        A = {q.chord.aFunc}
+        A = {aFuncLabel(q.chord)}
       </div>
     </div>
     <div class="text-right">
       <RevealBtn onclick={() => q.toggleReveal()}>
-        {q.revealed ? 'Ocultar acorde' : 'Revelar acorde'}
+        {q.revealed ? m.acordes_hide() : m.acordes_reveal()}
       </RevealBtn>
     </div>
   </div>
 </Panel>
 
-<Panel label="Reprodução">
+<Panel label={m.playback()}>
   <div class="grid grid-cols-2 gap-2">
-    <Btn onclick={() => q.playA()}><EighthNote size={16} />Tocar Lá (A)</Btn>
-    <Btn onclick={() => q.playChord()}><Piano size={16} />Tocar acorde</Btn>
-    <Btn primary onclick={() => q.newRandom()}><Shuffle size={16} />Novo acorde aleatório</Btn>
+    <Btn onclick={() => q.playA()}><EighthNote size={16} />{m.acordes_play_a()}</Btn>
+    <Btn onclick={() => q.playChord()}><Piano size={16} />{m.acordes_play_chord()}</Btn>
+    <Btn primary onclick={() => q.newRandom()}><Shuffle size={16} />{m.acordes_new()}</Btn>
   </div>
   <div class="mt-2.5 flex flex-wrap items-center gap-1.5">
-    <span class="text-xs tracking-[0.05em] text-fg-faint">Sortear:</span>
+    <span class="text-xs tracking-[0.05em] text-fg-faint">{m.acordes_draw()}</span>
     <TabBtn active={q.randPool === 'both'} onclick={() => (q.randPool = 'both')}>
-      Maior + Menor
+      {m.acordes_draw_both()}
     </TabBtn>
     <TabBtn active={q.randPool === 'major'} onclick={() => (q.randPool = 'major')}>
-      Só maiores
+      {m.acordes_draw_major()}
     </TabBtn>
     <TabBtn active={q.randPool === 'minor'} onclick={() => (q.randPool = 'minor')}>
-      Só menores
+      {m.acordes_draw_minor()}
     </TabBtn>
   </div>
   <OptsRow>
-    <OptsLabel>Oitava do A:</OptsLabel>
+    <OptsLabel>{m.acordes_octave()}</OptsLabel>
     <select bind:value={() => String(q.octave), (v) => (q.octave = parseInt(v))}>
       <option value="3">A3 — 220 Hz</option>
       <option value="4">A4 — 440 Hz</option>
       <option value="5">A5 — 880 Hz</option>
     </select>
-    <OptsLabel class="ml-2">Vol:</OptsLabel>
+    <OptsLabel class="ml-2">{m.volume()}</OptsLabel>
     <input type="range" min="0" max="100" bind:value={audio.volume} />
   </OptsRow>
 </Panel>
 
-<Panel label="Qual acorde está tocando?">
+<Panel label={m.acordes_which_chord()}>
   <OptsRow class="mt-0 mb-2.5">
-    <TabBtn active={q.guessPool === 'major'} onclick={() => q.setGuessPool('major')}>Maior</TabBtn>
-    <TabBtn active={q.guessPool === 'minor'} onclick={() => q.setGuessPool('minor')}>Menor</TabBtn>
-    <TabBtn active={q.guessPool === 'both'} onclick={() => q.setGuessPool('both')}>Ambos</TabBtn>
+    <TabBtn active={q.guessPool === 'major'} onclick={() => q.setGuessPool('major')}
+      >{m.major()}</TabBtn
+    >
+    <TabBtn active={q.guessPool === 'minor'} onclick={() => q.setGuessPool('minor')}
+      >{m.minor()}</TabBtn
+    >
+    <TabBtn active={q.guessPool === 'both'} onclick={() => q.setGuessPool('both')}
+      >{m.both()}</TabBtn
+    >
   </OptsRow>
   <div class={['grid gap-1', guessCols(q.guessPool) === 6 ? 'grid-cols-6' : 'grid-cols-5']}>
     {#each chordPool(q.guessPool) as chord (chord.name)}
@@ -189,7 +196,7 @@
   <Feedback result={q.guessFeedback} />
 </Panel>
 
-<Panel label="Qual função o A exerce?">
+<Panel label={m.acordes_which_func()}>
   <div class="mb-3 grid grid-cols-4 gap-1.5">
     {#each FUNCS as fn (fn)}
       <button
@@ -205,7 +212,7 @@
     {/each}
   </div>
   <CheckBtn disabled={q.funcAnswered || !q.selectedFunc} onclick={() => q.checkFunc()}>
-    Verificar função
+    {m.acordes_check_func()}
   </CheckBtn>
   <Feedback result={q.funcFeedback} />
 </Panel>

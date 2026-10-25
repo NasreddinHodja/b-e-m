@@ -37,7 +37,7 @@ export interface DitadoSettings {
 }
 
 export type QuizState =
-  | { kind: 'hint'; text: string }
+  | { kind: 'hint'; reason: 'start' | 'melodyFailed' | 'slonimskyFailed' }
   | {
       kind: 'quiz';
       options: string[];
@@ -71,8 +71,7 @@ class Ditado {
   staffBaseMidi = $state(60);
   staffBlurred = $state(false);
   metric = $state('—');
-  quiz = $state<QuizState>({ kind: 'hint', text: 'Gere um exercício para começar.' });
-  copyLabel = $state('Copiar .ly');
+  quiz = $state<QuizState>({ kind: 'hint', reason: 'start' });
   /** The source was just copied (the button shows a check). */
   copied = $state(false);
   /** The LilyPond block is expanded. */
@@ -128,10 +127,7 @@ class Ditado {
     if (!notes) {
       this.quiz = {
         kind: 'hint',
-        text:
-          s.mode === 'slonimsky'
-            ? 'Padrão grande demais para A2–A5. Reduza as repetições ou o padrão.'
-            : 'Não foi possível gerar — afrouxe um parâmetro.'
+        reason: s.mode === 'slonimsky' ? 'slonimskyFailed' : 'melodyFailed'
       };
       return;
     }
@@ -171,11 +167,12 @@ class Ditado {
     q.answerShown = true;
     this.staffBlurred = false;
     const ok = option === q.correct;
+    const meter = this.current.model.meter;
     score.record({
       module: 'd',
       tag: 'D',
-      prompt: this.current.model.meter,
-      answer: ok ? '✓' : '✗',
+      prompt: () => meter,
+      answer: () => (ok ? '✓' : '✗'),
       correct: ok
     });
   }
@@ -213,12 +210,8 @@ class Ditado {
   async copyLily() {
     try {
       await navigator.clipboard.writeText(this.lily());
-      this.copyLabel = 'Copiado';
       this.copied = true;
-      setTimeout(() => {
-        this.copyLabel = 'Copiar .ly';
-        this.copied = false;
-      }, 1200);
+      setTimeout(() => (this.copied = false), 1200);
     } catch {
       // Clipboard denied: the legacy app ignored it too.
     }

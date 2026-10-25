@@ -1,3 +1,4 @@
+import { m } from '#lib/paraglide/messages.js';
 import {
   Accidental,
   BarlineType,
@@ -142,7 +143,7 @@ export function renderStaff(host: HTMLElement, model: Model, baseMidi: number) {
     console.error('Ditado — erro de notação:', err);
     const box = document.createElement('div');
     box.style.cssText = 'padding:20px;color:#444;font-family:var(--font-mono);font-size:11px';
-    box.append('Não foi possível desenhar a pauta.', document.createElement('br'));
+    box.append(m.ditado_staff_failed(), document.createElement('br'));
     box.append(String((err as Error)?.message ?? err));
     host.replaceChildren(box);
   }

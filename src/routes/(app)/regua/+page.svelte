@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { referenceLabel, reguaFull, reguaQuality } from '#lib/features/regua/labels.js';
+  import { m } from '#lib/paraglide/messages.js';
   import CircleDot from '@lucide/svelte/icons/circle-dot';
   import Play from '@lucide/svelte/icons/play';
   import { REFERENCES, REGUA, type Tone } from '#lib/features/regua/intervals.js';
@@ -19,17 +21,15 @@
   <div>
     <div class="mb-[0.6rem] flex items-center justify-between">
       <span class="font-display text-[22px] font-black tracking-[-0.01em] text-accent">B.E.M</span>
-      <span class="text-2xs tracking-[0.18em] text-fg-faint uppercase"
-        >SISTEMA DE PERCEPÇÃO MUSICAL</span
-      >
+      <span class="text-2xs tracking-[0.18em] text-fg-faint uppercase">{m.regua_system()}</span>
     </div>
     <div>
       <div class="mb-1 text-[18px] text-fg-faint">—</div>
       <div class="font-display text-[32px] leading-none font-black tracking-[0.02em] text-accent">
-        RÉGUA DE<br />INTERVALOS
+        {m.regua_title_1()}<br />{m.regua_title_2()}
       </div>
       <div class={[caption, 'mt-1.5 leading-[1.5]']}>
-        MAPA ESPACIAL DA<br />PERCEPÇÃO INTERVALAR
+        {m.regua_subtitle_1()}<br />{m.regua_subtitle_2()}
       </div>
     </div>
   </div>
@@ -37,13 +37,13 @@
   <div class="flex items-start gap-4">
     <div class="min-w-[90px] shrink-0 border border-line-lt p-[0.8rem]">
       <div class="mb-1.5 text-3xs tracking-[0.12em] text-fg-faint uppercase">
-        NOTA DE REFERÊNCIA
+        {m.regua_reference()}
       </div>
       <div class="font-display text-[36px] leading-none font-black text-accent">
         {regua.reference.name}<sub class="text-[18px] text-fg-mid">4</sub>
       </div>
       <div class="mt-1 mb-2.5 text-3xs tracking-[0.1em] text-fg-faint uppercase">
-        {regua.reference.label}
+        {referenceLabel(regua.reference.name)}
       </div>
       <div class="flex flex-col gap-[3px]">
         {#each REFERENCES as ref (ref.name)}
@@ -106,7 +106,7 @@
         >
           <div class="flex min-w-[70px] flex-col">
             <span class="text-2xs leading-[1.2] tracking-[0.08em] text-fg-mid uppercase"
-              >{iv.full}</span
+              >{reguaFull(iv)}</span
             >
             <span
               class={[
@@ -119,7 +119,7 @@
             {iv.semitones}
           </span>
           <span class={['flex-1 text-right text-3xs tracking-[0.1em] uppercase', TONE[iv.tone]]}>
-            {iv.quality}
+            {reguaQuality(iv)}
           </span>
         </div>
       {/each}
@@ -127,8 +127,8 @@
   </div>
 
   <div class="flex flex-wrap items-center gap-4">
-    <div class={[caption, 'mr-2']}>LEGENDA</div>
-    {#each [['green', 'CONSONÂNCIA ESTÁVEL'], ['gold', 'CONSONÂNCIA NEUTRA'], ['red', 'DISSONÂNCIA']] as [tone, text] (tone)}
+    <div class={[caption, 'mr-2']}>{m.regua_legend()}</div>
+    {#each [['green', m.regua_legend_stable()], ['gold', m.regua_legend_neutral()], ['red', m.regua_legend_dissonance()]] as [tone, text] (tone)}
       <div class="flex items-center gap-1.5 text-2xs tracking-[0.1em] text-fg-faint uppercase">
         <span class={['size-2 rounded-full', DOT[tone as Tone]]}></span>{text}
       </div>
@@ -137,7 +137,7 @@
 
   <div class="flex items-center gap-4">
     <span class="shrink-0 text-3xs tracking-[0.1em] text-fg-faint uppercase"
-      >ESCALA DE SEMITONS</span
+      >{m.regua_semitone_scale()}</span
     >
     <div
       class="relative flex max-w-[200px] flex-1 before:absolute before:top-1/2 before:right-0 before:left-0 before:h-px before:bg-line-lt before:content-['']"
@@ -154,16 +154,19 @@
     <CircleDot size={18} class="shrink-0 text-fg-mid" />
     <span>
       {#if regua.last}
-        {regua.last.full} ({regua.last.symbol}) — {regua.last.semitones} semitons<br />{regua.last
-          .quality}
+        {m.regua_last({
+          full: reguaFull(regua.last),
+          symbol: regua.last.symbol,
+          n: regua.last.semitones
+        })}<br />{reguaQuality(regua.last)}
       {:else}
-        TOQUE EM QUALQUER INTERVALO<br />PARA INTERNALIZAR SUA DISTÂNCIA SONORA.
+        {m.regua_hint_1()}<br />{m.regua_hint_2()}
       {/if}
     </span>
     <button
       type="button"
       class="ml-auto flex size-9 shrink-0 items-center justify-center rounded-full border border-line-lt bg-surface text-base text-fg transition-all duration-[140ms] hover:border-accent hover:bg-accent hover:text-bg"
-      aria-label="Tocar todos os intervalos"
+      aria-label={m.regua_play_all()}
       onclick={() => regua.togglePlayAll()}
     >
       <Play size={16} />

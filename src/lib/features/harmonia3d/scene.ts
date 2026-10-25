@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { m } from '#lib/paraglide/messages.js';
+import { getLocale } from '#lib/paraglide/runtime.js';
 import { FIELDS, HEX, toneNames, type ColorKey } from './fields.js';
 import type { harmonia as harmoniaState } from './harmonia.svelte.js';
 
@@ -68,6 +70,7 @@ export class HarmoniaScene {
   #raf = 0;
   #resizeObserver: ResizeObserver;
   #cleanup: (() => void)[] = [];
+  #locale = getLocale();
 
   constructor(state: State, stage: HTMLElement, canvas: HTMLCanvasElement, labels: HTMLElement) {
     this.#s = state;
@@ -288,7 +291,7 @@ export class HarmoniaScene {
     this.#anchors.ax.push(new V3(AX + 4.9, FLOOR, 0));
     this.#texts.ax.push('Y');
     this.#anchors.ax.push(new V3(AX, FLOOR, zEnd - 1.8));
-    this.#texts.ax.push('Z · tempo');
+    this.#texts.ax.push(m.hg_axis_time());
 
     // One block per chord event.
     const playingNow = s.active >= 0;
@@ -550,6 +553,11 @@ export class HarmoniaScene {
   #frame = (now: number) => {
     this.#raf = requestAnimationFrame(this.#frame);
     const s = this.#s;
+    // The axis labels are built in #build(): rebuild when the language changes.
+    if (getLocale() !== this.#locale) {
+      this.#locale = getLocale();
+      s.dirty = true;
+    }
     if (!this.#stage.offsetParent) return;
     if (s.needsFit) {
       this.#fit();

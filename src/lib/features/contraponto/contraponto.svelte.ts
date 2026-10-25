@@ -1,3 +1,4 @@
+import { m } from '#lib/paraglide/messages.js';
 import { audio } from '#lib/audio/engine.svelte.js';
 import { midiToFreq } from '#lib/music/pitch.js';
 import { generateLilyPond } from './lilypond.js';
@@ -35,7 +36,7 @@ export const X0 = 44;
 export const CW = 34;
 export const RH = 10;
 
-export const voiceLabel = (i: number) => (i ? 'Voz ' + (i + 1) : 'Cantus firmus');
+export const voiceLabel = (i: number) => (i ? m.ct_voice({ n: i + 1 }) : m.ct_cantus());
 /** Whether the voice has one note per cantus note. */
 export const oneNotePerBar = (v: Voice) => v.cf || v.sp === 1;
 const avg = (r: Line) => {
@@ -54,7 +55,6 @@ class Contraponto {
   acc = $state('');
   /** LilyPond textarea. Regenerated on every note change, editable in between. */
   lily = $state('');
-  copyLabel = $state('Copiar .ly');
   /** The source was just copied (the button shows a check). */
   copied = $state(false);
   /** Playhead x in the roll, or null when stopped. */
@@ -77,16 +77,22 @@ class Contraponto {
     const w = this.issues.length - e;
     const tone = e ? 'bad' : this.issues.length ? null : 'ok';
     const cp = this.lines[1];
-    if (!cp || !cp.length) return { text: 'Digite ou desenhe o contraponto.', tone };
+    if (!cp || !cp.length) return { text: m.ct_summary_empty(), tone };
     if (e || w)
-      return { text: `${e} erro${e === 1 ? '' : 's'} e ${w} aviso${w === 1 ? '' : 's'}`, tone };
-    return { text: 'Nenhum problema encontrado. Bom trabalho!', tone };
+      return {
+        text: m.ct_summary_counts({
+          errors: (e === 1 ? m.ct_errors_one : m.ct_errors)({ n: e }),
+          warnings: (w === 1 ? m.ct_warnings_one : m.ct_warnings)({ n: w })
+        }),
+        tone
+      };
+    return { text: m.ct_summary_ok(), tone };
   }
 
   #analyze(): VoiceIssue[] {
-    const bad: string[] = [];
+    const bad: { i: number; tokens: string[] }[] = [];
     this.parsed.forEach((r, i) => {
-      if (r.bad.length) bad.push(`${voiceLabel(i)} (${r.bad.join(', ')})`);
+      if (r.bad.length) bad.push({ i, tokens: r.bad });
     });
     if (bad.length)
       return [
@@ -94,7 +100,10 @@ class Contraponto {
           v: 0,
           k: -1,
           s: 'erro',
-          m: 'Notas não reconhecidas: ' + bad.join('; ') + '. Use D4, F#4, Bb3.'
+          m: () =>
+            m.ct_unparsed({
+              list: bad.map((b) => `${voiceLabel(b.i)} (${b.tokens.join(', ')})`).join('; ')
+            })
         }
       ];
     const P = this.lines;
@@ -106,13 +115,22 @@ class Contraponto {
     V.forEach((v, i) => {
       if (!i) return;
       for (const x of analyze(cf, P[i], v.sp, avg(P[i]) >= mc))
-        out.push({ ...x, v: i, m: (multi ? voiceLabel(i) + ': ' : '') + x.m });
+        out.push({ ...x, v: i, m: () => (multi ? voiceLabel(i) + ': ' : '') + x.m() });
     });
     for (let a = 1; a < V.length; a++)
       for (let b = a + 1; b < V.length; b++)
         if (P[a].length && P[b].length)
           out.push(
-            ...pairsCheck(P[a], P[b], V[a].sp, V[b].sp, voiceLabel(a), voiceLabel(b), cf.length, b)
+            ...pairsCheck(
+              P[a],
+              P[b],
+              V[a].sp,
+              V[b].sp,
+              () => voiceLabel(a),
+              () => voiceLabel(b),
+              cf.length,
+              b
+            )
           );
     return out;
   }
@@ -289,12 +307,8 @@ class Contraponto {
     const s = this.lily || this.generateLily();
     if (!s || !navigator.clipboard) return;
     await navigator.clipboard.writeText(s);
-    this.copyLabel = 'Copiado';
     this.copied = true;
-    setTimeout(() => {
-      this.copyLabel = 'Copiar .ly';
-      this.copied = false;
-    }, 1200);
+    setTimeout(() => (this.copied = false), 1200);
   }
 
   saveLily() {

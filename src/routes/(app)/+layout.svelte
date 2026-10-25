@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { m } from '#lib/paraglide/messages.js';
   import { afterNavigate, goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
@@ -30,7 +31,7 @@
     <button
       type="button"
       class="fixed top-3.5 left-3.5 z-300 hidden size-10 flex-col items-center justify-center gap-[5px] border border-line-lt bg-surface max-md:flex"
-      aria-label="Menu"
+      aria-label={m.menu()}
       onclick={() => (sidebarOpen = !sidebarOpen)}
     >
       {#each [0, 1, 2] as i (i)}

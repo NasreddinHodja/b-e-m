@@ -73,9 +73,10 @@ describe('Contraponto parity with the legacy page', () => {
       L.fn.run();
 
       const where = `seed ${seed}: ${voices.map((v) => v.txt).join(' / ')}`;
-      expect(JSON.parse(JSON.stringify(contraponto.issues)), where).toEqual(
-        JSON.parse(JSON.stringify(L.get('I')))
-      );
+      expect(
+        contraponto.issues.map((i) => ({ ...i, m: i.m() })),
+        where
+      ).toEqual(JSON.parse(JSON.stringify(L.get('I'))));
       expect(contraponto.summary.text, where).toBe(L.el('ct-sum').textContent);
       expect(contraponto.generateLily(), where).toBe(
         L.fn.generateLilyPond() || L.el('ct-lyout').value

@@ -1,3 +1,4 @@
+import { m } from '#lib/paraglide/messages.js';
 import { audio } from '#lib/audio/engine.svelte.js';
 import { midiToFreq } from '#lib/music/pitch.js';
 import {
@@ -28,6 +29,13 @@ export interface ProgEvent {
   /** Length in beats. */
   b: number;
 }
+
+/** The presets' notes (kept in Portuguese in PRESETS, as the legacy page had them), translated. */
+const PRESET_NOTE: Record<string, () => string> = {
+  'o exemplo do início': m.hg_preset_note_start,
+  '2 + 2 + 4 tempos': m.hg_preset_note_224,
+  '2 tempos cada': m.hg_preset_note_2each
+};
 
 /** How long a clicked chord stays highlighted. */
 const FLASH_MS = 1500;
@@ -101,7 +109,8 @@ class Harmonia {
   presetLabel(i: number) {
     const p = PRESETS[i];
     return (
-      p.seq.map((x) => FIELDS[this.field].roman[x[0]]).join(' – ') + (p.note ? ` (${p.note})` : '')
+      p.seq.map((x) => FIELDS[this.field].roman[x[0]]).join(' – ') +
+      (p.note ? ` (${PRESET_NOTE[p.note]()})` : '')
     );
   }
 

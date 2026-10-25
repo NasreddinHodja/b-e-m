@@ -40,10 +40,10 @@ All three questions already used one component, =src/lib/ui/Feedback.svelte=.
 
 Done in a4988a3: it animates its height with =svelte/transition='s =slide= (220ms), opening on an answer and closing on the next question; with =prefers-reduced-motion= it's instant. Measured on Intervalos: 223 → 331px and back over about 240ms, instead of a jump.
 
-* TODO Acordes: /Modo professor/ collapsible, at the top
-The teacher panel is at the bottom and always open, so students see the chord list. Owner: maybe keep it at the top, collapsed, toggled open.
+* DONE Acordes: /Modo professor/ collapsible, at the top
+The teacher panel was the last panel and always open, and it highlights the loaded chord, so students could see the answer.
 
-Plan: move it above /Acorde atual/, collapsed by default with an animated toggle; the open state kept in =acordes= so it survives navigation.
+Done in 3044b58. It's now the first panel on Acordes, collapsed by default. Its header (▸ MODO PROFESSOR, the /sem pontuação/ tag) is a button with =aria-expanded= that slides the contents open and closed (instant with reduced motion). The open state is =acordes.teacherOpen=, so it survives going to another view and back (a reload closes it). The ▸ is a text glyph until the icons item.
 
 * TODO Ditado: staff not centred in /Mapa métrico/
 The engraved staff sits at the top left of the paper box, and low: VexFlow's SVG is a fixed 180px tall with the stave drawn at y 50, and its width is the bars', not the box's.

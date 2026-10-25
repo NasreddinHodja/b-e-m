@@ -1,0 +1,20 @@
+#+TITLE: Deploying
+#+OPTIONS: ^:{}
+
+The app is a static site: =pnpm build= writes =build/=, which any static host can serve if it answers unknown paths with =404.html= (the SPA fallback; =adapter-static='s =fallback=).
+
+* GitHub Pages
+
+=.github/workflows/deploy.yml= runs on every push to =main=: checkout, pnpm 12.3.4, Node 24 with the pnpm cache, =pnpm install --frozen-lockfile=, =actions/configure-pages=, =pnpm build= with =BASE_PATH= set to the Pages base path (=/b-e-m= for a project site), then =upload-pages-artifact= and =deploy-pages=. The build job can only read; only the deploy job gets =pages: write= and =id-token: write=.
+
+The repository's Settings → Pages → Source must be /GitHub Actions/. As of 2026-10-25, =jfaragao-commits/b-e-m= publishes from the =main= branch's root instead (=gh api repos/jfaragao-commits/b-e-m/pages=: =build_type: legacy=), which serves the legacy =index.html= as is; switching the source needs admin rights on the repository.
+
+GitHub Pages serves =404.html= for a path it doesn't have, so a deep link like =/b-e-m/intervalos= loads the app, which then routes to it.
+
+* Base path
+
+=vite.config.ts= sets =paths.base= from =BASE_PATH= for builds and to empty for =vite dev=. A host serving the app at a domain's root builds with =BASE_PATH= unset; under a subpath, with =BASE_PATH=/that/path= (leading slash, no trailing one).
+
+* Firebase
+
+A build uses Firebase unless =VITE_BACKEND=local= is set. Every domain the app is served from (the Pages domain =jfaragao-commits.github.io=, a custom domain, a preview host) must be listed in the Firebase console under Authentication → Settings → Authorized domains, or sign-in fails. When the app can't reach Firebase within 8 s of loading, it shows a message saying so, in place of the app.

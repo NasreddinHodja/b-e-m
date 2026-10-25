@@ -1,0 +1,68 @@
+#+TITLE: Design system
+#+OPTIONS: ^:{}
+
+The look is the legacy page's: near-black surfaces, warm ivory text, DM Mono everywhere, Playfair Display for big numbers and names, Barlow Condensed for display type, gold labels, a film-grain overlay. It's written as Tailwind 4 utilities on the components; the tokens and the few global rules are in =src/routes/layout.css=.
+
+* Tailwind without preflight
+
+=layout.css= imports Tailwind's theme and utilities layers but not =preflight=:
+
+#+begin_src css
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+#+end_src
+
+With preflight on, the port didn't render like the legacy page, whose CSS was written on top of browser defaults; so the base layer has the legacy reset instead: =* { box-sizing: border-box; margin: 0; padding: 0 }=. Consequences when writing markup:
+
++ A =<button>= keeps the browser's border and background unless a class sets them: write =border-0= or =border= with a colour, and =bg-transparent=, as the components do.
++ =<ul>= keeps its bullets unless =list-none=.
+
+* Tokens
+
+Defined with =@theme= in =layout.css=. Tailwind's default palette, fonts and type scale are cleared (=--color-*: initial= etc.), so only these exist: a class like =text-gray-500= or =text-xl= doesn't compile to anything.
+
++ Colours :: =bg= #0c0c0c, =surface= #141414, =surface-2= #1c1c1c, =well= #080808, =line= #2a2a2a, =line-lt= #333, =fg= #e4e0d8, =fg-soft= #c9c5bc, =fg-mid= #888, =fg-faint= #444, =accent= #e4e0d8, =green= #4a9e6a, =red= #b84848, =gold= #c8a030, =blue= #7a9bc8, =paper= #f2eddf (the Ditado staff), =logo= #e8e2d4, =white=, =black=, =transparent=. Opacity modifiers work (=bg-gold/6=).
++ Fonts :: =font-mono= (DM Mono, the body font), =font-serif= (Playfair Display), =font-display= (Barlow Condensed). Loaded from Google Fonts in =src/app.html=.
++ Type scale :: =text-3xs= 8px, =2xs= 9, =xs= 10, =sm= 11, =base= 12, =md= 13 (the body), =lg= 15. Larger sizes are written inline (=text-[54px]=).
++ Animations :: =animate-fade-up= (every =Panel= fades up 5px in 0.25 s), =animate-regua-pulse= (a playing Régua dot).
+
+The colours are also CSS variables (=var(--color-gold)=), which SVG attributes, inline styles and three.js-side code use.
+
+* Global rules
+
+Base layer, =layout.css=: the reset; =body= as a flex row, =min-h-screen=, =bg-bg=, mono 13px, =text-fg=; the grain (=body::after=, a fixed SVG-noise layer at 3.5% opacity, =z-index: 9999=, no pointer events); =cursor: pointer= on every button and select; the dark =select= and the flat range slider (11px square thumb); a 4px scrollbar.
+
+Utilities, for quiz answer buttons, which must override a button's own colours whatever its other classes: =state-selected= (gold), =state-correct= (green), =state-wrong= (red), all =!important=. =markClass(mark, selected)= in =src/lib/ui/types.ts= picks one.
+
+* Components
+
+=src/lib/ui/=:
+
++ =Panel= :: the bordered surface every section sits in: =label= (rendered by =PanelLabel=), =labelExtra= snippet after the label text, =padding= (replaces the default =px-[1.6rem] py-[1.4rem]=), =class=.
++ =PanelLabel= :: tiny uppercase faint label with a rule filling the rest of the row.
++ =Btn= :: the main button: outlined, or =primary= (filled ivory); on hover a fill slides up from the bottom (=before:= layer). =pad= replaces its padding. =type= defaults to =button=.
++ =TabBtn= :: small toggle; =active= fills it.
++ =CheckBtn= :: full-width /Verificar/ button, dims when disabled.
++ =RevealBtn= :: small outlined button for reveal toggles.
++ =Feedback= :: the result box under an answer, green or red, from a =FeedbackResult= (=ok=, =title=, =explanation=, optional =theory=); nothing while =null=.
++ =HistoryList= :: rows of scored answers; =showTag= adds the module column; =class= replaces the default =max-h-[180px]=.
++ =OptsRow=, =OptsLabel= :: a wrapping row of controls (default =mt-2.5=, replaceable) and its faint label.
++ =BemLogo= :: the round /BEM/ mark; =size= and =fontSize= in px.
+
+Props named =class=, =pad= or =padding= replace defaults rather than add to them, so a caller never fights a default utility.
+
+* Class conventions
+
++ Classes are written as Svelte's =class={[...]}= arrays, with =cond && 'class'= for conditional ones; a long or repeated list goes in a =const= in the script block.
++ When a caller's class must beat a component's own utility of the same property, it uses Tailwind 4's =!= suffix (=mt-0!=, =border-red!=) rather than relying on stylesheet order.
++ Where the legacy CSS combined transforms in an order that Tailwind's composed =translate=/=scale=/=rotate= utilities would change, the transform is written whole as an arbitrary property: =[transform:scale(1.5)]= (Régua hover), =[transform:rotate(45deg)_translate(4px,4px)]= (the hamburger).
++ Sizes and spacings are the legacy values, so arbitrary values (=px-[1.2rem]=, =tracking-[0.14em]=) are normal here; prefer the theme scale where it matches exactly.
++ =prettier-plugin-tailwindcss= sorts the classes (=pnpm format=); =tailwindStylesheet= points it at =layout.css= so it knows the custom tokens.
+
+* Breakpoints
+
++ =max-md= (under 768px): the sidebar becomes an off-canvas drawer with a hamburger; =main= loses its left margin and gets top padding for the button.
++ =max-[900px]=: Contraponto's two columns stack.
++ =max-[1100px]=: Harmonia 3D's side panel goes under the stage; the stage drops to 520px and its axis legend hides.
++ =max-[500px]=, =max-[480px]=: the Acordes teacher grid goes to 4 columns; the Ditado form to 1.

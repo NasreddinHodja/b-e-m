@@ -1,0 +1,76 @@
+#+TITLE: Overview
+#+OPTIONS: ^:{}
+
+SvelteKit 3 with Svelte 5 runes, built as a static SPA (=@sveltejs/adapter-static=, =fallback: '404.html'=; =ssr = false= in =src/routes/+layout.ts=). TypeScript strict. Tailwind 4 without preflight. pnpm. Everything runs in the browser; the only server is Firebase (auth and Firestore), or nothing at all in dev ([[file:backend.org][Backend]]).
+
+Pinned runtime libraries, the versions the legacy page loaded ([[file:../parity.org][Parity]]): =vexflow= 4.2.2, =three= 0.128.0, =firebase= 10.8.0.
+
+SvelteKit 3 specifics this repo depends on:
+
++ Config lives in =vite.config.ts= (the =sveltekit()= plugin's options); there is no =svelte.config.js=.
++ =src/lib= is imported through the =#lib= subpath import (=package.json= =imports=), not =$lib=. Imports need the =.js= extension, and a =foo.svelte.ts= module is imported as =foo.svelte.js=.
++ Route IDs include the group: =resolve('/(app)/acordes')=, typed by =RouteId= from =$app/types=.
+
+* Routes
+
+| Route                        | File                                     | View                                             |
+|------------------------------+------------------------------------------+--------------------------------------------------|
+| (all)                        | =src/routes/+layout.svelte=              | boot screen, "unreachable" screen, global CSS    |
+| =/login=                     | =src/routes/login/+page.svelte=          | e-mail and password sign-in                      |
+| (signed-in views)            | =src/routes/(app)/+layout.svelte=        | sign-in guard, sidebar, hamburger, content width |
+| =/=                          | =src/routes/(app)/+page.ts=              | redirects (307) to =/acordes=                    |
+| =/acordes=                   | =(app)/acordes/+page.svelte=             | [[file:../features/acordes.org][Acordes]]                                          |
+| =/intervalos=                | =(app)/intervalos/+page.svelte=          | [[file:../features/intervalos.org][Intervalos]]                                       |
+| =/ditado=                    | =(app)/ditado/+page.svelte=, =Field.svelte= | [[file:../features/ditado.org][Ditado melódico]]                                  |
+| =/contraponto=               | =(app)/contraponto/+page.svelte=, =Roll.svelte=, =colors.ts= | [[file:../features/contraponto.org][Contraponto]]                     |
+| =/regua=                     | =(app)/regua/+page.svelte=               | [[file:../features/regua.org][Régua]]                                            |
+| =/harmonia-3d=               | =(app)/harmonia-3d/+page.svelte=         | [[file:../features/harmonia-3d.org][Harmonia 3D]]                                      |
+| =/apreciacao=                | =(app)/apreciacao/+page.svelte=          | [[file:../features/pages.org][Apreciação]]                                       |
+| =/afinador=                  | =(app)/afinador/+page.svelte=            | [[file:../features/afinador.org][Afinador]]                                         |
+| =/pratica=                   | =(app)/pratica/+page.svelte=             | [[file:../features/pratica.org][Prática]]                                          |
+| =/metronomo=                 | =(app)/metronomo/+page.svelte=           | [[file:../features/pratica.org][Metrônomo]]                                        |
+| =/manifesto=                 | =(app)/manifesto/+page.svelte=           | [[file:../features/pages.org][Manifesto]]                                        |
+| =/historico=                 | =(app)/historico/+page.svelte=           | [[file:../features/pages.org][Histórico]]                                        |
+
+Each route is one tab of the legacy page. The sidebar's groups, labels, icons, badges and which views use the wide column come from =NAV= in =src/lib/nav.ts=; =Sidebar.svelte= and the layout both read it, so a new view is a route plus a =NAV= entry.
+
+* Layers
+
++ =src/lib/features/<view>/= :: a view's logic. Plain =.ts= modules hold the music logic (pure functions and tables, no Svelte); one =*.svelte.ts= class holds the view's state and actions, exported as a module singleton (=export const acordes = new AcordesQuiz()=). Pages only render that state and call its methods.
++ =src/lib/session/score.svelte.ts= :: =score=, every scored answer of this session. The sidebar's counters and badges, each quiz's history list, Intervalos' per-interval stats and the Histórico page are all derived from =score.answers=. =record()= also saves the totals through the backend.
++ =src/lib/backend/= :: =session= (status, user, the active backend) and the two backends. See [[file:backend.org][Backend]].
++ =src/lib/audio/= :: =audio=, the one synth every view plays through. See [[file:audio.org][Audio]].
++ =src/lib/music/pitch.ts= :: =PC_NAMES=, =mod12=, =midiToFreq=, =pcName=, shared by the views. Features keep their own spelling tables where the legacy code had its own (=ditado/theory.ts=, =harmonia3d/fields.ts=, =contraponto/rules.ts=).
++ =src/lib/ui/= :: shared components and the =FeedbackResult= / =AnswerMark= types. See [[file:../design/system.org][Design system]].
++ =src/lib/nav.ts= :: the sidebar's structure.
+
+Dependencies run one way: routes → features → session / backend / audio / music / ui. Nothing under =src/lib= imports from =src/routes=; =ui= imports only the =Answer= type, from =session/score.svelte.ts=.
+
+* State
+
+Every feature's state is a module-level singleton created on first import. Navigating away unmounts the page but not the state, so a quiz, a half-built progression or a running timer is where it was when you come back: the legacy page hid tabs rather than destroying them, and this reproduces that. Consequences that are on purpose:
+
++ The metronome and the Pomodoro keep running on other pages.
++ The tuner keeps the microphone open on other pages until /Desligar microfone/.
++ Harmonia 3D is the exception: leaving the page stops its playback (the legacy tab switch did), and the three.js scene is destroyed and rebuilt, while the progression and camera stay in =harmonia=.
+
+Constructors that generate a first exercise (=acordes=, =intervalos=, =ditado=, =contraponto=, =harmonia=) do it without playing audio.
+
+Reactivity: =$state= fields, =$derived= getters, =SvelteSet= for sets (Intervalos' active intervals, Régua's lit rows), =$state.raw= where a value is replaced rather than mutated (the tuner's history, Ditado's current exercise). Harmonia 3D keeps the camera and animation values as plain, non-reactive fields: the scene reads them every frame.
+
+* Boot and sign-in
+
+1. =src/routes/+layout.svelte= calls =session.start()= and shows /INICIANDO SISTEMA B.E.M.../ while =session.status= is =loading=.
+2. =start()= loads the chosen backend with a dynamic import, so the other one's code is never fetched, and subscribes to auth. If no auth answer comes in 8 s, the status becomes =unreachable= and the layout shows the legacy "couldn't connect to Firebase" text.
+3. =signed-in= renders the =(app)= layout; =signed-out= makes it =goto('/login')=. The login page, once signed in, goes to =/acordes=.
+4. /Sair do App/ in the sidebar calls =session.signOut()=; the guard then sends you to =/login=.
+
+* Layout
+
+=(app)/+layout.svelte=: the sidebar is fixed, 220px wide; =main= has =ml-[220px]=, max width 780px, or 1320px for the views with =wide: true= in =NAV= (Contraponto, Harmonia 3D). Below 768px (Tailwind's =max-md=) the sidebar slides off-canvas, a hamburger button at the top left toggles it, a dark overlay closes it, and navigating closes it when =window.innerWidth <= 768=.
+
+The sidebar (=Sidebar.svelte=), top to bottom: the logo; correct and wrong totals; /zerar pontuação/ (a =confirm()=, then =score.reset()=); /Sair do App/; the nav, with an =a/b= badge on Acordes, Intervalos and Ditado; the speaker / headphone switch for =audio.setMode=.
+
+* Build and deploy
+
+=pnpm build= writes =build/=, with =404.html= as the SPA fallback. =paths.base= is =BASE_PATH= in builds and empty under =vite dev=. =.github/workflows/deploy.yml= builds on push to =main= and deploys to GitHub Pages. See [[file:../guide/deploy.org][Deploying]].

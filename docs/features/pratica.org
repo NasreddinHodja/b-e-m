@@ -1,0 +1,27 @@
+#+TITLE: Prática and Metrônomo
+#+OPTIONS: ^:{}
+
+/Prática/ has the 10 pillars, the practice journal and a Pomodoro timer; /Metrônomo/ is its own page. Not scored.
+
++ Pages :: =src/routes/(app)/pratica/+page.svelte=, =src/routes/(app)/metronomo/+page.svelte=
++ State :: =src/lib/features/pratica/diario.svelte.ts= (=diario=), =pomodoro.svelte.ts= (=pomodoro=), =metronome.svelte.ts= (=metronome=)
++ Table :: =pilares.ts=, the ten pillars and their one-line descriptions (the same ten as the Manifesto's last section)
+
+* Journal
+
+=diario= keeps =entries= in sync with the backend's journal for the signed-in user ([[file:../architecture/backend.org][Backend]]); it reloads whenever the user changes.
+
++ /Registrar/ :: needs a title (/O que eu estudei hoje?/); the observation is optional. Both are trimmed. The entry is saved with the date as =pt-BR= text and a timestamp, and put first.
++ The list :: the newest 20: title, date, observation, and a 🗑 that deletes that entry.
++ /Apagar tudo/ :: after a =confirm()=, deletes every entry, one request each.
++ /↓ JSON/ :: downloads =entries= as =diario_bem.json=.
+
+Entries are rendered as text. The legacy page put them in =innerHTML=, so HTML in a title or note rendered as HTML; this is the port's one deliberate difference ([[file:../parity.org][Parity]]).
+
+* Pomodoro
+
+=pomodoro=: 25:00 by default; /25 min/ and /50 min/ reset to that length. /▶ Iniciar/ counts down each second (the digits gold); /⏸ Parar/ pauses; /↺ Reset/ goes back to 25:00 and the 25 button. At 00:00 it stops, the digits turn green until reset, the status reads /Ciclo concluído! Faça uma pausa./, and three 880 Hz chimes play, but only if the app's audio has already been started by something else, as in the legacy code. It keeps counting on other pages.
+
+* Metrônomo
+
+=metronome=: 40–220 BPM (default 90), four beats with the first accented (1800 Hz click, 1200 Hz on the others, =audio.blip=), four LEDs that flash 60 ms each. It ticks with =setInterval(60000 / bpm)=; moving the slider while it runs restarts it from beat 1. /Tap Tempo/ sets the tempo from the interval between two taps less than 2 s apart, clamped to 40–220. It keeps ticking on other pages.

@@ -1,0 +1,16 @@
+#+TITLE: Apreciação, Manifesto, Histórico
+#+OPTIONS: ^:{}
+
+* Apreciação
+
+=src/routes/(app)/apreciacao/+page.svelte=: a short note on active listening, the B.E.M Spotify playlist in an =<iframe>= (=open.spotify.com/embed/playlist/3HvTNGj1RAWolEB1ojNDok=, loaded lazily), and five numbered listening steps.
+
+* Manifesto
+
+=src/routes/(app)/manifesto/+page.svelte=: the B.E.M manifesto, static text, sections separated by small uppercase titles, ending with the 10 pillars.
+
+* Histórico
+
+=src/routes/(app)/historico/+page.svelte=: =HistoryList= over =score.recent()=, the last 30 scored answers of the session from every quiz, newest first, with the module tag column (=H·A=, =H·F=, =I=, =D=). Each row: a green or red dot, the tag, the prompt, the answer, =HH:MM=.
+
+The same list, per module and without the tag, is under Intervalos and Ditado. All of them are derived from =score.answers= ([[file:../architecture/overview.org][Overview]]); /zerar pontuação/ empties them all.

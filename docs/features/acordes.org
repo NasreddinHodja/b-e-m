@@ -1,0 +1,34 @@
+#+TITLE: Acordes
+#+OPTIONS: ^:{}
+
+Hear a major or minor triad against the note A and answer two questions: which chord it is, and what A is in it. Scores under module =h=.
+
++ Page :: =src/routes/(app)/acordes/+page.svelte=
++ Tables :: =src/lib/features/acordes/chords.ts=
++ State :: =src/lib/features/acordes/quiz.svelte.ts=, =acordes=
+
+* Tables
+
++ =QUIZ_CHORDS= :: the chords the quiz draws from, 9 major and 9 minor: those in which A is a named function (1, 2, b3/3, 4, 5, b6, 6, b7, 7). Each has =root= (MIDI, 60–71), =type= (=maior= / =menor=), =intervals= (=[0,4,7]= or =[0,3,7]=) and =aFunc=, the label shown when revealed.
++ =TEACHER_CHORDS= :: all twelve roots of each quality, chromatic, for the teacher panel; =aFunc= is =—= where A isn't one of the named functions.
++ =FUNCS= :: the twelve answer symbols, indexed by semitones above the root (=1=, =b2=, =2=, … =7=). =FUNC_NAMES= is the same in words, for the feedback.
++ =chordPool(pool)= :: =major=, =minor= or both concatenated.
+
+* State and flow
+
+=octave= (3, 4 or 5) places A at MIDI =12·(octave+1)+9= and moves the chord down or up an octave with it (=chordMidis=). =aSemis= is A's distance above the chord root.
+
++ /Novo acorde aleatório/ :: =newRandom()= picks from =chordPool(randPool)= (/Sortear/: both, major, minor) and =load()=s it: everything resets, the name and notes are blurred, and the chord plays 80 ms later.
++ /Revelar acorde/ :: toggles =revealed=; revealed, the badge /A = <aFunc>/ shows.
++ /Qual acorde está tocando?/ :: a grid of =chordPool(guessPool)= (/Maior/, /Menor/, /Ambos/; 5 columns, 6 for both). The first click answers: the right chord is marked correct, a wrong pick wrong, the chord is revealed, and feedback explains what A is. Later clicks do nothing until a new chord. Changing =guessPool= rebuilds the grid and drops its marks, as the legacy rebuild did.
++ /Qual função o A exerce?/ :: pick a function (highlighted gold), then /Verificar função/; marks, reveal and feedback as above. The button is disabled until something is picked and after answering.
++ /Modo professor/ :: every root of the chosen quality; clicking one loads it with =teacherMode = true=: it plays and is blurred like any other, but answers aren't scored.
+
+* Scoring
+
+| Question | Tag   | Prompt            | Answer                       |
+|----------+-------+-------------------+------------------------------|
+| Chord    | =H·A= | =<picked> → <chord>= | =✓= or =✗ era <chord>=       |
+| Function | =H·F= | =<chord>=         | =A = <picked>[ → <correct>]= |
+
+Not scored in teacher mode.

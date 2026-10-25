@@ -1,0 +1,28 @@
+#+TITLE: Intervalos
+#+OPTIONS: ^:{}
+
+Hear two notes and name the interval, from unison to octave. Scores under module =i=, with a hit rate per interval.
+
++ Page :: =src/routes/(app)/intervalos/+page.svelte=
++ Tables :: =src/lib/features/intervalos/intervals.ts=
++ State :: =src/lib/features/intervalos/quiz.svelte.ts=, =intervalos=
+
+* Tables
+
++ =INTERVALS= :: 13 entries, 0–12 semitones: =symbol= (=2ª m=), =short= (=2m=), =name= (=Segunda Menor=), =groups= (any of =consonant=, =dissonant=, =diatonic=) and a one-line =theory= shown in the feedback.
++ =ROOTS= :: =fixed_A= (A4), =fixed_C= (C4), =random= (the seven naturals C4–B4).
++ =NOTE_PT= :: Portuguese note names (=Lá=, =Si♭=); anything not in it is shown as is.
+
+* State and flow
+
++ =next()= :: picks an interval from the active ones and a root from =ROOTS[rootMode]=; with direction /Aleatória/ (=both=) the actual direction is a coin flip. The second note is hidden (blurred) and the sequence plays 80 ms later. /Novo intervalo/ calls it.
++ Playback :: /Nota 1/, /Nota 2/, /Seq./ (one then the other), /Harm./ (together).
++ /Revelar resposta/ :: toggles =revealed=. The direction tag (/↑ ascendente/) is always shown for a fixed direction; for /Aleatória/ it's hidden until revealed (=directionShown=, which mirrors the legacy display toggling exactly).
++ /Intervalos ativos/ :: one toggle per interval; the last active one can't be turned off. /Todos/, /Consonantes/, /Dissonantes/, /Diatônicos/ set the whole filter. If the current interval drops out of the filter, a new one is drawn (except after /Todos/, which can't remove it). /Todos/ is always the lit button, whichever was pressed last: legacy markup.
++ Answer grid :: the active intervals, in 1–7 columns (=answerCols=). Click selects (gold), /Verificar/ answers: correct and wrong marks, everything revealed, feedback with the interval's =theory=. A filter change clears the marks and the selection highlight, but not the selection itself: /Verificar/ still answers with it.
+
+* Scoring and stats
+
+=score.record()= with tag =I=, prompt =<nota 1> → <nota 2>= in Portuguese, answer =<short>= or =<picked short> → <correct short>=, and =semitones=.
+
+/Desempenho por intervalo/ is derived from =score.answers=: one cell per interval answered at least once this session, with its hit rate (green ≥ 70%, gold ≥ 40%, red below). The grid's column count (=statCols=) is set only after an answer, to at most 7: after /zerar pontuação/ the empty message keeps the previous column count, as the legacy code did. Below it, this quiz's last 30 answers.

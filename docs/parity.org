@@ -1,0 +1,55 @@
+#+TITLE: Parity with the legacy app
+#+OPTIONS: ^:{}
+
+* The rule
+
+The SvelteKit app is a 1:1 port of the legacy single-page app: the same behaviour, output and look, legacy bugs and quirks included. Structure may change (routes for tabs, typed modules, Tailwind for CSS); nothing a user can observe may, except the one deviation below. A bug noticed while porting is ported as it is and listed here; fixing it is separate work, done after the port and recorded as a change from the legacy.
+
+* The reference
+
+=index.html= at the repo root, as committed (=git show HEAD:index.html=; 4,314 lines, HTML, CSS and JS in one file). It's kept unformatted (=.prettierignore=) and not served by the build. The uncommitted =js/= and =css/= split in some working trees is a Prettier reformat of the same code and isn't the reference: the reformat broke Régua's reference-button highlight (=textContent === name= now sees the padded whitespace).
+
+Library versions are the ones that page loaded:
+
+| Library  | Legacy                                                   | Port                    |
+|----------+----------------------------------------------------------+-------------------------|
+| VexFlow  | =cdn.jsdelivr.net/npm/vexflow@4.2.2= (line 8)            | =vexflow= 4.2.2         |
+| three.js | cdnjs =three.js/r128/three.min.js=, loaded on demand (line 3825) | =three= 0.128.0  |
+| Firebase | =gstatic.com/firebasejs/10.8.0/= modules (lines 685–687) | =firebase= 10.8.0       |
+
+Pinned exactly in =package.json=, no caret. Code written against them uses their APIs: VexFlow 4's snake_case options (=num_beats=, =first_note=), r128 without =outputColorSpace=.
+
+* The deviation
+
++ Journal entries (Prática) are rendered as text. The legacy page built each row with =innerHTML= from the stored title and note (line 2190), so HTML typed into them rendered; the port escapes it. Whether to reproduce that is an open decision.
+
+* Kept on purpose
+
+Each is a legacy behaviour that looks wrong and is reproduced; the code comments at each say so.
+
++ Acordes :: changing /Maior/ / /Menor/ / /Ambos/ in the guess grid drops its marks (the legacy grid was rebuilt).
++ Intervalos :: /Todos/ is always the highlighted filter button. A filter change drops the answer marks and the selection highlight but keeps the selection, so /Verificar/ still answers with it. The direction tag is hidden and shown exactly as the legacy toggling did (=directionShown=). The stats grid keeps its last column count after /zerar pontuação/ (=statCols=).
++ Ditado :: inside a beat group, notes are sorted by pitch, not time (=model.ts=, the sort after =offset= is overwritten: legacy line 2897), so the staff and playback can differ from the degree answer. /Ouvir/, /Tônica/ and the LilyPond export read the key and tempo from the form at that moment. The LilyPond =<pre>= is never filled. Dots are drawn as modifiers on undotted notes, in a non-strict voice. Only =groups= reaches =Beam.generateBeams=: the legacy call also passed =beamRests= and =maintainStemDirections=, which VexFlow 4 ignores (it reads snake_case). Engraving errors are swallowed per element. =nameAt()= relies on JS =%= keeping the sign. Picking an option after /Revelar resposta/ is scored.
++ Contraponto :: /Parar/ hides the playhead but already-scheduled notes keep sounding.
++ Afinador :: the microphone stays on across pages; the non-standard =latency: 0= constraint is passed; the reference A isn't clamped.
++ Prática :: /Apagar tudo/ keeps its red over the hover colours (a legacy inline style). The Pomodoro chime only sounds if audio was already started.
++ Layout :: the Afinador's panels, once on, sit in a plain block without the column gap.
++ Stats are written to Firestore and never read back, so every session starts at zero.
+
+* How it was checked
+
+On 2026-10-25, against the reference served locally, in headless Chromium driven over the DevTools protocol, at 1280×900 and 390px, with pixel diffs of full-page screenshots:
+
++ Identical on first load: Manifesto, Prática, Metrônomo, Histórico, Apreciação, Afinador, Régua, Contraponto, Harmonia 3D (the WebGL canvas included).
++ Different only in their random content (the chord, interval or melody drawn): Acordes, Intervalos, Ditado.
++ The mobile sidebar, open and closed: identical.
+
+A functional pass by hand through each quiz: scoring, badges and history worked, with no console errors.
+
+The scripts for this lived outside the repo and aren't in it.
+
+* Not checked
+
++ Interactions, compared against the reference. A full check needs the same random draws in both apps (seeded =Math.random=), scripted flows run on both with DOM and screenshot comparison (hover and focus states included), the =AudioContext= calls recorded and compared, and Firebase mocked. Not built yet.
++ Firebase in the deployed build: sign-in, the journal and stats were exercised against the local backend only.
++ Browsers other than Chromium.

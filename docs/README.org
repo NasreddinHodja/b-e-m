@@ -1,0 +1,40 @@
+#+TITLE: B.E.M documentation
+#+OPTIONS: ^:{}
+
+B.E.M (Bloco de Estudos Musicais) is a music-education SPA: ear-training quizzes, a melodic dictation generator, a Fux counterpoint checker, a 3D view of diatonic harmony, a tuner, a metronome and a practice journal. The UI is in Portuguese. It was a single =index.html=; it is now SvelteKit, ported 1:1 from that file, which stays in the repo as the reference ([[file:parity.org][Parity]]).
+
+* Architecture
+
++ [[file:architecture/overview.org][Overview]]: stack, routes, the layers under =src/lib/=, how state lives, boot and sign-in
++ [[file:architecture/backend.org][Backend]]: auth, the journal and the stats behind one interface; Firebase and the local dev backend
++ [[file:architecture/audio.org][Audio]]: the shared synth, its signal graph and output profiles
+
+* Features
+
+One file per view: what it does, where its logic and state are, what it scores.
+
++ [[file:features/acordes.org][Acordes]]: which chord is playing, and what A is in it
++ [[file:features/intervalos.org][Intervalos]]: which interval is this
++ [[file:features/ditado.org][Ditado melódico]]: generated melodies and Slonimsky patterns, engraved with VexFlow
++ [[file:features/contraponto.org][Contraponto]]: first- and second-species rules, a piano roll, LilyPond export
++ [[file:features/regua.org][Régua]]: the interval ruler
++ [[file:features/harmonia-3d.org][Harmonia 3D]]: diatonic chords as three.js blocks along a time axis
++ [[file:features/afinador.org][Afinador]]: microphone tuner
++ [[file:features/pratica.org][Prática and Metrônomo]]: the 10 pillars, the journal, the Pomodoro timer, the metronome
++ [[file:features/pages.org][Apreciação, Manifesto, Histórico]]: the static pages and the session history
+
+* Design
+
++ [[file:design/system.org][Design system]]: tokens, type scale, Tailwind without preflight, shared components, class conventions
+
+* Parity
+
++ [[file:parity.org][Parity with the legacy app]]: the rule, the reference, the pinned versions, every legacy quirk kept on purpose, the one deviation, how it was checked and what wasn't
+
+* Guide
+
++ [[file:guide/deploy.org][Deploying]]: GitHub Pages, the base path, Firebase's authorized domains
+
+* Contributing
+
++ [[file:../CONTRIBUTING.org][Contributing]]: setup, scripts, checks, code conventions, commits

@@ -1,0 +1,69 @@
+#+TITLE: Contributing
+#+OPTIONS: ^:{}
+
+* Prerequisites
+
++ Node.js 24 (CI's version)
++ pnpm 12 (=pnpm/action-setup= in CI uses 12.3.4)
+
+* Setup
+
+#+begin_src sh
+git clone https://github.com/jfaragao-commits/b-e-m.git
+cd b-e-m
+pnpm install
+pnpm dev         # http://localhost:5173, signed in, no Firebase
+#+end_src
+
+=pnpm dev= uses the local backend: you start signed in as =dev@local=, signing out works, any e-mail and password sign back in, and the journal and stats are in =localStorage=. =VITE_BACKEND=firebase pnpm dev= uses the real project ([[file:docs/architecture/backend.org][Backend]]).
+
+=pnpm-workspace.yaml='s =allowBuilds= lets only =esbuild= run its install script; Firebase's =@firebase/util= and =protobufjs= postinstalls are refused.
+
+* Scripts
+
+| Command            | Description                                                   |
+|--------------------+---------------------------------------------------------------|
+| =pnpm dev=         | Dev server, local backend                                     |
+| =pnpm build=       | Static build into =build/=, Firebase backend, =404.html= fallback |
+| =pnpm preview=     | Serve =build/=                                                |
+| =pnpm check=       | =svelte-kit sync= and =svelte-check= (TypeScript, strict)     |
+| =pnpm check:watch= | The same, on every change                                     |
+| =pnpm lint=        | =prettier --check .= and ESLint                               |
+| =pnpm format=      | =prettier --write .=                                          |
+
+There are no automated tests yet; see [[file:docs/parity.org][Parity]] for how the port was checked and what isn't.
+
+* Before a commit
+
+#+begin_src sh
+pnpm format
+pnpm lint
+pnpm check
+pnpm build
+#+end_src
+
+All four pass on every commit.
+
+* Code conventions
+
++ The port is 1:1 with =index.html=. Don't change what a user sees or hears, including legacy bugs, without recording it in [[file:docs/parity.org][Parity]]. When porting a legacy line that looks wrong, port it and say so in a comment.
++ A view is a route under =src/routes/(app)/<view>/= plus an entry in =NAV= (=src/lib/nav.ts=). Its logic goes in =src/lib/features/<view>/=: pure =.ts= modules for tables and algorithms, one =*.svelte.ts= class for state and actions, exported as a singleton. The page renders that state and calls its methods; it holds no logic beyond presentation ([[file:docs/architecture/overview.org][Overview]]).
++ Scored answers go through =score.record()=; sound through =audio=; the backend through =session=. Nothing imports Firebase outside =src/lib/backend/=.
++ Imports from =src/lib= use =#lib/...= with the =.js= extension (=#lib/audio/engine.svelte.js= for =engine.svelte.ts=). Links and redirects use =resolve()= from =$app/paths= with the route ID, group included: =resolve('/(app)/acordes')=.
++ Svelte 5 runes only (=vite.config.ts= forces runes mode); props are typed.
++ Styles are Tailwind utilities with this repo's tokens; see [[file:docs/design/system.org][Design system]] for what exists (Tailwind's default colours and sizes don't) and why preflight is off.
++ Comments say why, or what a non-obvious value is; doc comments (=/** */=) on exported functions, classes and non-obvious fields.
++ Docs are Org, under =docs/=; a change to behaviour or structure updates the doc that describes it.
+
+* Commits
+
+[[https://www.conventionalcommits.org][Conventional Commits]]: =feat=, =fix=, =docs=, =chore=, =ci=, =test=, =perf=, =refactor=, =style=.
+
++ The subject is lowercase and states what is now true, not a task: =feat: the app on SvelteKit, one route per tab=, =ci: deploy to GitHub Pages from Actions=.
++ The body, when there is one, is prose or =-= bullets wrapped at about 72 columns, with the specifics: what changed, file paths, what was measured and how.
++ One concern per commit.
++ No =Co-Authored-By= or tool attribution lines.
+
+* Deploying
+
+See [[file:docs/guide/deploy.org][Deploying]].

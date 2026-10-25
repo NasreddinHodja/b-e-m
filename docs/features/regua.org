@@ -1,0 +1,19 @@
+#+TITLE: Régua
+#+OPTIONS: ^:{}
+
+The interval ruler: thirteen rows, unison at the bottom to octave at the top, coloured by consonance. Clicking a row plays the reference note, then the interval above it. Not scored.
+
++ Page :: =src/routes/(app)/regua/+page.svelte=
++ Tables :: =src/lib/features/regua/intervals.ts=
++ State :: =src/lib/features/regua/regua.svelte.ts=, =regua=
+
+* Tables
+
++ =REGUA= :: one row per semitone, 0–12: =symbol= (=1P=, =2m= … =8J=), =full= name, =quality= label and =tone=: =green= (stable consonance), =gold= (neutral), =red= (dissonance). The tritone row has =tritone: true= and a red band. The colours are the legacy page's own: 2M is green, 3M red.
++ =REFERENCES= :: C4 (/DÓ CENTRAL/), A4 (/LÁ — 440 HZ/), G4 (/SOL/).
+
+* Flow
+
++ A reference button sets =regua.reference=; the big name and its caption follow it.
++ =play(idx)= :: the reference (1.2 s), then reference + interval 1.3 s later (1.2 s). The row lights for 2.8 s (=playing=, a =SvelteSet=; its dot pulses), lighting another clears the previous one, and the hint bar shows the interval's name, symbol, semitones and quality.
++ /▶/ in the hint bar :: =togglePlayAll()= plays every row bottom to top, 2.9 s apart; pressing again stops before the next one.

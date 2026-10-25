@@ -1,9 +1,8 @@
 #+TITLE: TODO
-#+TODO: TODO STRT WAIT | DONE
 
 The work queue, from the owner's =notes.org= (which isn't tracked). Each item says what's wrong, where, and the plan. =WAIT= says what input it needs; =DONE= says what was done, with the commit. Every visible change is also listed under "Changes since the port" in [[file:docs/parity.org][docs/parity.org]].
 
-* DONE Port to SvelteKit
+* TODO Port to SvelteKit
 pnpm, TypeScript, ESLint + Prettier, Tailwind with the styles ported, logic encapsulated by responsibility, 1:1 with the legacy page.
 
 Done in 2f33590 (the app), 8656109 (Pages deploy), 665fe09 (docs). Each tab is a route, each view's logic is in =src/lib/features/<view>/= with its state in a singleton class, and the backend, audio and score are separate modules ([[file:docs/architecture/overview.org][overview]]). Checked by screenshot diffs against =index.html=: 9 of 12 views pixel-identical on first load, the other 3 differ only in random content. Interactions weren't compared; that's under the tests item.
@@ -28,20 +27,18 @@ Done in 41cf9fc. The =(app)= wrapper pads 220px on the left from 768px up and =m
 
 Done in b6f7fb1. The badge is always rendered and =invisible= (=visibility: hidden=, so also hidden from screen readers) until revealed. The panel measured 188.8px before and after revealing, in headless Chromium.
 
-* TODO Acordes: /Qual acorde está tocando?/ shifts the layout
-Two causes:
-+ Answering shows the feedback box under the grid. Owner is fine with a shift here if it animates smoothly.
-+ /Maior/ / /Menor/ / /Ambos/ change the grid from 2 rows (9 chords in 5 columns) to 3 (18 in 6). This one must not shift: give the grid the height of the tallest (3 rows).
+* DONE Acordes: /Qual acorde está tocando?/ shifts the layout
+Two causes: answering showed the feedback box at once, and /Maior/ / /Menor/ / /Ambos/ switched the grid between 2 rows (9 chords in 5 columns) and 3 (18 in 6).
 
-Plan: the feedback box animates its height in and out (shared =Feedback= component, see below); the grid gets a min height of 3 rows.
+Done in 9a27e12 (grid) and a4988a3 (feedback). Invisible cells fill the grid to 3 rows whichever pool is shown, so its height doesn't change (89px on all three tabs, measured). The feedback now slides open (see the Intervalos item).
 
-* TODO Acordes: /Qual função o A exerce?/ feedback shifts the layout
-The feedback box appears under /Verificar função/. Owner: animating the expansion is fine.
+* DONE Acordes: /Qual função o A exerce?/ feedback shifts the layout
+Done in a4988a3: the shared feedback box slides open and closed (see below).
 
-Plan: same =Feedback= animation.
+* DONE Intervalos: /Qual é o intervalo?/ feedback shifts the layout
+All three questions already used one component, =src/lib/ui/Feedback.svelte=.
 
-* TODO Intervalos: /Qual é o intervalo?/ feedback shifts the layout
-Same as the function question; the owner notes one shared component fixes both. It already is one: =src/lib/ui/Feedback.svelte=, used by all three questions. Animate it once (height and fade in, out on reset), honouring =prefers-reduced-motion=.
+Done in a4988a3: it animates its height with =svelte/transition='s =slide= (220ms), opening on an answer and closing on the next question; with =prefers-reduced-motion= it's instant. Measured on Intervalos: 223 → 331px and back over about 240ms, instead of a jump.
 
 * TODO Acordes: /Modo professor/ collapsible, at the top
 The teacher panel is at the bottom and always open, so students see the chord list. Owner: maybe keep it at the top, collapsed, toggled open.

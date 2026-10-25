@@ -45,7 +45,7 @@ Utilities, for quiz answer buttons, which must override a button's own colours w
 + =TabBtn= :: small toggle; =active= fills it.
 + =CheckBtn= :: full-width /Verificar/ button, dims when disabled.
 + =RevealBtn= :: small outlined button for reveal toggles.
-+ =Feedback= :: the result box under an answer, green or red, from a =FeedbackResult= (=ok=, =title=, =explanation=, optional =theory=); nothing while =null=.
++ =Feedback= :: the result box under an answer, green or red, from a =FeedbackResult= (=ok=, =title=, =explanation=, optional =theory=); nothing while =null=. It opens and closes with a 220ms height animation (=slide=), instantly under =prefers-reduced-motion=.
 + =HistoryList= :: rows of scored answers; =showTag= adds the module column; =class= replaces the default =max-h-[180px]=.
 + =OptsRow=, =OptsLabel= :: a wrapping row of controls (default =mt-2.5=, replaceable) and its faint label.
 + =BemLogo= :: the round /BEM/ mark; =size= and =fontSize= in px.

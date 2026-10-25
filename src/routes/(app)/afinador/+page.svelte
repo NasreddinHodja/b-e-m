@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Mic from '@lucide/svelte/icons/mic';
+  import MicOff from '@lucide/svelte/icons/mic-off';
   import { tuner, type TunerMode } from '#lib/features/afinador/tuner.svelte.js';
   import Btn from '#lib/ui/Btn.svelte';
   import OptsRow from '#lib/ui/OptsRow.svelte';
@@ -59,7 +61,7 @@
         O afinador usa o microfone do dispositivo para detectar a nota tocada em tempo real.<br />
         Funciona com qualquer instrumento ou voz.
       </p>
-      <Btn primary onclick={() => tuner.start()}>🎤 Ativar microfone</Btn>
+      <Btn primary onclick={() => tuner.start()}><Mic size={16} />Ativar microfone</Btn>
     </Panel>
   {:else}
     <!-- The legacy panels here sat in a plain block, without the column gap. -->
@@ -143,7 +145,7 @@
           </div>
         </div>
         <OptsRow>
-          <Btn onclick={() => tuner.stop()}>⏹ Desligar microfone</Btn>
+          <Btn onclick={() => tuner.stop()}><MicOff size={16} />Desligar microfone</Btn>
         </OptsRow>
       </Panel>
     </div>

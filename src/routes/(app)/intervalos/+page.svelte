@@ -1,4 +1,8 @@
 <script lang="ts">
+  import EighthNote from '@lucide/svelte/icons/eighth-note';
+  import EighthNotes from '@lucide/svelte/icons/eighth-notes';
+  import Piano from '@lucide/svelte/icons/piano';
+  import Shuffle from '@lucide/svelte/icons/shuffle';
   import { audio } from '#lib/audio/engine.svelte.js';
   import { INTERVALS } from '#lib/features/intervalos/intervals.js';
   import { intervalos as q } from '#lib/features/intervalos/quiz.svelte.js';
@@ -80,11 +84,13 @@
 
 <Panel label="Reprodução">
   <div class="grid grid-cols-4 gap-2">
-    <Btn onclick={() => q.playNote1()}>♩ Nota 1</Btn>
-    <Btn onclick={() => q.playNote2()}>♩ Nota 2</Btn>
-    <Btn onclick={() => q.playSequence()}>♫ Seq.</Btn>
-    <Btn onclick={() => q.playHarmonic()}>♬ Harm.</Btn>
-    <Btn primary class="col-span-full" onclick={() => q.next()}>↻ Novo intervalo</Btn>
+    <Btn onclick={() => q.playNote1()}><EighthNote size={16} />Nota 1</Btn>
+    <Btn onclick={() => q.playNote2()}><EighthNote size={16} />Nota 2</Btn>
+    <Btn onclick={() => q.playSequence()}><EighthNotes size={16} />Seq.</Btn>
+    <Btn onclick={() => q.playHarmonic()}><Piano size={16} />Harm.</Btn>
+    <Btn primary class="col-span-full" onclick={() => q.next()}
+      ><Shuffle size={16} />Novo intervalo</Btn
+    >
   </div>
   <OptsRow>
     <OptsLabel>Direção:</OptsLabel>

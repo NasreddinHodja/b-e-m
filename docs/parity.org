@@ -32,6 +32,7 @@ Deliberate changes made after the port, each its own commit. The reference stays
 + Quizzes :: the feedback box under an answer (Acordes' two questions, Intervalos) slides open and closed instead of appearing at once.
 + Acordes :: /Modo professor/ is the first panel instead of the last, and collapsed until its header is clicked.
 + Ditado :: the engraved staff is cropped to its drawing and centred in the /Mapa métrico/ paper; the legacy page left it at the top left of a fixed 180px-tall canvas. /🔒 ouça e adivinhe/ over the blurred staff is on a dark chip instead of straight on the paper. The /Representação musical — fonte LilyPond/ block slides open and closed (a button instead of =<details>=) and has a ▸ that turns when open.
++ Icons :: Lucide icons in place of the Unicode and emoji glyphs in the nav, the sidebar and the buttons (♬ ↔ ⚖ 📓 🚪 🎧 ▶ ⏹ 🗑 …), sized to their text.
 
 * Kept on purpose
 

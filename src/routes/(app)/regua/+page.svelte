@@ -1,4 +1,6 @@
 <script lang="ts">
+  import CircleDot from '@lucide/svelte/icons/circle-dot';
+  import Play from '@lucide/svelte/icons/play';
   import { REFERENCES, REGUA, type Tone } from '#lib/features/regua/intervals.js';
   import { regua } from '#lib/features/regua/regua.svelte.js';
 
@@ -149,7 +151,7 @@
   <div
     class="flex items-center gap-[0.8rem] border border-line bg-surface-2 px-4 py-[0.8rem] text-2xs leading-[1.5] tracking-[0.1em] text-fg-faint uppercase"
   >
-    <span class="shrink-0 text-[18px] text-fg-mid">◉</span>
+    <CircleDot size={18} class="shrink-0 text-fg-mid" />
     <span>
       {#if regua.last}
         {regua.last.full} ({regua.last.symbol}) — {regua.last.semitones} semitons<br />{regua.last
@@ -161,9 +163,10 @@
     <button
       type="button"
       class="ml-auto flex size-9 shrink-0 items-center justify-center rounded-full border border-line-lt bg-surface text-base text-fg transition-all duration-[140ms] hover:border-accent hover:bg-accent hover:text-bg"
+      aria-label="Tocar todos os intervalos"
       onclick={() => regua.togglePlayAll()}
     >
-      ▶
+      <Play size={16} />
     </button>
   </div>
 </div>

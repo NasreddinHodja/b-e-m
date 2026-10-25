@@ -45,6 +45,7 @@
     "#lib/*": "./src/lib/*"
   },
   "dependencies": {
+    "@lucide/svelte": "^1.61.0",
     "firebase": "10.8.0",
     "three": "0.128.0",
     "vexflow": "4.2.2"

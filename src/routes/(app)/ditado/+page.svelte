@@ -1,4 +1,13 @@
 <script lang="ts">
+  import Check from '@lucide/svelte/icons/check';
+  import ChevronRight from '@lucide/svelte/icons/chevron-right';
+  import Copy from '@lucide/svelte/icons/copy';
+  import Download from '@lucide/svelte/icons/download';
+  import EighthNote from '@lucide/svelte/icons/eighth-note';
+  import Lock from '@lucide/svelte/icons/lock';
+  import Play from '@lucide/svelte/icons/play';
+  import Shuffle from '@lucide/svelte/icons/shuffle';
+  import SlidersHorizontal from '@lucide/svelte/icons/sliders-horizontal';
   import { prefersReducedMotion } from 'svelte/motion';
   import { slide } from 'svelte/transition';
   import { ditado as d } from '#lib/features/ditado/ditado.svelte.js';
@@ -77,9 +86,15 @@
 
   <details class="group mt-3.5 border-t border-line pt-3">
     <summary
-      class="flex cursor-pointer list-none items-center justify-between py-1 text-2xs tracking-[0.22em] text-fg-mid uppercase select-none group-open:text-gold after:text-base after:transition-[transform,color] after:duration-150 after:content-['▸'] group-open:after:[transform:rotate(90deg)] group-open:after:text-gold [&::-webkit-details-marker]:hidden"
+      class="flex cursor-pointer list-none items-center justify-between py-1 text-2xs tracking-[0.22em] text-fg-mid uppercase select-none group-open:text-gold [&::-webkit-details-marker]:hidden"
     >
-      ⚙ Parâmetros avançados
+      <span class="flex items-center gap-2"
+        ><SlidersHorizontal size={14} />Parâmetros avançados</span
+      >
+      <ChevronRight
+        size={14}
+        class="transition-transform duration-150 group-open:rotate-90 group-open:text-gold"
+      />
     </summary>
     <div class="animate-[fade-up_0.18s_ease] pt-3">
       <div class={s.mode === 'melody' ? 'block' : 'hidden'}>
@@ -192,9 +207,9 @@
 
 <Panel label="Ações">
   <div class="grid grid-cols-2 gap-2">
-    <Btn primary onclick={() => d.generate()}>↻ Gerar exercício</Btn>
-    <Btn onclick={() => d.play()}>▶ Ouvir</Btn>
-    <Btn onclick={() => d.playRoot()}>♪ Tônica</Btn>
+    <Btn primary onclick={() => d.generate()}><Shuffle size={16} />Gerar exercício</Btn>
+    <Btn onclick={() => d.play()}><Play size={16} />Ouvir</Btn>
+    <Btn onclick={() => d.playRoot()}><EighthNote size={16} />Tônica</Btn>
     <Btn class="col-span-full" onclick={() => d.reveal()}>Revelar resposta</Btn>
   </div>
 </Panel>
@@ -227,8 +242,8 @@
     >
       <!-- A dark chip: gold straight on the blurred paper was unreadable. -->
       <span
-        class="border border-gold/40 bg-bg/90 px-3.5 py-2 text-xs tracking-[0.3em] text-gold uppercase"
-        >🔒 ouça e adivinhe</span
+        class="flex items-center gap-2 border border-gold/40 bg-bg/90 px-3.5 py-2 text-xs tracking-[0.3em] text-gold uppercase"
+        ><Lock size={14} />ouça e adivinhe</span
       >
     </div>
   </div>
@@ -289,10 +304,10 @@
     onclick={() => (d.lilyOpen = !d.lilyOpen)}
   >
     <span>Representação musical — fonte LilyPond</span>
-    <span
-      class={['inline-block transition-transform duration-150', d.lilyOpen && 'rotate-90']}
-      aria-hidden="true">▸</span
-    >
+    <ChevronRight
+      size={14}
+      class={['shrink-0 transition-transform duration-150', d.lilyOpen && 'rotate-90']}
+    />
   </button>
   {#if d.lilyOpen}
     <div id="ditado-lily" transition:slide={{ duration: prefersReducedMotion.current ? 0 : 220 }}>
@@ -303,9 +318,12 @@
         <Btn
           class="[border-width:0_1px_0_0]! [border-color:var(--color-line)]!"
           pad="p-3"
-          onclick={() => d.copyLily()}>{d.copyLabel}</Btn
+          onclick={() => d.copyLily()}
+          >{#if d.copied}<Check size={16} />{:else}<Copy size={16} />{/if}{d.copyLabel}</Btn
         >
-        <Btn class="[border-width:0]!" pad="p-3" onclick={() => d.downloadLily()}>⇩ Baixar .ly</Btn>
+        <Btn class="[border-width:0]!" pad="p-3" onclick={() => d.downloadLily()}
+          ><Download size={16} />Baixar .ly</Btn
+        >
       </div>
     </div>
   {/if}

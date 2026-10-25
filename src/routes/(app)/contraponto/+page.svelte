@@ -1,4 +1,10 @@
 <script lang="ts">
+  import Check from '@lucide/svelte/icons/check';
+  import Copy from '@lucide/svelte/icons/copy';
+  import Download from '@lucide/svelte/icons/download';
+  import Play from '@lucide/svelte/icons/play';
+  import Square from '@lucide/svelte/icons/square';
+  import X from '@lucide/svelte/icons/x';
   import { contraponto as c, voiceLabel } from '#lib/features/contraponto/contraponto.svelte.js';
   import type { Species } from '#lib/features/contraponto/rules.js';
   import Panel from '#lib/ui/Panel.svelte';
@@ -6,7 +12,7 @@
   import Roll from './Roll.svelte';
 
   const btn =
-    'border px-2.5 py-1.5 font-mono text-xs tracking-[0.08em] uppercase transition-all duration-[140ms] disabled:cursor-not-allowed disabled:opacity-35';
+    'inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-xs tracking-[0.08em] uppercase transition-all duration-[140ms] disabled:cursor-not-allowed disabled:opacity-35';
   const plain = [
     btn,
     'border-line-lt bg-transparent text-fg enabled:hover:border-accent enabled:hover:bg-accent enabled:hover:text-bg'
@@ -27,8 +33,8 @@
     Escreva ou desenhe as vozes, ouça o resultado e veja as regras apontando cada problema.
   </p>
   <div class="mt-2.5 flex flex-wrap items-center gap-x-3.5 gap-y-2">
-    <button type="button" class={primary} onclick={() => c.play()}>▶ Tocar</button>
-    <button type="button" class={plain} onclick={() => c.stop()}>■ Parar</button>
+    <button type="button" class={primary} onclick={() => c.play()}><Play size={14} />Tocar</button>
+    <button type="button" class={plain} onclick={() => c.stop()}><Square size={14} />Parar</button>
     <label class={barLabel}
       >Andamento
       <input type="range" min="40" max="160" class="w-[100px]" bind:value={c.bpm} />
@@ -48,8 +54,12 @@
     <button type="button" class={plain} onclick={() => c.setExample(1)}>Exemplo 1ª esp.</button>
     <button type="button" class={plain} onclick={() => c.setExample(2)}>Exemplo 2ª esp.</button>
     <button type="button" class={plain} onclick={() => c.generateLily()}>Gerar LilyPond</button>
-    <button type="button" class={plain} onclick={() => c.copyLily()}>{c.copyLabel}</button>
-    <button type="button" class={plain} onclick={() => c.saveLily()}>Salvar .ly</button>
+    <button type="button" class={plain} onclick={() => c.copyLily()}
+      >{#if c.copied}<Check size={14} />{:else}<Copy size={14} />{/if}{c.copyLabel}</button
+    >
+    <button type="button" class={plain} onclick={() => c.saveLily()}
+      ><Download size={14} />Salvar .ly</button
+    >
   </div>
 </Panel>
 
@@ -99,10 +109,10 @@
               <button
                 type="button"
                 class={plain}
-                style:padding="1px 8px"
+                style:padding="4px 6px"
                 title="Remover voz"
                 aria-label="Remover {voiceLabel(i)}"
-                onclick={() => c.removeVoice(i)}>×</button
+                onclick={() => c.removeVoice(i)}><X size={14} /></button
               >
             {/if}
           </div>

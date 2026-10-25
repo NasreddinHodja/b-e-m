@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Play from '@lucide/svelte/icons/play';
+  import Square from '@lucide/svelte/icons/square';
   import { metronome } from '#lib/features/pratica/metronome.svelte.js';
   import Btn from '#lib/ui/Btn.svelte';
   import OptsRow from '#lib/ui/OptsRow.svelte';
@@ -31,7 +33,9 @@
     oninput={(e) => metronome.setBpm(parseInt(e.currentTarget.value))}
   />
   <OptsRow class="mt-0">
-    <Btn onclick={() => metronome.toggle()}>{metronome.active ? '⏹ Parar' : '▶ Iniciar'}</Btn>
+    <Btn onclick={() => metronome.toggle()}
+      >{#if metronome.active}<Square size={16} />Parar{:else}<Play size={16} />Iniciar{/if}</Btn
+    >
     <Btn onclick={() => metronome.tap()}>Tap Tempo</Btn>
   </OptsRow>
 </Panel>

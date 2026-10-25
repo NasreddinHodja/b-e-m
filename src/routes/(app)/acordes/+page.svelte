@@ -1,4 +1,8 @@
 <script lang="ts">
+  import ChevronRight from '@lucide/svelte/icons/chevron-right';
+  import EighthNote from '@lucide/svelte/icons/eighth-note';
+  import Piano from '@lucide/svelte/icons/piano';
+  import Shuffle from '@lucide/svelte/icons/shuffle';
   import { prefersReducedMotion } from 'svelte/motion';
   import { slide } from 'svelte/transition';
   import { audio } from '#lib/audio/engine.svelte.js';
@@ -33,10 +37,10 @@
     aria-controls="teacher-panel"
     onclick={() => (q.teacherOpen = !q.teacherOpen)}
   >
-    <span
-      class={['inline-block transition-transform duration-150', q.teacherOpen && 'rotate-90']}
-      aria-hidden="true">▸</span
-    >
+    <ChevronRight
+      size={14}
+      class={['shrink-0 transition-transform duration-150', q.teacherOpen && 'rotate-90']}
+    />
     Modo professor
     <span class="ml-1.5 bg-gold px-[7px] py-px text-2xs tracking-[0.1em] text-bg uppercase">
       sem pontuação
@@ -133,9 +137,9 @@
 
 <Panel label="Reprodução">
   <div class="grid grid-cols-2 gap-2">
-    <Btn onclick={() => q.playA()}>♩ Tocar Lá (A)</Btn>
-    <Btn onclick={() => q.playChord()}>♬ Tocar acorde</Btn>
-    <Btn primary onclick={() => q.newRandom()}>↻ Novo acorde aleatório</Btn>
+    <Btn onclick={() => q.playA()}><EighthNote size={16} />Tocar Lá (A)</Btn>
+    <Btn onclick={() => q.playChord()}><Piano size={16} />Tocar acorde</Btn>
+    <Btn primary onclick={() => q.newRandom()}><Shuffle size={16} />Novo acorde aleatório</Btn>
   </div>
   <div class="mt-2.5 flex flex-wrap items-center gap-1.5">
     <span class="text-xs tracking-[0.05em] text-fg-faint">Sortear:</span>

@@ -1,4 +1,9 @@
 <script lang="ts">
+  import Download from '@lucide/svelte/icons/download';
+  import Pause from '@lucide/svelte/icons/pause';
+  import Play from '@lucide/svelte/icons/play';
+  import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
+  import Trash from '@lucide/svelte/icons/trash';
   import { diario } from '#lib/features/pratica/diario.svelte.js';
   import { PILARES } from '#lib/features/pratica/pilares.js';
   import { pomodoro } from '#lib/features/pratica/pomodoro.svelte.js';
@@ -58,7 +63,7 @@
       <Btn type="submit">Registrar</Btn>
       <!-- The legacy inline style kept the red over the hover colors. -->
       <Btn class="border-red! text-red!" onclick={clearAll}>Apagar tudo</Btn>
-      <Btn onclick={() => diario.exportJson()}>↓ JSON</Btn>
+      <Btn onclick={() => diario.exportJson()}><Download size={16} />JSON</Btn>
     </div>
   </form>
   <div class="mt-2.5 flex max-h-[180px] flex-col gap-[3px] overflow-y-auto">
@@ -73,9 +78,9 @@
         </span>
         <button
           type="button"
-          class="ml-auto shrink-0 cursor-pointer border-0 bg-transparent font-[inherit] text-md text-fg-faint opacity-50 transition-opacity duration-[120ms] hover:text-red hover:opacity-100"
+          class="ml-auto flex size-7 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent font-[inherit] text-md text-fg-faint opacity-50 transition-opacity duration-[120ms] hover:text-red hover:opacity-100"
           aria-label="Apagar registro"
-          onclick={() => diario.remove(e.id, idx)}>🗑</button
+          onclick={() => diario.remove(e.id, idx)}><Trash size={15} /></button
         >
       </div>
     {:else}
@@ -95,9 +100,9 @@
   </div>
   <div class="mb-[0.8rem] text-xs tracking-[0.07em] text-fg-faint">{pomodoro.status}</div>
   <OptsRow class="mt-0">
-    <Btn onclick={() => pomodoro.start()}>▶ Iniciar</Btn>
-    <Btn onclick={() => pomodoro.stop()}>⏸ Parar</Btn>
-    <Btn onclick={() => pomodoro.reset()}>↺ Reset</Btn>
+    <Btn onclick={() => pomodoro.start()}><Play size={16} />Iniciar</Btn>
+    <Btn onclick={() => pomodoro.stop()}><Pause size={16} />Parar</Btn>
+    <Btn onclick={() => pomodoro.reset()}><RotateCcw size={16} />Reset</Btn>
   </OptsRow>
   <OptsRow>
     <OptsLabel>Ciclo:</OptsLabel>

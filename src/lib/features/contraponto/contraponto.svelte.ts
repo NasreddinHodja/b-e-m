@@ -55,6 +55,8 @@ class Contraponto {
   /** LilyPond textarea. Regenerated on every note change, editable in between. */
   lily = $state('');
   copyLabel = $state('Copiar .ly');
+  /** The source was just copied (the button shows a check). */
+  copied = $state(false);
   /** Playhead x in the roll, or null when stopped. */
   head = $state<number | null>(null);
 
@@ -287,8 +289,12 @@ class Contraponto {
     const s = this.lily || this.generateLily();
     if (!s || !navigator.clipboard) return;
     await navigator.clipboard.writeText(s);
-    this.copyLabel = 'Copiado ✓';
-    setTimeout(() => (this.copyLabel = 'Copiar .ly'), 1200);
+    this.copyLabel = 'Copiado';
+    this.copied = true;
+    setTimeout(() => {
+      this.copyLabel = 'Copiar .ly';
+      this.copied = false;
+    }, 1200);
   }
 
   saveLily() {

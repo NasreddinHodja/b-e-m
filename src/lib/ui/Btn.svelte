@@ -34,5 +34,7 @@
   ]}
   {...rest}
 >
-  <span class="relative z-1">{@render children()}</span>
+  <span class="relative z-1 inline-flex items-center justify-center gap-2"
+    >{@render children()}</span
+  >
 </button>

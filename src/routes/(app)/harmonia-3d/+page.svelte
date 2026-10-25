@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Play from '@lucide/svelte/icons/play';
+  import Square from '@lucide/svelte/icons/square';
   import { onMount } from 'svelte';
   import { FIELDS, HEX, PRESETS, pretty } from '#lib/features/harmonia3d/fields.js';
   import { harmonia as h, type ViewName } from '#lib/features/harmonia3d/harmonia.svelte.js';
@@ -257,13 +259,15 @@
         oninput={(e) => h.setBpm(+e.currentTarget.value)}
       />
       <OptsRow>
-        {#each [['play', h.playing ? '■ Parar' : '▶ Tocar'], ['undo', 'Desfazer'], ['clear', 'Limpar']] as [id, text] (id)}
+        {#each [['play', h.playing ? 'Parar' : 'Tocar'], ['undo', 'Desfazer'], ['clear', 'Limpar']] as [id, text] (id)}
           <Btn
             primary={id === 'play'}
             class="flex-auto disabled:cursor-not-allowed disabled:opacity-30"
             disabled={!h.prog.length}
             onclick={() => (id === 'play' ? h.togglePlay() : id === 'undo' ? h.undo() : h.clear())}
-            >{text}</Btn
+            >{#if id === 'play'}{#if h.playing}<Square size={16} />{:else}<Play
+                  size={16}
+                />{/if}{/if}{text}</Btn
           >
         {/each}
       </OptsRow>

@@ -52,6 +52,12 @@ Utilities, for quiz answer buttons, which must override a button's own colours w
 
 Props named =class=, =pad= or =padding= replace defaults rather than add to them, so a caller never fights a default utility.
 
+* Icons
+
+Lucide, through =@lucide/svelte=, one import per icon (=import Play from '@lucide/svelte/icons/play'=) so only the used ones are bundled. Lucide marks an icon =aria-hidden= unless it gets an accessible prop; an icon-only button carries an =aria-label=. Sizes: 16px in =Btn= and the nav (next to 11–13px text), 14px in small buttons, chevrons and the sidebar's output switch, 13px in the sidebar's 9px footer buttons. =Btn='s label is an =inline-flex= with an 8px gap, so an icon placed before the text lines up with it. The nav's icons are components in =NAV= (=src/lib/nav.ts=).
+
+Musical symbols that are content stay text: the rhythm values in /Mapa métrico/ and the answer chips, /Andamento ♩ =/, the ↑ ↓ ✓ in sentences.
+
 * Class conventions
 
 + Classes are written as Svelte's =class={[...]}= arrays, with =cond && 'class'= for conditional ones; a long or repeated list goes in a =const= in the script block.

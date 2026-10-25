@@ -72,7 +72,9 @@ class Ditado {
   staffBlurred = $state(false);
   metric = $state('—');
   quiz = $state<QuizState>({ kind: 'hint', text: 'Gere um exercício para começar.' });
-  copyLabel = $state('⧉ Copiar .ly');
+  copyLabel = $state('Copiar .ly');
+  /** The source was just copied (the button shows a check). */
+  copied = $state(false);
   /** The LilyPond block is expanded. */
   lilyOpen = $state(false);
   #revealed = false;
@@ -211,8 +213,12 @@ class Ditado {
   async copyLily() {
     try {
       await navigator.clipboard.writeText(this.lily());
-      this.copyLabel = '✓ Copiado';
-      setTimeout(() => (this.copyLabel = '⧉ Copiar .ly'), 1200);
+      this.copyLabel = 'Copiado';
+      this.copied = true;
+      setTimeout(() => {
+        this.copyLabel = 'Copiar .ly';
+        this.copied = false;
+      }, 1200);
     } catch {
       // Clipboard denied: the legacy app ignored it too.
     }

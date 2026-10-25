@@ -6,6 +6,10 @@
   import { NAV } from '#lib/nav.js';
   import { score } from '#lib/session/score.svelte.js';
   import BemLogo from '#lib/ui/BemLogo.svelte';
+  import Headphones from '@lucide/svelte/icons/headphones';
+  import LogOut from '@lucide/svelte/icons/log-out';
+  import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
+  import Speaker from '@lucide/svelte/icons/speaker';
 
   let { open }: { open: boolean } = $props();
 
@@ -21,9 +25,9 @@
   }
 
   const footerBtn =
-    'w-full border-0 border-b border-line p-1.5 font-mono text-2xs tracking-[0.1em] uppercase transition-all duration-150';
+    'flex w-full items-center justify-center gap-1.5 border-0 border-b border-line p-1.5 font-mono text-2xs tracking-[0.1em] uppercase transition-all duration-150';
   const modeBtn = (active: boolean) => [
-    'flex-1 border px-1 py-[5px] font-mono text-xs tracking-[0.04em] transition-all duration-[120ms]',
+    'flex flex-1 items-center justify-center gap-1.5 border px-1 py-[5px] font-mono text-xs tracking-[0.04em] transition-all duration-[120ms]',
     active
       ? 'border-line-lt bg-surface-2 text-accent'
       : 'border-line bg-transparent text-fg-faint hover:text-fg-mid'
@@ -61,12 +65,12 @@
   <button
     type="button"
     class={[footerBtn, 'bg-transparent text-fg-faint hover:bg-red/6 hover:text-red']}
-    onclick={resetScores}>↺ zerar pontuação</button
+    onclick={resetScores}><RotateCcw size={13} />zerar pontuação</button
   >
   <button
     type="button"
     class={[footerBtn, 'bg-red/5 text-red hover:bg-red/15']}
-    onclick={() => session.signOut()}>🚪 Sair do App</button
+    onclick={() => session.signOut()}><LogOut size={13} />Sair do App</button
   >
 
   <nav class="flex flex-1 flex-col py-2">
@@ -90,8 +94,8 @@
               : 'border-l-transparent text-fg-mid hover:bg-white/3 hover:text-fg'
           ]}
         >
-          <span
-            ><span class="mr-2 shrink-0 text-base opacity-60">{item.icon}</span>{item.label}</span
+          <span class="flex items-center gap-2.5"
+            ><item.icon size={16} class="shrink-0 opacity-70" />{item.label}</span
           >
           {#if item.badge}
             <span
@@ -112,14 +116,14 @@
       class={modeBtn(audio.mode === 'speaker')}
       onclick={() => audio.setMode('speaker')}
     >
-      📱 Caixa
+      <Speaker size={14} /> Caixa
     </button>
     <button
       type="button"
       class={modeBtn(audio.mode === 'headphone')}
       onclick={() => audio.setMode('headphone')}
     >
-      🎧 Fone
+      <Headphones size={14} /> Fone
     </button>
   </div>
 </aside>

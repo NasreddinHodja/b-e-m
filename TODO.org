@@ -1,0 +1,79 @@
+#+TITLE: TODO
+#+TODO: TODO STRT WAIT | DONE
+
+The work queue, from the owner's =notes.org= (which isn't tracked). Each item says what's wrong, where, and the plan. =WAIT= says what input it needs; =DONE= says what was done, with the commit. Every visible change is also listed under "Changes since the port" in [[file:docs/parity.org][docs/parity.org]].
+
+* DONE Port to SvelteKit
+pnpm, TypeScript, ESLint + Prettier, Tailwind with the styles ported, logic encapsulated by responsibility, 1:1 with the legacy page.
+
+Done in 2f33590 (the app), 8656109 (Pages deploy), 665fe09 (docs). Each tab is a route, each view's logic is in =src/lib/features/<view>/= with its state in a singleton class, and the backend, audio and score are separate modules ([[file:docs/architecture/overview.org][overview]]). Checked by screenshot diffs against =index.html=: 9 of 12 views pixel-identical on first load, the other 3 differ only in random content. Interactions weren't compared; that's under the tests item.
+
+* WAIT Tests
+Should we have tests? Yes: nothing guards the logic or the UI now.
+
+Plan:
+1. Unit tests (Vitest) for the pure modules: =ditado/{theory,rhythm,melody,model}.ts=, =contraponto/{rules,lilypond}.ts=, =acordes/chords.ts=, =harmonia3d/fields.ts=, =afinador/autocorrelate.ts=, =music/pitch.ts=. Seed =Math.random= where they draw.
+2. Differential parity tests: the same functions run on the legacy =index.html='s code and on the port with the same seeds, outputs compared.
+3. End-to-end (Playwright, Chromium) on the build: each view's main flow, scoring, sign-out, no console errors.
+
+Waiting: it needs =vitest= and =@playwright/test= installed, and installing is the owner's call. Also: Playwright's own Chromium or the system =/usr/bin/chromium= (pad uses the system one)?
+
+* DONE Center the page
+The content column sat against the sidebar on wide screens: =main= had =margin-left: 220px= and a max width, and nothing centred it.
+
+Done in 41cf9fc. The =(app)= wrapper pads 220px on the left from 768px up and =main= is =mx-auto=, so it centres in the space right of the sidebar; wide views (1320px) the same. Below 768px, unchanged. Checked at 1920, 800 and 390px.
+
+* STRT Acordes: reveal toggle shifts the layout
+/Revelar acorde/ in /Acorde atual/ adds the /A = <função>/ badge, so the panel grows.
+
+Plan: keep the badge always laid out, =invisible= until revealed. Panel height must be identical before and after.
+
+* TODO Acordes: /Qual acorde está tocando?/ shifts the layout
+Two causes:
++ Answering shows the feedback box under the grid. Owner is fine with a shift here if it animates smoothly.
++ /Maior/ / /Menor/ / /Ambos/ change the grid from 2 rows (9 chords in 5 columns) to 3 (18 in 6). This one must not shift: give the grid the height of the tallest (3 rows).
+
+Plan: the feedback box animates its height in and out (shared =Feedback= component, see below); the grid gets a min height of 3 rows.
+
+* TODO Acordes: /Qual função o A exerce?/ feedback shifts the layout
+The feedback box appears under /Verificar função/. Owner: animating the expansion is fine.
+
+Plan: same =Feedback= animation.
+
+* TODO Intervalos: /Qual é o intervalo?/ feedback shifts the layout
+Same as the function question; the owner notes one shared component fixes both. It already is one: =src/lib/ui/Feedback.svelte=, used by all three questions. Animate it once (height and fade in, out on reset), honouring =prefers-reduced-motion=.
+
+* TODO Acordes: /Modo professor/ collapsible, at the top
+The teacher panel is at the bottom and always open, so students see the chord list. Owner: maybe keep it at the top, collapsed, toggled open.
+
+Plan: move it above /Acorde atual/, collapsed by default with an animated toggle; the open state kept in =acordes= so it survives navigation.
+
+* TODO Ditado: staff not centred in /Mapa métrico/
+The engraved staff sits at the top left of the paper box, and low: VexFlow's SVG is a fixed 180px tall with the stave drawn at y 50, and its width is the bars', not the box's.
+
+Plan: after engraving, crop the SVG's viewBox to its drawn bounding box plus padding, then centre it both ways in the box (auto margins in a flex box, so a staff wider than the box still scrolls from its left edge).
+
+* TODO Ditado: LilyPond block should animate open and closed
+/Representação musical — fonte LilyPond/ is a =<details>= that snaps open.
+
+Plan: a button with =aria-expanded= and an animated height, or CSS =::details-content= transitions if the target browsers support them (check before choosing).
+
+* TODO Monospace everywhere
+Every text is DM Mono, including prose (Manifesto, feedback, hints, the journal), where it reads worse.
+
+Plan: map every mono use, view by view, and sort them: keep mono where it carries meaning (note and interval symbols, counters, tempo, LilyPond and note-entry fields, maybe small uppercase labels); use a readable sans or serif for prose and controls. Present the map and a font pairing for the owner to pick before changing anything: the choice of fonts is theirs.
+
+* TODO Icons
+The "icons" are Unicode and emoji glyphs (♬ ↔ ⚖ ◈ ◇ ♪ ◎ 📓 ⏱ 📖 ○ 🚪 📱 🎧 ▶ ⏹ 🗑 …), rendered at text size, inconsistent across systems, too small.
+
+Plan: an icon library (Lucide, through =@lucide/svelte=, is the likely pick: tree-shaken SVG components, consistent stroke), sized to the text they sit with (16–20px in nav and buttons) and labelled for screen readers where they stand alone. Needs the owner's OK on the library and to install it.
+
+* TODO Ditado: /ouça e adivinhe/ unreadable over the blurred staff
+Gold text on the blurred, light paper has almost no contrast.
+
+Plan: put the label on a dark, bordered chip so it reads over any background; check its contrast.
+
+* TODO Portuguese and English, with a toggle
+Every string is Portuguese and inline: in the pages, and in the logic modules' feedback (Acordes, Intervalos), the counterpoint rules' ~40 messages, Ditado's errors, the Manifesto's text.
+
+Plan: a typed message catalogue per language and a =locale= state, kept in =localStorage= and defaulting to the browser's language; a PT / EN toggle in the sidebar. Logic modules return message keys and arguments instead of sentences. Options: Paraglide (inlang; compiled, typed, an official =sv add= add-on, needs installing) or a small hand-written catalogue (no dependency). Translating the Manifesto and the musical terms (note names Dó/Ré vs C/D, interval names) needs the owner's say on wording.

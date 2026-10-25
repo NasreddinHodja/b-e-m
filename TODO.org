@@ -6,7 +6,7 @@ The work queue, from the owner's =notes.org= (which isn't tracked). Each item sa
 pnpm, TypeScript, ESLint + Prettier, Tailwind with the styles ported, logic encapsulated by responsibility, 1:1 with the legacy page.
 
 ** Done so far
-2f33590 (the app), 8656109 (Pages deploy), 665fe09 (docs). Each tab is a route, each view's logic is in =src/lib/features/<view>/= with its state in a singleton class, and the backend, audio and score are separate modules ([[file:docs/architecture/overview.org][overview]]). Checked by screenshot diffs against =index.html=: 9 of 12 views pixel-identical on first load, the other 3 differ only in random content. Interactions weren't compared; that's under the tests item.
+Commits =2f33590= (the app), =8656109= (Pages deploy), =665fe09= (docs). Each tab is a route, each view's logic is in =src/lib/features/<view>/= with its state in a singleton class, and the backend, audio and score are separate modules ([[file:docs/architecture/overview.org][overview]]). Checked by screenshot diffs against =index.html=: 9 of 12 views pixel-identical on first load, the other 3 differ only in random content. Interactions weren't compared; that's under the tests item.
 
 * WAIT Tests
 Should we have tests? Yes: nothing guards the logic or the UI now.
@@ -23,55 +23,55 @@ Installing =vitest= and =@playwright/test=: that's the owner's call. Also: Playw
 The content column sat against the sidebar on wide screens: =main= had =margin-left: 220px= and a max width, and nothing centred it.
 
 ** Done
-41cf9fc. The =(app)= wrapper pads 220px on the left from 768px up and =main= is =mx-auto=, so it centres in the space right of the sidebar; wide views (1320px) the same. Below 768px, unchanged. Checked at 1920, 800 and 390px.
+Commit =41cf9fc=. The =(app)= wrapper pads 220px on the left from 768px up and =main= is =mx-auto=, so it centres in the space right of the sidebar; wide views (1320px) the same. Below 768px, unchanged. Checked at 1920, 800 and 390px.
 
 * DONE Acordes: reveal toggle shifts the layout
 /Revelar acorde/ in /Acorde atual/ added the /A = <função>/ badge, so the panel grew.
 
 ** Done
-b6f7fb1. The badge is always rendered and =invisible= (=visibility: hidden=, so also hidden from screen readers) until revealed. The panel measured 188.8px before and after revealing, in headless Chromium.
+Commit =b6f7fb1=. The badge is always rendered and =invisible= (=visibility: hidden=, so also hidden from screen readers) until revealed. The panel measured 188.8px before and after revealing, in headless Chromium.
 
 * DONE Acordes: /Qual acorde está tocando?/ shifts the layout
 Two causes: answering showed the feedback box at once, and /Maior/ / /Menor/ / /Ambos/ switched the grid between 2 rows (9 chords in 5 columns) and 3 (18 in 6).
 
 ** Done
-9a27e12 (grid) and a4988a3 (feedback). Invisible cells fill the grid to 3 rows whichever pool is shown, so its height doesn't change (89px on all three tabs, measured). The feedback now slides open (see the Intervalos item).
+Commits =9a27e12= (grid) and =a4988a3= (feedback). Invisible cells fill the grid to 3 rows whichever pool is shown, so its height doesn't change (89px on all three tabs, measured). The feedback now slides open (see the Intervalos item).
 
 * DONE Acordes: /Qual função o A exerce?/ feedback shifts the layout
 The feedback box appeared at once under /Verificar função/.
 
 ** Done
-a4988a3: the shared feedback box slides open and closed (see the Intervalos item).
+Commit =a4988a3=: the shared feedback box slides open and closed (see the Intervalos item).
 
 * DONE Intervalos: /Qual é o intervalo?/ feedback shifts the layout
 The feedback box appeared at once. All three questions already used one component, =src/lib/ui/Feedback.svelte=.
 
 ** Done
-a4988a3. It animates its height with =svelte/transition='s =slide= (220ms), opening on an answer and closing on the next question; with =prefers-reduced-motion= it's instant. Measured on Intervalos: 223 → 331px and back over about 240ms, instead of a jump.
+Commit =a4988a3=. It animates its height with =svelte/transition='s =slide= (220ms), opening on an answer and closing on the next question; with =prefers-reduced-motion= it's instant. Measured on Intervalos: 223 → 331px and back over about 240ms, instead of a jump.
 
 * DONE Acordes: /Modo professor/ collapsible, at the top
 The teacher panel was the last panel and always open, and it highlights the loaded chord, so students could see the answer.
 
 ** Done
-3044b58. It's now the first panel on Acordes, collapsed by default. Its header (▸ MODO PROFESSOR, the /sem pontuação/ tag) is a button with =aria-expanded= that slides the contents open and closed (instant with reduced motion). The open state is =acordes.teacherOpen=, so it survives going to another view and back (a reload closes it). The ▸ is a text glyph until the icons item.
+Commit =3044b58=. It's now the first panel on Acordes, collapsed by default. Its header (▸ MODO PROFESSOR, the /sem pontuação/ tag) is a button with =aria-expanded= that slides the contents open and closed (instant with reduced motion). The open state is =acordes.teacherOpen=, so it survives going to another view and back (a reload closes it). The ▸ is a text glyph until the icons item.
 
 * DONE Ditado: staff not centred in /Mapa métrico/
 The staff sat at the top left of the paper box and low: VexFlow draws into a fixed canvas (bars × 240 + 20 by 180px) with the stave at y 50 and room for ledger lines below, and the box didn't centre it.
 
 ** Done
-4834649. =renderStaff()= (=src/lib/features/ditado/staff.ts=) now crops the SVG to what was drawn (=getBBox()= plus 12px, as =viewBox=, =width=, =height=), and the paper box is a flex container whose SVG has auto margins: centred both ways when it fits, scrolling from the clef when it doesn't (auto margins resolve to 0 on overflow, so nothing is cut off on the left). Measured: 82px either side and 21px above and below at 2 bars; 8 bars and the 390px layout scroll from the start. The box keeps its 170px minimum height.
+Commit =4834649=. =renderStaff()= (=src/lib/features/ditado/staff.ts=) now crops the SVG to what was drawn (=getBBox()= plus 12px, as =viewBox=, =width=, =height=), and the paper box is a flex container whose SVG has auto margins: centred both ways when it fits, scrolling from the clef when it doesn't (auto margins resolve to 0 on overflow, so nothing is cut off on the left). Measured: 82px either side and 21px above and below at 2 bars; 8 bars and the 390px layout scroll from the start. The box keeps its 170px minimum height.
 
 * DONE Ditado: /ouça e adivinhe/ unreadable over the blurred staff
 Gold text straight on the blurred, light paper: about 1.5:1 contrast.
 
 ** Done
-9ffb5e2. The label sits on a dark chip (=bg-bg/90=, a =gold/40= border) centred over the staff: about 6.6:1 (gold #c8a030 on the chip's #202020 over the paper). Checked at 1280 and 390px.
+Commit =9ffb5e2=. The label sits on a dark chip (=bg-bg/90=, a =gold/40= border) centred over the staff: about 6.6:1 (gold #c8a030 on the chip's #202020 over the paper). Checked at 1280 and 390px.
 
 * DONE Ditado: LilyPond block should animate open and closed
 /Representação musical — fonte LilyPond/ was a =<details>= that snapped open.
 
 ** Done
-ff204af. The header is a button (=aria-expanded=, =aria-controls=) with a ▸ that turns when open, and the contents open and close with =svelte/transition='s =slide= (220ms; instant with reduced motion); the state is =ditado.lilyOpen=. CSS =::details-content= transitions would have kept the =<details>=, but I couldn't check their browser support offline, so I used what's already used for the feedback and the teacher panel. Measured: 50 → 114px over about 200ms.
+Commit =ff204af=. The header is a button (=aria-expanded=, =aria-controls=) with a ▸ that turns when open, and the contents open and close with =svelte/transition='s =slide= (220ms; instant with reduced motion); the state is =ditado.lilyOpen=. CSS =::details-content= transitions would have kept the =<details>=, but I couldn't check their browser support offline, so I used what's already used for the feedback and the teacher panel. Measured: 50 → 114px over about 200ms.
 
 * WAIT Ditado: the LilyPond block shows nothing
 Found while doing the item above: the block's =<pre>= is empty, in the legacy page too (=dLilySource= is never written). /Copiar .ly/ and /Baixar .ly/ do produce the source (=ditado.lily()=).

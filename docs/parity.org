@@ -62,6 +62,10 @@ The scripts for this lived outside the repo and aren't in it.
 
 =pnpm test= runs the port's logic against the legacy page's own code, in a sandbox, on the same inputs and random draws (=src/**/parity.test.ts=, see [[file:../CONTRIBUTING.org][Contributing]]): Ditado (spelling, key signatures, rhythms, melodies, Slonimsky, model, playback events, LilyPond, distractors), Contraponto (parsing, classification, every rule, the summary and LilyPond, on 400 random sets of voices), Harmonia 3D (tables, spelling, chord names, colours) and the shared tables (synth profiles, chords, intervals, roots, the ruler, the pillars, tuner ranges, pitch detection). They were checked to fail when the port is changed: a max-leap comparison, a double-sharp glyph, a counterpoint warning's severity and a LilyPond octave mark.
 
+* End-to-end tests
+
+=pnpm test:e2e= drives the production build (local backend) in Chromium: every view, the quizzes' scoring, the journal, sign-out and sign-in, the score reset, the phone menu ([[file:../e2e/app.e2e.ts][e2e/app.e2e.ts]]). These check the port works, not that it matches the legacy page.
+
 * Not checked
 
 + Interactions, compared against the reference: the logic is (see Parity tests), the UI flows and the =AudioContext= calls aren't. That needs scripted flows run on both pages with DOM and screenshot comparison, the audio calls recorded, and Firebase mocked.

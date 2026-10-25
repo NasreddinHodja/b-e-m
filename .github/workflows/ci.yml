@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 12.3.4
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint
+
+      - run: pnpm check
+
+      - run: pnpm test
+
+      - run: pnpm build
+
+      # Playwright's own Chromium here: the runner has no system one at /usr/bin/chromium.
+      - run: pnpm exec playwright install --with-deps chromium
+
+      - run: pnpm test:e2e
+        env:
+          CHROMIUM_PATH: ''

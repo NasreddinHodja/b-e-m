@@ -40,7 +40,9 @@ pnpm dev         # http://localhost:5173, signed in, no Firebase
 
 The =parity.test.ts= files compare the port with the legacy page itself: =src/lib/testing/legacy.ts= runs =index.html='s scripts in a Node =vm= sandbox with a stand-in DOM and hands back their functions, and the tests feed both the same inputs and the same seeded random draws (Ditado's spelling, key signatures, rhythms, melodies, Slonimsky lines, model, playback and LilyPond; every counterpoint rule, summary and LilyPond on 400 random sets of voices; Harmonia 3D's tables and spelling; the chord, interval and ruler tables, the synth's profiles and pitch detection). Any difference is a parity bug, unless it's a change listed in [[file:docs/parity.org][Parity]].
 
-=pnpm test:e2e= builds the app with =VITE_BACKEND=local= and serves it on port 4174, then drives it in Chromium from =e2e/*.e2e.ts=. It uses the system's =/usr/bin/chromium=; =CHROMIUM_PATH= points elsewhere, or set it empty and run =pnpm exec playwright install chromium= for Playwright's own.
+=pnpm test:e2e= builds the app with =VITE_BACKEND=local= and serves it on port 4174, then drives it in Chromium from =e2e/*.e2e.ts=. It uses the system's =/usr/bin/chromium=; =CHROMIUM_PATH= points elsewhere, or set it empty and run =pnpm exec playwright install chromium= for Playwright's own. It checks that every view opens without console errors or failed requests, a deep link, scoring on Acordes, Intervalos and Ditado, Contraponto's bad-note error, the journal (add, reload, delete, HTML shown as text), sign-out and sign-in, the score reset, and the phone menu.
+
+CI ([[file:.github/workflows/ci.yml][ci.yml]]) runs lint, type checking, the unit tests, a build and the end-to-end tests (on Playwright's Chromium) on every push to =main= and every pull request against it.
 
 * Before a commit
 

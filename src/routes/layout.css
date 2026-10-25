@@ -1,0 +1,134 @@
+/* No preflight: the legacy app's own reset below is kept so rendering matches it 1:1. */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@theme {
+  --color-*: initial;
+  --color-bg: #0c0c0c;
+  --color-surface: #141414;
+  --color-surface-2: #1c1c1c;
+  --color-well: #080808;
+  --color-line: #2a2a2a;
+  --color-line-lt: #333;
+  --color-fg: #e4e0d8;
+  --color-fg-soft: #c9c5bc;
+  --color-fg-mid: #888;
+  --color-fg-faint: #444;
+  --color-accent: #e4e0d8;
+  --color-green: #4a9e6a;
+  --color-red: #b84848;
+  --color-gold: #c8a030;
+  --color-blue: #7a9bc8;
+  --color-paper: #f2eddf;
+  --color-logo: #e8e2d4;
+  --color-white: #fff;
+  --color-black: #000;
+  --color-transparent: transparent;
+
+  --font-*: initial;
+  --font-mono: 'DM Mono', monospace;
+  --font-serif: 'Playfair Display', serif;
+  --font-display: 'Barlow Condensed', sans-serif;
+
+  /* The app's type scale is small; sizes outside it are written inline. */
+  --text-*: initial;
+  --text-3xs: 8px;
+  --text-2xs: 9px;
+  --text-xs: 10px;
+  --text-sm: 11px;
+  --text-base: 12px;
+  --text-md: 13px;
+  --text-lg: 15px;
+
+  --animate-fade-up: fade-up 0.25s ease both;
+  --animate-regua-pulse: regua-pulse 0.6s ease infinite;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes regua-pulse {
+    0%,
+    100% {
+      transform: scale(1.8);
+    }
+    50% {
+      transform: scale(2.1);
+    }
+  }
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    @apply flex min-h-screen bg-bg font-mono text-md text-fg;
+  }
+
+  /* Film grain over the whole app. */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* Every legacy button and select declared cursor: pointer. */
+  button,
+  select {
+    cursor: pointer;
+  }
+
+  select {
+    @apply border border-line-lt bg-bg px-2.5 py-1 font-mono text-xs text-fg outline-none focus:border-fg-mid;
+  }
+
+  input[type='range'] {
+    @apply h-0.5 w-[90px] cursor-pointer appearance-none bg-line-lt outline-none;
+  }
+  input[type='range']::-webkit-slider-thumb {
+    @apply size-[11px] cursor-pointer appearance-none rounded-none bg-accent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-surface);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-line-lt);
+  }
+}
+
+/* Answer-button states shared by every quiz. They override the button's own colors. */
+@utility state-selected {
+  border-color: var(--color-gold) !important;
+  color: var(--color-gold) !important;
+  background: rgb(200 160 48 / 0.07) !important;
+}
+@utility state-correct {
+  border-color: var(--color-green) !important;
+  color: var(--color-green) !important;
+  background: rgb(74 158 106 / 0.09) !important;
+}
+@utility state-wrong {
+  border-color: var(--color-red) !important;
+  color: var(--color-red) !important;
+  background: rgb(184 72 72 / 0.08) !important;
+}

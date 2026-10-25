@@ -1,0 +1,60 @@
+#+title: B.E.M — Bloco de Estudos Musicais
+
+SvelteKit SPA (adapter-static, =ssr = false=), TypeScript, Tailwind, ESLint + Prettier.
+Scaffolded with [[https://github.com/sveltejs/cli][sv]].
+
+* Recreate the scaffold
+
+#+begin_src sh
+pnpm dlx sv@1.1.1 create --template minimal --types ts --add prettier eslint --install pnpm .
+pnpm dlx sv@1.1.1 add tailwindcss="plugins:none" sveltekit-adapter="adapter:static" --install pnpm
+#+end_src
+
+* Develop
+
+#+begin_src sh
+pnpm install
+pnpm dev            # add -- --open to open a browser tab
+#+end_src
+
+=pnpm dev= runs without Firebase: you start signed in, any e-mail/password signs back in,
+and the journal and stats live in =localStorage= (=src/lib/backend/local.ts=).
+To use the real Firebase project in dev:
+
+#+begin_src sh
+VITE_BACKEND=firebase pnpm dev
+#+end_src
+
+Builds always use Firebase unless =VITE_BACKEND=local= is set.
+
+* Layout
+
+- =src/routes/(app)/<page>/= :: one route per legacy tab; =(app)/+layout.svelte= is the
+  sidebar shell and the sign-in guard, =login/= the sign-in page.
+- =src/lib/features/<page>/= :: each page's logic: plain TS modules for the music logic,
+  a =*.svelte.ts= class holding its state. The state is a module singleton, so it survives
+  navigating away and back, like the legacy hidden tabs.
+- =src/lib/backend/= :: auth, journal and stats behind one interface, Firebase or local.
+- =src/lib/audio/engine.svelte.ts= :: the synth shared by every page.
+- =src/lib/session/score.svelte.ts= :: this session's answers; scores, badges and history
+  are derived from it.
+- =src/lib/ui/= :: shared components (panels, buttons, feedback, history list).
+
+Styles are Tailwind utilities on the components; the theme tokens and the few global rules
+are in =src/routes/layout.css=. Tailwind's preflight is off on purpose: the legacy reset is
+used instead so the port renders 1:1 with the original.
+
+* Check
+
+#+begin_src sh
+pnpm check          # svelte-check / TypeScript
+pnpm lint           # prettier --check + eslint
+pnpm format         # prettier --write
+#+end_src
+
+* Build
+
+#+begin_src sh
+pnpm build          # static output in build/, SPA fallback is build/404.html
+pnpm preview
+#+end_src

@@ -30,8 +30,15 @@ pnpm dev         # http://localhost:5173, signed in, no Firebase
 | =pnpm check:watch= | The same, on every change                                     |
 | =pnpm lint=        | =prettier --check .= and ESLint                               |
 | =pnpm format=      | =prettier --write .=                                          |
+| =pnpm test=        | Unit tests (Vitest), once                                     |
+| =pnpm test:watch=  | The same, on every change                                     |
+| =pnpm test:e2e=    | End-to-end tests (Playwright) on a local-backend build        |
 
-There are no automated tests yet; see [[file:docs/parity.org][Parity]] for how the port was checked and what isn't.
+* Tests
+
+=pnpm test= runs every =src/**/*.test.ts= in Node: the pure modules (music theory, rhythm, melody generation, the counterpoint rules, LilyPond output, Harmonia 3D's spelling, pitch detection). Code that draws random numbers is tested with =Math.random= replaced by a seeded generator (=src/lib/testing/random.ts=), so runs repeat. Tests pin down legacy quirks too, each named as one.
+
+=pnpm test:e2e= builds the app with =VITE_BACKEND=local= and serves it on port 4174, then drives it in Chromium from =e2e/*.e2e.ts=. It uses the system's =/usr/bin/chromium=; =CHROMIUM_PATH= points elsewhere, or set it empty and run =pnpm exec playwright install chromium= for Playwright's own.
 
 * Before a commit
 
@@ -39,10 +46,11 @@ There are no automated tests yet; see [[file:docs/parity.org][Parity]] for how t
 pnpm format
 pnpm lint
 pnpm check
+pnpm test
 pnpm build
 #+end_src
 
-All four pass on every commit.
+All five pass on every commit.
 
 * Code conventions
 

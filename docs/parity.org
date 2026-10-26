@@ -34,7 +34,7 @@ Its library versions, pinned exactly in =package.json=:
 
 * Kept on purpose
 
-Legacy behaviour that looks wrong, ported as is; a comment marks each.
+Legacy behaviour that looks wrong, ported as is; a comment marks each. *To ask the owner: bug or intended?* (=notes.org=, "Meeting with the owner").
 
 + Acordes :: switching the guess pool drops its marks.
 + Intervalos :: /Todos/ always lit. A filter change drops marks and highlight but keeps the selection. Direction-tag toggling as legacy (=directionShown=). Stats keep their last column count after a reset (=statCols=).
@@ -51,4 +51,4 @@ Legacy behaviour that looks wrong, ported as is; a comment marks each.
 + Unit and end-to-end tests (=pnpm test=, =pnpm test:e2e=): the app's own logic and flows. They don't compare with legacy.
 + 2026-10-25, screenshots against legacy at 1280×900 and 390px: 9 of 12 views pixel-identical on load; Acordes, Intervalos and Ditado differ only in random content. Scripts not in the repo.
 
-Not checked: UI flows and audio against legacy, real Firebase, browsers other than Chromium.
+Not checked: UI flows and audio against legacy, real Firebase, browsers other than Chromium. The flows to run by hand: [[file:flows.org][Flows]].

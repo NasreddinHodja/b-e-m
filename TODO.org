@@ -112,10 +112,10 @@ The label sits on a dark chip (=bg-bg/90=, a =gold/40= border) centred over the 
 The header is a button (=aria-expanded=, =aria-controls=) with a ▸ that turns when open, and the contents open and close with =svelte/transition='s =slide= (220ms; instant with reduced motion); the state is =ditado.lilyOpen=. CSS =::details-content= transitions would have kept the =<details>=, but I couldn't check their browser support offline, so I used what's already used for the feedback and the teacher panel. Measured: 50 → 114px over about 200ms.
 
 * TODO Ditado: the LilyPond block shows nothing
-Found while animating the block: its =<pre>= is empty, in the legacy page too (=dLilySource= is never written). /Copiar .ly/ and /Baixar .ly/ do produce the source (=ditado.lily()=). The owner saw it too; it stays empty for now. The =<pre>= carries a =TODO:= comment pointing here.
+Pre-existing: the legacy page has the same empty =<pre>= (=legacy/index.html:1232=, =id="dLilySource"=, never written by any script). Not caused by the port or the animation; kept on purpose. /Copiar .ly/ and /Baixar .ly/ do produce the source (=ditado.lily()=). The =<pre>= carries a =TODO:= comment pointing here.
 
 ** Plan
-Show =ditado.lily()= in the =<pre>=, updated with each exercise.
+Show =ditado.lily()= in the =<pre>=, updated with each exercise, when the owner wants it.
 
 * DONE Monospace everywhere
 Every text was DM Mono (the =body= font), prose included, where it reads worse.
@@ -151,9 +151,34 @@ To make that work, state holds facts and the text is made when rendered: quiz ou
 
 Not translated, on purpose: LilyPond exports, developer-facing errors, note letters, chord symbols and degrees. In English the notes are letter names (=A → E=), in Portuguese solfège (=Lá → Mi=), as before.
 
-* TODO Review the English
-The English is my draft: every message in =messages/en.json=, the Manifesto included.
+* DONE Review the English
+The English was my first draft: every message in =messages/en.json=, the Manifesto included.
 
-** Plan
-The owner reviews it later. Choices worth a look: interval names and abbreviations (=m2=, =M3=, =P5=, Perfect Fourth…), "Ear Training" for /Percepção/, "Listening" for /Apreciação/, "Ruler" for /Régua/, "Harmony 3D", and the Manifesto's wording. Also: should the LilyPond exports (=.ly= headers, instrument names like =Voz 2=) follow the language?
+** Done
++ uncommitted
 
+The owner handed the review to me. 48 messages changed. The music terms were checked against Wikipedia's /Interval (music)/, /Counterpoint/, /Species counterpoint/, /Mode (music)/ and /Nonchord tone/:
++ Interval abbreviations: =P1 m2 M2 … TT … P8=, as in /Interval (music)/; the unison was =U=.
++ /Modos gregos/: "Diatonic modes", not "Church modes" (/Mode (music)/: the church modes are the medieval eight).
++ Counterpoint: "similar motion" (the articles' term) for /movimento direto/, "perfect consonance" for /perfeita/, "passing tone", "penultimate bar", "ascending" / "descending" minor sixth.
++ Nav: "Interval Ruler", "3D Harmony", "Music Appreciation" (as in the pillars and the playlist title).
++ US spelling throughout (practiced, organized, recognize, unrecognized).
++ Smaller fixes of tone and accuracy in the interval descriptions, the chord function question, /Sortear/ ("Pick from:"), the Régua hint, Harmonia 3D's legend and the Manifesto.
+
+Checked: lint, types, 78 unit and 11 end-to-end tests; English screenshots of Acordes and Ditado (the longest nav labels fit the sidebar). Still open: whether the LilyPond exports (=.ly= headers, =Voz 2=) should follow the language; they stay Portuguese.
+
+* DONE Slim the tests
+Only what the app needs tested, not the port.
+
+** Done
++ uncommitted
+
+Deleted: the four parity suites and their harness (=src/lib/testing/legacy.ts=), done once the port was proven; the i18n checks that Portuguese labels equal the legacy tables; the static-table tests of chords and pitch. Kept, 50 unit tests: the counterpoint rules, Ditado's melody, rhythm, spelling, model and LilyPond, Contraponto's LilyPond, Harmonia 3D's spelling, pitch detection, the two catalogues having the same keys and parameters. End-to-end, 7 of 11: every view, Acordes and Ditado scoring, Contraponto's errors, the journal, sign-out and in, the language toggle (dropped: deep link, Intervalos scoring, score reset, phone menu).
+
+* DONE CI fails on a fresh clone
+First run on GitHub (run =40268740524=, a throwaway =ci-test= branch on the fork): =pnpm check= failed, 35 × =Cannot find module '#lib/paraglide/messages.js'=. =src/lib/paraglide/= is gitignored and only the Vite plugin generated it; =svelte-check= doesn't run Vite.
+
+** Done
++ uncommitted
+
+The =prepare= script (run by =pnpm install=) compiles it with Paraglide's CLI, same options as =vite.config.ts=, before =svelte-kit sync=. Checked locally from a deleted =src/lib/paraglide/=: =prepare=, then lint, check and tests pass.

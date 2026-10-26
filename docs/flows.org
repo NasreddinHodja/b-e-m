@@ -1,0 +1,164 @@
+#+TITLE: UI flows: legacy vs port
+#+OPTIONS: ^:{}
+
+Every user flow in =legacy/index.html=, to run by hand on both apps and compare. Each flow: what to do, what both should do, where the code is.
+
+* How to use
+
++ Legacy :: =legacy/index.html= needs real Firebase: serve it over http(s), sign in with a real account.
++ Port :: =pnpm dev= (local backend, signed in, data in localStorage) or a build with real Firebase ([[file:architecture/backend.org][backend]]).
++ Refs :: =L1884= is a line of =legacy/index.html=; port paths are under =src/=, =F/= = =lib/features/=, =R/= = =routes/(app)/=.
++ Random :: chords, intervals, melodies, distractors and option order are drawn at random; compare the behaviour, not the values.
++ Δ :: a deliberate difference, listed in [[file:parity.org][Parity]] (/Changes since the port/). Anything else that differs is a bug.
++ Bugs kept :: legacy bugs the port keeps are marked *kept*; they must behave the same.
++ ? :: not yet checked against the code; check while running it.
+
+* Check first
+
+Not yet checked against the port's code; look at these while running the flows.
++ S2 :: the boot error screen after 8s
++ G14 :: Harmonia 3D's camera after leaving and coming back
++ P9 :: the Pomodoro keeps counting after leaving Prática
++ M4 :: the metronome keeps clicking after leaving Metrônomo
+
+* Boot and session
+
++ S1 :: Open the app signed out → /INICIANDO SISTEMA B.E.M.../, then the login screen. L703–715, 763 · =lib/backend/session.svelte.ts:25=, =routes/login/+page.svelte=
++ S2 :: Firebase unreachable for 8s → the /NÃO FOI POSSÍVEL CONECTAR/ help text. L765–776 · ? boot screen
++ S3 :: Wrong password → /Processando.../ then /Erro: Email ou senha incorretos./ L717–726 · =routes/login/+page.svelte:46=
++ S4 :: Right password → app, journal loaded from the cloud. L703–709, 729–735 · =session.svelte.ts:46=, =F/pratica/diario.svelte.ts:8=
++ S5 :: /Sair do App/ → login screen. L727 · =R/Sidebar.svelte:75=, =session.svelte.ts:51=
++ S6 :: Reload while signed in → straight into the app, scores at 0 (stats are written, never read). L703, 757 · =lib/session/score.svelte.ts=
+
+* Layout and sidebar
+
++ N1 :: Each nav button opens its view and lights itself. L2525–2529 · =R/+layout.svelte=, =lib/nav.ts= (one route per tab)
++ N2 :: Contraponto and Harmonia 3D widen the content column; the others don't. L2533 · =R/+layout.svelte:15=
++ N3 :: ≤768px: ☰ opens the sidebar and overlay, ☰ again or the overlay closes, choosing a view closes it. L2514–2530 · =R/+layout.svelte:23,35,51=
++ N4 :: Δ Content centred right of the sidebar on wide screens.
++ N5 :: /Caixa/ / /Fone/: the lit button follows; sound changes timbre (EQ, reverb, envelope) from the next note; mid-note, a 80ms fade out and back in. L1724–1734 · =R/Sidebar.svelte:119,127=, =lib/audio/engine.svelte.ts:50=
++ N6 :: /Vol:/ slider on Acordes moves the one on Intervalos too, and the volume of everything. L1735–1740 · =R/acordes/+page.svelte:165=, =R/intervalos/+page.svelte:117=, =engine.svelte.ts:25=
++ N7 :: Audio blocked until a gesture: legacy resumes the context on any click (L1741); the port on the next sound (=engine.svelte.ts:36=). Check the first sound after load plays on both.
++ N8 :: Δ PT / EN toggle (port only).
+
+* Score and history
+
++ H1 :: Each scored answer: green/red total +1, the module's badge shows =correct/total= (=0= when none). Acordes (both questions) → badge H, Intervalos → I, Ditado → D. L1745–1758 · =score.svelte.ts:42=, =R/Sidebar.svelte:23=
++ H2 :: Each answer adds a row on top of /Histórico/ (tag =H·A=, =H·F=, =I= or =D=, prompt, answer, HH:MM), max 30. Intervalos and Ditado also add to their own list, without the tag. L1774–1792 · =score.svelte.ts:58=, =R/historico/+page.svelte:9=
++ H3 :: /zerar pontuação/ → confirm; cancel keeps everything; OK zeroes totals, badges, Intervalos' stats and every history list. L1759–1772 · =R/Sidebar.svelte:19=, =score.svelte.ts:63=
++ H4 :: *kept* Intervalos' stats keep their last column count after the reset.
+
+* Acordes
+
++ A1 :: Load → a random chord from both pools, hidden, no sound. L2004 · =F/acordes/quiz.svelte.ts:39=
++ A2 :: /Novo acorde aleatório/ → new chord from the /Sortear/ pool, hidden; plays after 80ms (3 notes, 70ms apart, 2.2s); both feedbacks closed, marks cleared, /Verificar função/ disabled. L1884–1907 · =quiz.svelte.ts:103,108=
++ A3 :: /Sortear/: /Maior + Menor/, /Só maiores/, /Só menores/ light up and pick from 18 / 9 / 9 chords on the next draw. L1868, 1885 · =R/acordes/+page.svelte:147–153=
++ A4 :: /Oitava do A/ 3 / 4 / 5: /Tocar Lá/ and the chord move an octave; the chord's notes read the same. L1862–1867 · =quiz.svelte.ts:76,80=
++ A5 :: /Tocar Lá (A)/ → one A; /Tocar acorde/ → the chord; each button lit 2.4s. L1873–1883 · =quiz.svelte.ts:94,98=
++ A6 :: /Revelar acorde/ ↔ /Ocultar acorde/: name, notes and the /A = …/ badge show and hide. Δ the badge keeps its space. L1917–1923 · =quiz.svelte.ts:122=
++ A7 :: /Qual acorde está tocando?/ tabs /Maior/ / /Menor/ / /Ambos/: 9 / 9 / 18 buttons. Δ always 3 rows. *kept* switching drops the marks. L1944–1959 · =quiz.svelte.ts:126=
++ A8 :: Pick a chord: right → green, /✓ Acorde correto!/ + text (/semitom/ singular at 1); wrong → yours red, right one green, /✗ Era X./ Chord revealed. Second pick ignored. Score + history (=H·A=, =pick → chord=). Δ feedback slides. L1960–1975 · =quiz.svelte.ts:132,43=
++ A9 :: Function grid: a click selects (one at a time) and enables /Verificar função/; after checking, clicks do nothing. L1982–1986 · =quiz.svelte.ts:152=
++ A10 :: /Verificar função/: right one green, wrong pick red, /✓ Correto!/ or /✗ Errado./ + text, chord revealed, button disabled; score + history (=H·F=, =A = pick → right=). Δ feedback slides. L1987–2003 · =quiz.svelte.ts:157,63=
++ A11 :: Δ /Modo professor/ first, collapsed; opens and closes.
++ A12 :: Teacher /Maior/ / /Menor/: 12 chords each with A's function, /—/ greyed. Click → loads it hidden, plays it, lights it; answers on it aren't scored or logged. A new random chord moves the light off. L1924–1943, 1974, 2002 · =R/acordes/+page.svelte:63–81=, =quiz.svelte.ts:108=
+
+* Intervalos
+
++ I1 :: Load → a random interval, root A, ascending, no sound; note 2, name and semitones hidden; /↑ ascendente/ tag shown. L2167, 2049–2072 · =F/intervalos/quiz.svelte.ts:60,121=
++ I2 :: /Novo intervalo/ → new one from the active filters; plays the sequence after 80ms; feedback closed, marks cleared, /Verificar/ disabled. L2049–2072 · =quiz.svelte.ts:121=
++ I3 :: /Nota 1/, /Nota 2/, /Seq./ (1.6s each, 1.7s apart), /Harm./ (together, 2.2s); each lit 2.4s. L2044–2047 · =quiz.svelte.ts:107,114=
++ I4 :: /Direção/ asc / desc / /Aleatória/: next interval follows; with /Aleatória/ the tag is hidden until revealed. *kept* tag toggling (=directionShown=). L2032, 2054, 2066, 2079 · =R/intervalos/+page.svelte:99–105=
++ I5 :: /Raiz/ A / C / random (C D E F G A B): note 1 follows on the next interval; names in solfège. L1013, 2053 · =R/intervalos/+page.svelte:111=
++ I6 :: /Revelar resposta/ ↔ /Ocultar/: note 2, name, semitones. L2074–2085 · =quiz.svelte.ts:139=
++ I7 :: Filter grid: click toggles an interval; the last one can't be removed; the answer grid follows (columns: n ≤ 7 → n, ≤ 10 → 5, else 7); removing the current interval draws a new one with sound. L2094–2108, 2117–2120 · =quiz.svelte.ts:150=
++ I8 :: /Todos/ / /Consonantes/ / /Dissonantes/ / /Diatônicos/: filters set. *kept* /Todos/ always lit; a filter change drops marks and highlight but keeps the selection. L2109–2116 · =quiz.svelte.ts:158,163=
++ I9 :: Pick + /Verificar/: as A9–A10; texts /✓ Correto!/ or /✗ Era uma X./, explanation, theory line; score + both histories (=Lá → Mi=, =5J= or =3m → 5J=); stats row updates (% coloured ≥70 green, ≥40 gold, else red; max 7 columns). Δ feedback slides. L2124–2166 · =quiz.svelte.ts:177,183,64=
+
+* Ditado
+
++ D1 :: Load → keys filled, melodic mode, an exercise generated, staff blurred. L3137–3145 · =F/ditado/ditado.svelte.ts:81=
++ D2 :: /Modo/ Slonimsky ↔ melodic: swaps the advanced panels. L2907–2912 · =R/ditado/+page.svelte:52=
++ D3 :: /Gerar exercício/ → new melody from all settings; metric map (=4/4 · ♩ + ♩ + ♩ + ♩=); staff blurred; 4 shuffled options; answer hidden. L2921–2952 · =ditado.svelte.ts:94=
++ D4 :: Settings no melody fits (600 tries; Slonimsky: 200, e.g. a long pattern × 8 reps beyond A2–A5) → the hint replaces the quiz; staff and metric map stay. L2938–2944 · =ditado.svelte.ts:127=
++ D5 :: Slonimsky: each /Gerar/ transposes within A2–A5; /Transformação/ applies. L2844 · =F/ditado/melody.ts=
++ D6 :: /Ouvir/ → the melody, tempo from /Andamento/ (min 30, default 70). /Tônica/ → the tonic, 1.5s. *kept* both read key and tempo from the form when pressed. L3075–3093 · =ditado.svelte.ts:187,198=
++ D7 :: Pick an option: all disabled; right green, else yours red and the right one green; answer block (degrees, rhythm chips) shown; staff unblurred; score + Ditado history (meter, ✓ / ✗). L3122–3134 · =ditado.svelte.ts:163=
++ D8 :: /Revelar resposta/ → staff unblurred, answer shown, options *reshuffled and re-enabled*; *kept* a pick after it still scores. L3087–3092 · =ditado.svelte.ts:180=
++ D9 :: /Copiar .ly/ → clipboard, label /✓ Copiado/ for 1.2s. /Baixar .ly/ → =bem-ditado.ly=. Tempo from the form. L3037–3063 · =ditado.svelte.ts:206–220=
++ D10 :: Δ LilyPond block slides open; its =<pre>= is empty in both (*kept*, TODO.org). L1232
++ D11 :: Δ staff cropped and centred; /ouça e adivinhe/ on a chip; final leap respects /Salto máx./.
+
+* Contraponto
+
++ C1 :: Load → example 1 (cantus firmus + 1st species voice), checked, voice 2 active. L3343–3351, 3807 · =F/contraponto/contraponto.svelte.ts:71,156=
++ C2 :: Type in a voice's textarea → re-checked on each keystroke: summary (/Digite ou desenhe…/, /N erros e N avisos/, /Nenhum problema…/), list, roll, LilyPond if generated. Bad note → one /Notas não reconhecidas/ error. L3410, 3419–3468 · =contraponto.svelte.ts:165,75=
++ C3 :: Species select 1 ↔ 2: notes doubled (all but the last) or every other kept. L3352–3356, 3385 · =contraponto.svelte.ts:171=
++ C4 :: /som/ checkbox → voice muted in /Tocar/; nothing re-checked. L3391 · =R/contraponto/+page.svelte:118=
++ C5 :: Radio → active voice. L3369 · =R/contraponto/+page.svelte:98=
++ C6 :: × → voice removed, active clamped. /+ voz (até 4)/ → copy of the cantus firmus an octave up, 1st species, active; disabled at 4. L3398–3403, 3772–3780 · =contraponto.svelte.ts:183,198=
++ C7 :: /+ compasso/ repeats each voice's last note (twice in 2nd species). /− compasso/ removes a bar; does nothing when the cantus has fewer than 3 notes. L3781–3800 · =contraponto.svelte.ts:204,216=
++ C8 :: /Exemplo 1ª esp./ / /Exemplo 2ª esp./ → replace all voices. L3801–3802 · =contraponto.svelte.ts:156=
++ C9 :: Roll: click near another voice's note (±1 semitone) selects that voice; click or drag places the note in the column, spelled with /Ao inserir nota/; preview: the note and the cantus note under it, 0.6s. L3582–3629 · =R/contraponto/Roll.svelte:97–100=, =contraponto.svelte.ts:227,234=
++ C10 :: /Tocar/ → all audible voices, playhead moves; /repetir/ loops; /Parar/ hides the playhead. *kept* /Parar/ doesn't silence scheduled notes. Tempo slider updates its readout. L3631–3666, 3768–3770 · =contraponto.svelte.ts:258,301=
++ C11 :: /Gerar LilyPond/ fills the textarea; /Copiar/ → /Copiado ✓/ 1.2s; /Salvar .ly/ → =bem-contraponto.ly=; both generate first when empty. L3697–3766 · =contraponto.svelte.ts:143,306,314=
+
+* Régua
+
++ R1 :: First open builds 13 rows and a table. L2531, 2333 · =R/regua/+page.svelte=
++ R2 :: Reference C / A / G: big note (=C₄=), label, lit button. L2327–2332 · =R/regua/+page.svelte:57=
++ R3 :: Click a row (ruler or table) → root then interval (1.2s each, 1.3s apart), both rows lit 2.8s, hint shows /name (symbol) — N semitons/ and the quality. L2352–2366 · =F/regua/regua.svelte.ts:20=
++ R4 :: ▶ plays all 13, 2.9s apart; ▶ again stops the sequence. L2367–2376 · =regua.svelte.ts:34=
+
+* Harmonia 3D
+
++ G1 :: First open → /Carregando…/, then the scene: C major, triads, preset 1 (I – VI – II – V – I), diagonal view. L3830–3842, 4302–4305 · =R/harmonia-3d/+page.svelte=, =F/harmonia3d/harmonia.svelte.ts:92=
++ G2 :: /Campo maior/ ↔ /menor/ → tonic moves to the relative (C ↔ A), tonic list, preset labels, legend, degrees redrawn; playback stops. L4213–4221 · =harmonia.svelte.ts:138=
++ G3 :: Tonic select → degree names and progression text respelled. L4250 · =harmonia.svelte.ts:147=
++ G4 :: /Tríades/ ↔ /Tétrades/ → legend, degree glyphs, 7th leg animates in (instant with reduced motion). L4212 · =harmonia.svelte.ts:131=
++ G5 :: Degree button → chord plays (1s), appended with the chosen length, preset → /Personalizada/, block flashes 1.5s; at 16 chords it only plays. L4232–4238 · =harmonia.svelte.ts:169=
++ G6 :: Preset select → that progression; /Personalizada/ does nothing. L4251 · =harmonia.svelte.ts:153=
++ G7 :: Progression text and /N tempos, N compassos em 4/4./ (decimal comma); /Tocar/, /Desfazer/, /Limpar/ disabled when empty. L4189–4194 · =harmonia.svelte.ts=, =R/harmonia-3d/+page.svelte:270=
++ G8 :: /Tocar/ ↔ /Parar/: chords in time, playhead and marker move, stops at the end. Tempo slider (50–160) keeps the position while playing. L4240–4248, 4265–4269, 4282–4299 · =harmonia.svelte.ts:208,219,227=
++ G9 :: /Desfazer/, /Limpar/ → stop, edit, preset → /Personalizada/. L4257–4258 · =harmonia.svelte.ts:182,189=
++ G10 :: Length 1 / 2 / 4 → used by the next degree click. L4261–4264 · =R/harmonia-3d/+page.svelte:247=
++ G11 :: Views /Frente/ / /Diagonal/ / /Lado/ / /Cima/ → camera eases there, pan reset, zoom refit. L4086–4090 · =harmonia.svelte.ts:240=
++ G12 :: Drag orbits, Shift- or right-drag pans, wheel and pinch zoom (10–280); no context menu. L4104–4120 · =F/harmonia3d/scene.ts=
++ G13 :: /Mostrar medidas/ toggles the semitone labels. L4259 · =harmonia.svelte.ts:235=
++ G14 :: Leave the tab while playing → stops. Come back: legacy keeps the same scene (camera, zoom); the port rebuilds it (=R/harmonia-3d/+page.svelte:41=). ? check the camera after coming back. L2534–2535, 3843
++ G15 :: No WebGL / three.js fails to load → the two error messages. L3836–3840
+
+* Apreciação, Manifesto, Histórico
+
++ V1 :: Apreciação: the Spotify embed loads; the tips list. No interactions.
++ V2 :: Manifesto: static text.
++ V3 :: Histórico: see H2.
+
+* Afinador
+
++ T1 :: /Ativar microfone/ → permission prompt; allowed → meter UI, /MICROFONE ATIVO/; denied → /❌ Microfone bloqueado/. L2384–2401 · =F/afinador/tuner.svelte.ts:49=
++ T2 :: Sing or play: note + octave, cents (±50), needle eases, /✓ Afinado/ under 5 cents (green), /↑ Muito agudo/ (gold), /↓ Muito grave/ (red); /ESTABILIDADE N%/ after 6 readings; history line coloured <5 / <20 / else. L2415–2502 · =tuner.svelte.ts=, =R/afinador/+page.svelte=
++ T3 :: Mode /Cromático/ / /Violão/Guitarra/ / /Voz/ → range 27.5–4200 / 80–1400 / 85–1100 Hz; smoothing and stability reset. L2503–2509 · =tuner.svelte.ts:91=
++ T4 :: /Ref. A =/ → note names and cents move; *kept* not clamped to 415–466. L2511 · =R/afinador/+page.svelte:141=
++ T5 :: /Desligar microfone/ → mic released, button screen back, /MICROFONE DESLIGADO/. L2409–2414 · =tuner.svelte.ts:85=
++ T6 :: *kept* the mic stays on when going to another view.
+
+* Prática
+
++ P1 :: Pillars list: 10 items. L2304–2306
++ P2 :: /Registrar/ with a title → entry on top (title, pt-BR date, notes), fields cleared; empty title does nothing. L2197–2205, 736–742 · =R/pratica/+page.svelte:63=, =diario.svelte.ts:22=
++ P3 :: 🗑 on an entry → deleted from the cloud and the list. Only 20 shown. L2188–2193, 743–748 · =diario.svelte.ts:34=
++ P4 :: /Apagar tudo/ → confirm; OK deletes all. *kept* stays red on hover. L2206, 749–756 · =R/pratica/+page.svelte:43=, =diario.svelte.ts:41=
++ P5 :: /↓ JSON/ → =diario_bem.json= with every entry. L2207–2211 · =diario.svelte.ts:48=
++ P6 :: Pomodoro /Iniciar/ → counts down, /Sessão em andamento…/; /Parar/ → /Pausado./; /Reset/ → 25:00, /Pronto para começar/, 25 lit. L2223–2261 · =F/pratica/pomodoro.svelte.ts:30,47,56=
++ P7 :: /25 min/ / /50 min/ → reset, then that time and lit. L2218–2222 · =pomodoro.svelte.ts:24=
++ P8 :: At 00:00 → /Ciclo concluído! Faça uma pausa./, three 880 Hz beeps. *kept* beeps only if audio was already started. L2229–2243 · =pomodoro.svelte.ts=
++ P9 :: Leave and come back while running: keeps counting (legacy: hidden tab). ? check in the port.
++ P10 :: Δ journal entries render as text, legacy as HTML (open decision).
+
+* Metrônomo
+
++ M1 :: /Iniciar/ ↔ /Parar/: click every beat (1800 Hz on 1, 1200 Hz on 2–4), LED flashes 60ms. Stop resets to beat 1. L2271–2292 · =F/pratica/metronome.svelte.ts:23=
++ M2 :: Slider 40–220 → readout; while running, restarts at the new tempo (from beat 1). L1363 · =metronome.svelte.ts:18=
++ M3 :: /Tap Tempo/ twice within 2s → BPM = 60000 / gap, clamped 40–220, slider and readout follow, restarts if running. L2293–2302 · =metronome.svelte.ts:29=
++ M4 :: Leave while running: keeps clicking (legacy: hidden tab). ? check in the port.

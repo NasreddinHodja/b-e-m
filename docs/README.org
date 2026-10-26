@@ -25,5 +25,6 @@ B.E.M (Bloco de Estudos Musicais): ear-training quizzes, melodic dictation, a Fu
 
 + [[file:design/system.org][Design system]]
 + [[file:parity.org][Parity]]: the reference, changes, kept quirks, checks
++ [[file:flows.org][Flows]]: every UI flow, legacy line ↔ port file, to run by hand on both
 + [[file:guide/deploy.org][Deploying]]
 + [[file:../CONTRIBUTING.org][Contributing]]

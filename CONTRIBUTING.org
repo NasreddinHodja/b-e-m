@@ -33,7 +33,7 @@ pnpm dev         # localhost:5173, signed in, no Firebase
 
 + Unit :: =src/**/*.test.ts=, in Node. Random code runs on a seeded =Math.random= (=src/lib/testing/random.ts=).
 + End-to-end :: =e2e/=, against a local-backend build on port 4174, in =pt-BR=. Uses =/usr/bin/chromium=; set =CHROMIUM_PATH= elsewhere, or empty plus =pnpm exec playwright install chromium=.
-+ CI :: [[file:.github/workflows/ci.yml][ci.yml]] runs all of it on pushes to =main= and PRs.
++ CI :: [[file:.github/workflows/ci.yml][ci.yml]] runs all of it on PRs, and on pushes to =main= before the deploy ([[file:.github/workflows/deploy.yml][deploy.yml]]).
 
 * Before a commit
 

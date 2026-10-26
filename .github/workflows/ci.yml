@@ -1,10 +1,10 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
+  # deploy.yml runs it on pushes to main, before building.
+  workflow_call:
 
 permissions:
   contents: read

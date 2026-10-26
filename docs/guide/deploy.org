@@ -5,7 +5,7 @@
 
 * GitHub Pages
 
-=.github/workflows/deploy.yml=, on push to =main=: install, build with =BASE_PATH= from =configure-pages=, upload, deploy. Only the deploy job can write.
+=.github/workflows/deploy.yml=, on push to =main=: CI (=ci.yml=, all checks and tests), then install, build with =BASE_PATH= from =configure-pages=, upload, deploy. Only the deploy job can write.
 
 Settings → Pages → Source must be /GitHub Actions/. On 2026-10-25 =jfaragao-commits/b-e-m= published the =main= branch root instead (=gh api …/pages=: =build_type: legacy=); changing it needs repo admin.
 

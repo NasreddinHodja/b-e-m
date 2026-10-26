@@ -155,7 +155,7 @@ Not translated, on purpose: LilyPond exports, developer-facing errors, note lett
 The English was my first draft: every message in =messages/en.json=, the Manifesto included.
 
 ** Done
-+ uncommitted
++ commit =afdc33a=
 
 The owner handed the review to me. 48 messages changed. The music terms were checked against Wikipedia's /Interval (music)/, /Counterpoint/, /Species counterpoint/, /Mode (music)/ and /Nonchord tone/:
 + Interval abbreviations: =P1 m2 M2 … TT … P8=, as in /Interval (music)/; the unison was =U=.
@@ -165,13 +165,13 @@ The owner handed the review to me. 48 messages changed. The music terms were che
 + US spelling throughout (practiced, organized, recognize, unrecognized).
 + Smaller fixes of tone and accuracy in the interval descriptions, the chord function question, /Sortear/ ("Pick from:"), the Régua hint, Harmonia 3D's legend and the Manifesto.
 
-Checked: lint, types, 78 unit and 11 end-to-end tests; English screenshots of Acordes and Ditado (the longest nav labels fit the sidebar). Still open: whether the LilyPond exports (=.ly= headers, =Voz 2=) should follow the language; they stay Portuguese.
+Checked: lint, types, 78 unit and 11 end-to-end tests; English screenshots of Acordes and Ditado (the longest nav labels fit the sidebar). The LilyPond exports stay Portuguese: see the export language item.
 
 * DONE Slim the tests
 Only what the app needs tested, not the port.
 
 ** Done
-+ uncommitted
++ commit =b6c94f3=
 
 Deleted: the four parity suites and their harness (=src/lib/testing/legacy.ts=), done once the port was proven; the i18n checks that Portuguese labels equal the legacy tables; the static-table tests of chords and pitch. Kept, 50 unit tests: the counterpoint rules, Ditado's melody, rhythm, spelling, model and LilyPond, Contraponto's LilyPond, Harmonia 3D's spelling, pitch detection, the two catalogues having the same keys and parameters. End-to-end, 7 of 11: every view, Acordes and Ditado scoring, Contraponto's errors, the journal, sign-out and in, the language toggle (dropped: deep link, Intervalos scoring, score reset, phone menu).
 
@@ -179,6 +179,18 @@ Deleted: the four parity suites and their harness (=src/lib/testing/legacy.ts=),
 First run on GitHub (run =40268740524=, a throwaway =ci-test= branch on the fork): =pnpm check= failed, 35 × =Cannot find module '#lib/paraglide/messages.js'=. =src/lib/paraglide/= is gitignored and only the Vite plugin generated it; =svelte-check= doesn't run Vite.
 
 ** Done
-+ uncommitted
++ commit =ae866ca=
 
 The =prepare= script (run by =pnpm install=) compiles it with Paraglide's CLI, same options as =vite.config.ts=, before =svelte-kit sync=. Checked locally from a deleted =src/lib/paraglide/=: =prepare=, then lint, check and tests pass.
+
+* TODO LilyPond exports: choose English or Portuguese
+The =.ly= exports are Portuguese in both languages: Ditado's title "B.E.M. Ditado Melódico", Contraponto's "Voz 2".
+
+** Plan
+Offer the export in either language, on Ditado (/Copiar .ly/, /Baixar .ly/) and Contraponto.
+
+* TODO Favicon
+None: no =<link rel="icon">= in =src/app.html= or =legacy/index.html=, and no image assets in the repo (=static/= has only =robots.txt=), so the browser tab shows its default.
+
+** Plan
+Design one (an SVG in =static/=, linked from =src/app.html=), from the design tokens in =docs/design/system.org=.

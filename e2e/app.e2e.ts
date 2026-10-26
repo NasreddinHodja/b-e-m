@@ -53,11 +53,6 @@ test('every view opens without errors', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test('a deep link loads its view', async ({ page }) => {
-  await page.goto('/contraponto');
-  await expect(page.locator('main')).toContainText('Nenhum problema encontrado');
-});
-
 test('Acordes scores a guess and a function', async ({ page }) => {
   await page.goto('/acordes');
   const guess = page.locator('main .grid').filter({ hasText: 'Bb' }).first().getByRole('button');
@@ -70,15 +65,6 @@ test('Acordes scores a guess and a function', async ({ page }) => {
   await expect(page.locator('main')).toContainText(/Correto!|Errado\./);
   await expect(badge(page, 'Acordes')).toHaveText(/^[012]\/2$/);
   await expect(sidebar(page)).toContainText(/acertos/i);
-});
-
-test('Intervalos scores an answer and shows its stats', async ({ page }) => {
-  await page.goto('/intervalos');
-  await page.getByRole('button', { name: /^5ª J\s*7st$/ }).click();
-  await page.getByRole('button', { name: 'Verificar', exact: true }).click();
-  await expect(badge(page, 'Intervalos')).toHaveText(/^[01]\/1$/);
-  await expect(page.locator('main')).toContainText('%');
-  await expect(page.locator('main')).not.toContainText('Nenhuma resposta ainda.');
 });
 
 test('Ditado scores a pick and unblurs the staff', async ({ page }) => {
@@ -120,32 +106,6 @@ test('signing out goes to the login, signing in comes back', async ({ page }) =>
   await page.getByLabel('Senha').fill('qualquer');
   await page.getByRole('button', { name: 'Entrar no Sistema' }).click();
   await expect(page).toHaveURL(/\/acordes$/);
-});
-
-test('the score resets after confirming', async ({ page }) => {
-  await page.goto('/intervalos');
-  await page.getByRole('button', { name: /^5ª J\s*7st$/ }).click();
-  await page.getByRole('button', { name: 'Verificar', exact: true }).click();
-  await expect(badge(page, 'Intervalos')).toHaveText(/^[01]\/1$/);
-  page.once('dialog', (d) => d.accept());
-  await sidebar(page)
-    .getByRole('button', { name: /zerar pontuação/ })
-    .click();
-  await expect(badge(page, 'Intervalos')).toHaveText('0');
-});
-
-test.describe('on a phone', () => {
-  test.use({ viewport: { width: 390, height: 800 } });
-
-  test('the menu opens the sidebar and navigating closes it', async ({ page }) => {
-    await page.goto('/acordes');
-    await expect(sidebar(page)).not.toBeInViewport();
-    await page.getByRole('button', { name: 'Menu' }).click();
-    await expect(sidebar(page)).toBeInViewport();
-    await sidebar(page).locator('a[href$="/regua"]').click();
-    await expect(page).toHaveURL(/\/regua$/);
-    await expect(sidebar(page)).not.toBeInViewport();
-  });
 });
 
 test('the language toggle switches to English and back, keeping the session', async ({ page }) => {

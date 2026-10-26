@@ -24,7 +24,7 @@ pnpm dev         # localhost:5173, signed in, no Firebase
 | =pnpm check=      | type check                                      |
 | =pnpm lint=       | Prettier and ESLint                             |
 | =pnpm format=     | Prettier, writing                               |
-| =pnpm test=       | unit and parity tests (Vitest)                  |
+| =pnpm test=       | unit tests (Vitest)                             |
 | =pnpm test:e2e=   | end-to-end tests (Playwright) on a build        |
 
 =check:watch= and =test:watch= rerun on change.
@@ -32,7 +32,6 @@ pnpm dev         # localhost:5173, signed in, no Firebase
 * Tests
 
 + Unit :: =src/**/*.test.ts=, in Node. Random code runs on a seeded =Math.random= (=src/lib/testing/random.ts=).
-+ Parity :: =parity.test.ts= files run =legacy/index.html='s own code (=src/lib/testing/legacy.ts=, a =vm= with a fake DOM) against the port, same inputs, same draws. A difference is a bug unless listed in [[file:docs/parity.org][Parity]].
 + End-to-end :: =e2e/=, against a local-backend build on port 4174, in =pt-BR=. Uses =/usr/bin/chromium=; set =CHROMIUM_PATH= elsewhere, or empty plus =pnpm exec playwright install chromium=.
 + CI :: [[file:.github/workflows/ci.yml][ci.yml]] runs all of it on pushes to =main= and PRs.
 

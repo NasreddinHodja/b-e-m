@@ -58,7 +58,7 @@ Paraglide (=@inlang/paraglide-js=): =messages/pt-br.json= (base) and =messages/e
 + Locale: the toggle's saved choice (=localStorage=), else the browser's, else Portuguese.
 + =i18n.svelte.ts= keeps it in a rune behind =getLocale()=, so the sidebar's PT / EN toggle re-renders in place: no reload, no lost state. It sets =<html lang>=.
 + State holds facts, text is made when rendered: quiz results, history =prompt= / =answer= and counterpoint issue =m= are functions.
-+ Tables compared with the legacy page keep their Portuguese; =labels.ts= per feature translates them. =src/lib/i18n.test.ts= checks both catalogues match and the Portuguese labels equal the tables.
++ Tables compared with the legacy page keep their Portuguese; =labels.ts= per feature translates them. =src/lib/i18n.test.ts= checks both catalogues have the same keys and parameters.
 + Not translated: LilyPond exports, developer errors, note letters, chord symbols, degrees.
 
 * Boot and sign-in

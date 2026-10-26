@@ -7,7 +7,7 @@ The app is a 1:1 port of the legacy single-page app, bugs included. Structure ma
 
 * Reference
 
-=legacy/index.html=: the legacy app, one 4,314-line file, unformatted (=.prettierignore=), not served. The parity tests run its code.
+=legacy/index.html=: the legacy app, one 4,314-line file, unformatted (=.prettierignore=), not served.
 
 Its library versions, pinned exactly in =package.json=:
 
@@ -27,7 +27,7 @@ Its library versions, pinned exactly in =package.json=:
 + Acordes :: the /A = …/ badge always takes its space; the chord grid is always 3 rows; /Modo professor/ is first and collapsed.
 + Quizzes :: feedback slides open and closed.
 + Ditado :: staff cropped and centred on its paper; /ouça e adivinhe/ on a dark chip; the LilyPond block slides open.
-+ Ditado :: the leap into the final tonic is checked from the note before it (legacy: from the note it replaced, so it could exceed /Salto máx./). The melody parity test allows only this difference.
++ Ditado :: the leap into the final tonic is checked from the note before it (legacy: from the note it replaced, so it could exceed /Salto máx./).
 + Languages :: Portuguese and English, with a toggle. Portuguese is the legacy text.
 + Fonts :: Inter for text; DM Mono (legacy's only font) for data.
 + Icons :: Lucide in place of Unicode and emoji glyphs.
@@ -47,8 +47,8 @@ Legacy behaviour that looks wrong, ported as is; a comment marks each.
 
 * How it's checked
 
-+ Parity tests (=pnpm test=, =src/**/parity.test.ts=): the port and the legacy code, same inputs, same random draws. Ditado (spelling, keys, rhythms, melodies, Slonimsky, model, playback, LilyPond, distractors), Contraponto (every rule, summary, LilyPond, 400 random voice sets), Harmonia 3D, the shared tables, pitch detection. Each suite fails on a deliberate change to the port.
-+ End-to-end tests (=pnpm test:e2e=): the build works. They don't compare with legacy.
++ Parity tests, 2026-10-25 to 2026-10-26: the port's logic run against the legacy code, same inputs, same random draws (Ditado, Contraponto, Harmonia 3D, shared tables, pitch detection). No difference but the final-leap fix. Deleted once the port was done; in git history before the commit that removed them.
++ Unit and end-to-end tests (=pnpm test=, =pnpm test:e2e=): the app's own logic and flows. They don't compare with legacy.
 + 2026-10-25, screenshots against legacy at 1280×900 and 390px: 9 of 12 views pixel-identical on load; Acordes, Intervalos and Ditado differ only in random content. Scripts not in the repo.
 
 Not checked: UI flows and audio against legacy, real Firebase, browsers other than Chromium.

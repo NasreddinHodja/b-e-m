@@ -12,7 +12,7 @@ pnpm install
 pnpm dev         # localhost:5173, signed in, no Firebase
 #+end_src
 
-Dev uses the local backend; =VITE_BACKEND=firebase pnpm dev= for the real one ([[file:docs/architecture/backend.org][Backend]]). Only =esbuild= may run install scripts (=pnpm-workspace.yaml=).
+=pnpm install= also generates =src/lib/paraglide/= (the =prepare= script; gitignored). Dev uses the local backend; =VITE_BACKEND=firebase pnpm dev= for the real one ([[file:docs/architecture/backend.org][Backend]]). Only =esbuild= may run install scripts (=pnpm-workspace.yaml=).
 
 * Scripts
 
